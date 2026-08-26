@@ -1,0 +1,190 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AP Advisor Generated Content",
+  "description": "Output shape for one generated AP Precalculus / Calculus AB / Calculus BC learning item. Reviews and study plans use their own human-readable formats.",
+  "type": "object",
+  "required": ["course", "unit", "topic", "topic_exam_scope", "type", "difficulty", "style", "citation_validation", "content"],
+  "properties": {
+    "course": {
+      "type": "string",
+      "enum": ["precalculus", "calc-ab", "calc-bc"],
+      "description": "Course key used by the citation validator."
+    },
+    "unit": {
+      "type": "string",
+      "pattern": "^Unit (?:[1-9]|10)$",
+      "description": "Unit number from the validated citation, e.g. 'Unit 2'."
+    },
+    "topic": {
+      "type": "string",
+      "pattern": "^[1-9][0-9]*\\.[1-9][0-9]* .+$",
+      "description": "Topic code and catalog title from the validator, without scope markers, e.g. '2.4 Exponential Function Manipulation'."
+    },
+    "topic_exam_scope": {
+      "type": "string",
+      "enum": ["assessed", "not-assessed"],
+      "description": "Topic-level scope recorded in the bundled catalog. This does not certify that the generated content satisfies every AP Exam learning objective, exclusion, format, or calculator condition."
+    },
+    "type": {
+      "type": "string",
+      "enum": ["explanation", "practice_problem", "worked_example"],
+      "description": "The kind of content being generated."
+    },
+    "difficulty": {
+      "type": "string",
+      "enum": ["foundational", "standard", "challenge"],
+      "description": "Cognitive and prerequisite demand, independent of AP-oriented style."
+    },
+    "style": {
+      "type": "string",
+      "enum": ["instructional", "ap-oriented"],
+      "description": "ap-oriented means original course-shaped practice, not official College Board material or proof of full exam alignment."
+    },
+    "citation_validation": {
+      "type": "object",
+      "required": ["catalog_match", "automated_status"],
+      "properties": {
+        "catalog_match": {
+          "const": "exact",
+          "description": "The unit/topic citation exactly matches the bundled catalog."
+        },
+        "automated_status": {
+          "type": "string",
+          "enum": ["pass", "not_run"],
+          "description": "Whether the bundled citation validator ran successfully. not_run requires an exact manual catalog lookup."
+        }
+      },
+      "additionalProperties": false
+    },
+    "supporting_topics": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Optional validated supporting catalog topics materially used by the item.",
+      "items": {
+        "type": "object",
+        "required": ["unit", "topic", "topic_exam_scope"],
+        "properties": {
+          "unit": {
+            "type": "string",
+            "pattern": "^Unit (?:[1-9]|10)$"
+          },
+          "topic": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]*\\.[1-9][0-9]* .+$"
+          },
+          "topic_exam_scope": {
+            "type": "string",
+            "enum": ["assessed", "not-assessed"]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "content": {
+      "type": "object",
+      "description": "Type-specific body. Required sub-fields depend on the value of 'type'.",
+      "properties": {
+        "principle": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Required for type=explanation. Core concept/rule explained first, before any application."
+        },
+        "real_world_application": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Optional for type=explanation. A concrete scenario when it materially clarifies the principle."
+        },
+        "problem_statement": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Required for type=practice_problem or type=worked_example."
+        },
+        "final_answer": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Optional concise answer for a practice problem when the user requests an answer or answer key."
+        },
+        "solution": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Required for type=worked_example and optional for type=practice_problem. Full worked reasoning, not just the final answer."
+        },
+        "common_mistake": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Optional topic-specific pitfall without an unsupported prevalence claim."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": { "type": { "const": "explanation" } }
+      },
+      "then": {
+        "properties": {
+          "content": {
+            "required": ["principle"]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "practice_problem" } }
+      },
+      "then": {
+        "properties": {
+          "content": {
+            "required": ["problem_statement"]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "worked_example" } }
+      },
+      "then": {
+        "properties": {
+          "content": {
+            "required": ["problem_statement", "solution"]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "topic_exam_scope": { "const": "not-assessed" } }
+      },
+      "then": {
+        "properties": {
+          "style": {
+            "const": "instructional"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "style": { "const": "ap-oriented" } }
+      },
+      "then": {
+        "properties": {
+          "supporting_topics": {
+            "items": {
+              "properties": {
+                "topic_exam_scope": {
+                  "const": "assessed"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

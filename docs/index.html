@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ap-advisor</title>
+<meta name="description" content="A Codex Skill for generating, reviewing, and planning AP Precalculus / Calculus AB / BC study content.">
+<style>
+  :root {
+    --bg: #fafafa;
+    --card: #f0f1f3;
+    --card-border: #e2e4e8;
+    --text: #1c1e21;
+    --text-muted: #5b5f66;
+    --accent: #4a6fa5;
+    --accent-hover: #3d5c8a;
+    --code-bg: #ffffff;
+    --code-border: #dcdfe4;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+    line-height: 1.6;
+  }
+
+  /* language toggle: hide spans that don't match html[data-lang] */
+  html[data-lang="en"] [data-lang="zh"] { display: none; }
+  html[data-lang="zh"] [data-lang="en"] { display: none; }
+
+  a { color: var(--accent); }
+
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 24px 64px;
+  }
+
+  header.hero {
+    position: relative;
+    padding: 96px 0 56px;
+    text-align: center;
+  }
+
+  .lang-toggle {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 10;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    color: var(--text);
+    font-size: 13px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .lang-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+  h1.title {
+    font-size: 2.4rem;
+    margin: 0 0 12px;
+    letter-spacing: -0.02em;
+  }
+  h1.title code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    background: none;
+    padding: 0;
+  }
+
+  .tagline {
+    color: var(--text-muted);
+    font-size: 1.05rem;
+    max-width: 520px;
+    margin: 0 auto 28px;
+  }
+
+  .btn-primary {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    text-decoration: none;
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+  .btn-primary:hover { background: var(--accent-hover); }
+
+  section {
+    padding: 40px 0;
+    border-top: 1px solid var(--card-border);
+  }
+
+  section h2 {
+    font-size: 1.3rem;
+    margin: 0 0 18px;
+  }
+
+  ul.feature-list {
+    margin: 0;
+    padding-left: 1.2em;
+  }
+  ul.feature-list li {
+    margin-bottom: 10px;
+  }
+  ul.feature-list li:last-child { margin-bottom: 0; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 20px 22px;
+  }
+
+  pre.code-block {
+    position: relative;
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-radius: 8px;
+    padding: 16px 18px;
+    overflow-x: auto;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.85rem;
+    margin: 0;
+  }
+
+  .copy-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    color: var(--text-muted);
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+  p.body-text {
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  footer {
+    padding: 32px 0 0;
+    border-top: 1px solid var(--card-border);
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    text-align: center;
+  }
+  footer p { margin: 6px 0; }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16171a;
+      --card: #202226;
+      --card-border: #2d2f34;
+      --text: #e8e9ec;
+      --text-muted: #9a9da3;
+      --accent: #7ea3d6;
+      --accent-hover: #96b6de;
+      --code-bg: #1b1c1f;
+      --code-border: #2d2f34;
+    }
+    .btn-primary { color: #16171a; }
+  }
+</style>
+</head>
+<body>
+
+<button class="lang-toggle" id="langToggle" type="button" aria-label="Switch language">EN / 中文</button>
+
+<div class="wrap">
+
+  <header class="hero">
+    <h1 class="title"><code>ap-advisor</code></h1>
+    <p class="tagline">
+      <span data-lang="en">A Codex Skill that generates, reviews, and prioritizes AP Precalculus / Calculus AB / BC study content using a bundled citation catalog.</span>
+      <span data-lang="zh">一个 Codex Skill，使用仓库内的引用目录生成、审阅和安排 AP Precalculus、AP Calculus AB/BC 学习内容。</span>
+    </p>
+    <a class="btn-primary" href="https://github.com/iyorixy/ap-advisor" target="_blank" rel="noopener">
+      <span data-lang="en">View on GitHub</span>
+      <span data-lang="zh">查看 GitHub 仓库</span>
+    </a>
+  </header>
+
+  <section id="what-it-does">
+    <h2><span data-lang="en">What it does</span><span data-lang="zh">功能介绍</span></h2>
+    <div data-lang="en">
+      <ul class="feature-list">
+        <li>Labels generated content with a Unit/Topic from the bundled citation catalog — e.g. <code>Unit 2, Topic 2.4 — Exponential Function Manipulation</code>.</li>
+        <li>Keeps learning difficulty separate from instructional or AP-oriented style.</li>
+        <li>Explanations state the underlying principle before any application, and include an application when it materially helps.</li>
+        <li>Given weak topics and/or an exam date, produces a suggested review order for the learner to evaluate.</li>
+        <li>Checks every citation label before showing it, normally with the bundled script, and reports when automated validation cannot run.</li>
+      </ul>
+    </div>
+    <div data-lang="zh">
+      <ul class="feature-list">
+        <li>每次生成内容都会标注仓库引用目录中的 Unit/Topic，例如 <code>Unit 2, Topic 2.4 — Exponential Function Manipulation</code>。</li>
+        <li>把学习难度与教学型或 AP-oriented 风格分开表达。</li>
+        <li>讲解内容先讲原理；实际应用场景只在确实有助于理解时加入。</li>
+        <li>根据你指出的薄弱知识点和/或考试日期，给出一份需要由学习者评估的复习顺序建议。</li>
+        <li>展示引用前检查每个引用标签；正常使用仓库脚本，并在自动校验无法运行时明确报告。</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="install">
+    <h2><span data-lang="en">Install</span><span data-lang="zh">安装方式</span></h2>
+    <p class="body-text" style="margin-bottom: 14px;">
+      <span data-lang="en">Clone the repo, then copy it into your Codex skills directory:</span>
+      <span data-lang="zh">克隆仓库，然后把它复制到 Codex 的 skills 目录下：</span>
+    </p>
+    <pre class="code-block"><button class="copy-btn" id="copyBtn" type="button"><span data-lang="en">Copy</span><span data-lang="zh">复制</span></button><code id="installCmd">git clone https://github.com/iyorixy/ap-advisor.git
+
+# Codex
+mkdir -p ~/.agents/skills
+cp -r ap-advisor ~/.agents/skills/ap-advisor
+# or, for a project-local skill:
+mkdir -p .agents/skills
+cp -r ap-advisor .agents/skills/ap-advisor</code></pre>
+    <p class="body-text" style="margin-top: 14px; font-size: 0.9rem;">
+      <span data-lang="en">Requires Python 3.10+ (standard library only) on the machine running the agent, for the citation validator script.</span>
+      <span data-lang="zh">运行 agent 的机器上需要 Python 3.10+（仅用标准库），用于运行引用校验脚本。</span>
+    </p>
+  </section>
+
+  <section id="why">
+    <h2><span data-lang="en">Why this exists</span><span data-lang="zh">为什么做这个</span></h2>
+    <div class="card">
+      <p class="body-text">
+        <span data-lang="en">Ask a generic AI agent to "make me some AP Calc practice problems" and you may get course-scope mixups or invented Unit/Topic labels. AP Advisor checks citation labels against an internal catalog before presenting them. The validator proves exact catalog matching and topic-level scope only; it does not independently prove mathematical correctness, topical fit, learning-objective coverage, exclusions, task format, or calculator conditions.</span>
+        <span data-lang="zh">让一个普通的 AI 助手“帮我出几道 AP 微积分练习题”，可能会遇到课程范围混用或凭空捏造 Unit/Topic 标签。AP Advisor 会在展示前根据内部目录检查引用标签。校验器只能证明目录精确匹配和 Topic 层级范围；它不能独立证明数学正确、内容符合所引 Topic，也不能证明 Learning Objectives、排除项、题型或计算器条件全部满足。</span>
+      </p>
+      <p class="body-text" style="margin-top: 12px;">
+        <span data-lang="en">Machine-readable validator evidence binds the selected course and AP-oriented mode to every exact citation and topic scope. A command merely starting is not treated as a passing validation.</span>
+        <span data-lang="zh">机器可读的校验证据会把所选课程与 AP-oriented 模式绑定到每条精确引用及其 Topic 范围；仅仅启动过命令不会被视为校验通过。</span>
+      </p>
+    </div>
+  </section>
+
+  <footer>
+    <p>
+      <span data-lang="en">MIT License — see the </span><span data-lang="zh">MIT 许可证 — 详见</span>
+      <a href="https://github.com/iyorixy/ap-advisor/blob/main/LICENSE" target="_blank" rel="noopener">LICENSE</a>
+      <span data-lang="en"> file. Repository: </span><span data-lang="zh">文件。仓库地址：</span>
+      <a href="https://github.com/iyorixy/ap-advisor" target="_blank" rel="noopener">github.com/iyorixy/ap-advisor</a>
+    </p>
+    <p>
+      <span data-lang="en">Open source — contributions welcome.</span>
+      <span data-lang="zh">开源项目，欢迎贡献。</span>
+    </p>
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var STORAGE_KEY = 'ap-advisor-lang';
+  var html = document.documentElement;
+
+  function detectDefault() {
+    var nav = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+    return nav.indexOf('zh') === 0 ? 'zh' : 'en';
+  }
+
+  function applyLang(lang) {
+    html.setAttribute('data-lang', lang);
+  }
+
+  var stored = null;
+  try { stored = localStorage.getItem(STORAGE_KEY); } catch (e) {}
+  var initial = (stored === 'en' || stored === 'zh') ? stored : detectDefault();
+  applyLang(initial);
+
+  document.getElementById('langToggle').addEventListener('click', function () {
+    var next = html.getAttribute('data-lang') === 'zh' ? 'en' : 'zh';
+    applyLang(next);
+    try { localStorage.setItem(STORAGE_KEY, next); } catch (e) {}
+  });
+
+  var copyBtn = document.getElementById('copyBtn');
+  copyBtn.addEventListener('click', function () {
+    var text = document.getElementById('installCmd').innerText;
+    var lang = html.getAttribute('data-lang');
+    var restore = copyBtn.innerHTML;
+    function showCopied() {
+      copyBtn.textContent = lang === 'zh' ? '已复制' : 'Copied';
+      setTimeout(function () { copyBtn.innerHTML = restore; }, 1500);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(showCopied, showCopied);
+    } else {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(ta);
+      showCopied();
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

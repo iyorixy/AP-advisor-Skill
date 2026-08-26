@@ -1,0 +1,202 @@
+# AP Precalculus / Calculus — Internal Citation Catalog
+
+Catalog status: scope last checked 2026-08-23 against the current College Board
+course pages for [AP Precalculus](https://apcentral.collegeboard.org/courses/ap-precalculus)
+and [AP Calculus AB/BC](https://apcentral.collegeboard.org/courses/ap-calculus-ab).
+
+Topic numbering and unit/topic boundaries follow the Course and Exam
+Description structure so citations line up with common AP materials. Catalog
+titles are concise matching labels: many retain the short CED topic label for
+precision, while some are shortened. This catalog does not reproduce the
+learning objectives, essential knowledge, exclusions, or exam task rules.
+This file is the project's internal matching catalog; College Board remains the
+authority for current course and exam requirements.
+As of the catalog check above, AP Precalculus Units 1–3 are assessed; Unit 4
+remains course content but is not assessed on the AP Exam.
+
+## AP Precalculus
+- Unit 1 — Polynomial and Rational Functions
+  - 1.1 Change in Tandem
+  - 1.2 Rates of Change
+  - 1.3 Rates of Change in Linear and Quadratic Functions
+  - 1.4 Polynomial Functions and Rates of Change
+  - 1.5 Polynomial Functions and Complex Zeros
+  - 1.6 Polynomial Functions and End Behavior
+  - 1.7 Rational Functions and End Behavior
+  - 1.8 Rational Functions and Zeros
+  - 1.9 Rational Functions and Vertical Asymptotes
+  - 1.10 Rational Functions and Holes
+  - 1.11 Equivalent Representations of Polynomial and Rational Expressions
+  - 1.12 Transformations of Functions
+  - 1.13 Function Model Selection and Assumption Articulation
+  - 1.14 Function Model Construction and Application
+- Unit 2 — Exponential and Logarithmic Functions
+  - 2.1 Change in Arithmetic and Geometric Sequences
+  - 2.2 Change in Linear and Exponential Functions
+  - 2.3 Exponential Functions
+  - 2.4 Exponential Function Manipulation
+  - 2.5 Exponential Function Context and Data Modeling
+  - 2.6 Competing Function Model Validation
+  - 2.7 Composition of Functions
+  - 2.8 Inverse Functions
+  - 2.9 Logarithmic Expressions
+  - 2.10 Inverses of Exponential Functions
+  - 2.11 Logarithmic Functions
+  - 2.12 Logarithmic Function Manipulation
+  - 2.13 Exponential and Logarithmic Equations and Inequalities
+  - 2.14 Logarithmic Function Context and Data Modeling
+  - 2.15 Semi-log Plots
+- Unit 3 — Trigonometric and Polar Functions
+  - 3.1 Periodic Phenomena
+  - 3.2 Sine, Cosine, and Tangent
+  - 3.3 Sine and Cosine Function Values
+  - 3.4 Sine and Cosine Function Graphs
+  - 3.5 Sinusoidal Functions
+  - 3.6 Sinusoidal Function Transformations
+  - 3.7 Sinusoidal Function Context and Data Modeling
+  - 3.8 The Tangent Function
+  - 3.9 Inverse Trigonometric Functions
+  - 3.10 Trigonometric Equations and Inequalities
+  - 3.11 The Secant, Cosecant, and Cotangent Functions
+  - 3.12 Equivalent Representations of Trigonometric Functions
+  - 3.13 Trigonometry and Polar Coordinates
+  - 3.14 Polar Function Graphs
+  - 3.15 Rates of Change in Polar Functions
+- Unit 4 — Functions Involving Parameters, Vectors, and Matrices (not assessed on AP Exam)
+  - 4.1 Parametric Functions
+  - 4.2 Parametric Functions Modeling Planar Motion
+  - 4.3 Parametric Functions and Rates of Change
+  - 4.4 Parametrically Defined Circles and Lines
+  - 4.5 Implicitly Defined Functions
+  - 4.6 Conic Sections
+  - 4.7 Parametrization of Implicitly Defined Functions
+  - 4.8 Vectors
+  - 4.9 Vector-Valued Functions
+  - 4.10 Matrices
+  - 4.11 The Inverse and Determinant of a Matrix
+  - 4.12 Linear Transformations and Matrices
+  - 4.13 Matrices as Functions
+  - 4.14 Matrices Modeling Contexts
+
+## AP Calculus AB / BC (BC-only content marked)
+- Unit 1 — Limits and Continuity
+  - 1.1 Introducing Calculus: Can Change Occur at an Instant?
+  - 1.2 Defining Limits and Using Limit Notation
+  - 1.3 Estimating Limit Values from Graphs
+  - 1.4 Estimating Limit Values from Tables
+  - 1.5 Determining Limits Using Algebraic Properties of Limits
+  - 1.6 Determining Limits Using Algebraic Manipulation
+  - 1.7 Selecting Procedures for Determining Limits
+  - 1.8 Determining Limits Using the Squeeze Theorem
+  - 1.9 Connecting Multiple Representations of Limits
+  - 1.10 Exploring Types of Discontinuities
+  - 1.11 Defining Continuity at a Point
+  - 1.12 Confirming Continuity over an Interval
+  - 1.13 Removing Discontinuities
+  - 1.14 Connecting Infinite Limits and Vertical Asymptotes
+  - 1.15 Connecting Limits at Infinity and Horizontal Asymptotes
+  - 1.16 Working with the Intermediate Value Theorem (IVT)
+- Unit 2 — Differentiation: Definition and Basic Derivative Rules
+  - 2.1 Defining Average and Instantaneous Rates of Change at a Point
+  - 2.2 Defining the Derivative of a Function and Using Derivative Notation
+  - 2.3 Estimating Derivatives of a Function at a Point
+  - 2.4 Connecting Differentiability and Continuity
+  - 2.5 Applying the Power Rule
+  - 2.6 Derivative Rules: Constant, Sum, Difference, and Constant Multiple
+  - 2.7 Derivatives of cos x, sin x, e^x, and ln x
+  - 2.8 The Product Rule
+  - 2.9 The Quotient Rule
+  - 2.10 Derivatives of Tangent, Cotangent, Secant, and Cosecant
+- Unit 3 — Differentiation: Composite, Implicit, and Inverse Functions
+  - 3.1 The Chain Rule
+  - 3.2 Implicit Differentiation
+  - 3.3 Differentiating Inverse Functions
+  - 3.4 Differentiating Inverse Trigonometric Functions
+  - 3.5 Selecting Procedures for Calculating Derivatives
+  - 3.6 Calculating Higher-Order Derivatives
+- Unit 4 — Contextual Applications of Differentiation
+  - 4.1 Interpreting the Meaning of the Derivative in Context
+  - 4.2 Straight-Line Motion: Position, Velocity, and Acceleration
+  - 4.3 Rates of Change in Applied Contexts Other Than Motion
+  - 4.4 Introduction to Related Rates
+  - 4.5 Solving Related Rates Problems
+  - 4.6 Approximating Values Using Local Linearity and Linearization
+  - 4.7 Using L'Hospital's Rule for Indeterminate Forms
+- Unit 5 — Analytical Applications of Differentiation
+  - 5.1 Using the Mean Value Theorem
+  - 5.2 Extreme Value Theorem, Global vs. Local Extrema, and Critical Points
+  - 5.3 Intervals of Increase and Decrease
+  - 5.4 Using the First Derivative Test for Relative (Local) Extrema
+  - 5.5 Using the Candidates Test for Absolute (Global) Extrema
+  - 5.6 Determining Concavity of Functions over Their Domains
+  - 5.7 Using the Second Derivative Test to Determine Extrema
+  - 5.8 Sketching Graphs of Functions and Their Derivatives
+  - 5.9 Connecting a Function, Its First Derivative, and Its Second Derivative
+  - 5.10 Introduction to Optimization Problems
+  - 5.11 Solving Optimization Problems
+  - 5.12 Exploring Behaviors of Implicit Relations
+- Unit 6 — Integration and Accumulation of Change
+  - 6.1 Exploring Accumulations of Change
+  - 6.2 Approximating Areas with Riemann Sums
+  - 6.3 Riemann Sums, Summation Notation, and Definite Integral Notation
+  - 6.4 The Fundamental Theorem of Calculus and Accumulation Functions
+  - 6.5 Interpreting the Behavior of Accumulation Functions Involving Area
+  - 6.6 Applying Properties of Definite Integrals
+  - 6.7 The Fundamental Theorem of Calculus and Definite Integrals
+  - 6.8 Antiderivatives and Indefinite Integrals: Basic Rules and Notation
+  - 6.9 Integrating Using Substitution
+  - 6.10 Integrating Using Long Division and Completing the Square
+  - 6.11 Integrating Using Integration by Parts (BC)
+  - 6.12 Using Linear Partial Fractions (BC)
+  - 6.13 Evaluating Improper Integrals (BC)
+  - 6.14 Selecting Techniques for Antidifferentiation
+- Unit 7 — Differential Equations
+  - 7.1 Modeling Situations with Differential Equations
+  - 7.2 Verifying Solutions for Differential Equations
+  - 7.3 Sketching Slope Fields
+  - 7.4 Reasoning Using Slope Fields
+  - 7.5 Approximating Solutions Using Euler's Method (BC)
+  - 7.6 Finding General Solutions Using Separation of Variables
+  - 7.7 Finding Particular Solutions Using Separation of Variables
+  - 7.8 Exponential Models with Differential Equations
+  - 7.9 Logistic Models with Differential Equations (BC)
+- Unit 8 — Applications of Integration
+  - 8.1 Finding the Average Value of a Function on an Interval
+  - 8.2 Connecting Position, Velocity, and Acceleration Using Integrals
+  - 8.3 Using Accumulation Functions and Definite Integrals in Context
+  - 8.4 Area Between Curves Expressed as Functions of x
+  - 8.5 Area Between Curves Expressed as Functions of y
+  - 8.6 Area Between Curves That Intersect at More Than Two Points
+  - 8.7 Volumes with Cross Sections: Squares and Rectangles
+  - 8.8 Volumes with Cross Sections: Triangles and Semicircles
+  - 8.9 Volume with Disc Method: Revolving Around the x- or y-Axis
+  - 8.10 Volume with Disc Method: Revolving Around Other Axes
+  - 8.11 Volume with Washer Method: Revolving Around the x- or y-Axis
+  - 8.12 Volume with Washer Method: Revolving Around Other Axes
+  - 8.13 Arc Length of a Smooth, Planar Curve and Distance Traveled (BC)
+- Unit 9 — Parametric Equations, Polar Coordinates, and Vector-Valued Functions (BC)
+  - 9.1 Defining and Differentiating Parametric Equations
+  - 9.2 Second Derivatives of Parametric Equations
+  - 9.3 Arc Length of Curves Given by Parametric Equations
+  - 9.4 Defining and Differentiating Vector-Valued Functions
+  - 9.5 Integrating Vector-Valued Functions
+  - 9.6 Solving Motion Problems Using Parametric and Vector-Valued Functions
+  - 9.7 Defining Polar Coordinates and Differentiating in Polar Form
+  - 9.8 Area Bounded by a Single Polar Curve
+  - 9.9 Area of the Region Bounded by Two Polar Curves
+- Unit 10 — Infinite Sequences and Series (BC)
+  - 10.1 Defining Convergent and Divergent Infinite Series
+  - 10.2 Working with Geometric Series
+  - 10.3 The nth Term Test for Divergence
+  - 10.4 Integral Test for Convergence
+  - 10.5 Harmonic Series and p-Series
+  - 10.6 Comparison Tests for Convergence
+  - 10.7 Alternating Series Test for Convergence
+  - 10.8 Ratio Test for Convergence
+  - 10.9 Determining Absolute or Conditional Convergence
+  - 10.10 Alternating Series Error Bound
+  - 10.11 Finding Taylor Polynomial Approximations of Functions
+  - 10.12 Lagrange Error Bound
+  - 10.13 Radius and Interval of Convergence of Power Series
+  - 10.14 Finding Taylor or Maclaurin Series for a Function
+  - 10.15 Representing Functions as Power Series
