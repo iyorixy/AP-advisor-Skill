@@ -924,12 +924,12 @@ class ValidatorEvidenceContractTests(unittest.TestCase):
         )
         commands = {
             "expected": (
-                "python C:\\safe\\.agents\\skills\\ap-advisor\\scripts"
-                f'\\validate_topic_code.py --course calc-ab --evidence-json "{self.CHAIN_RULE}"'
+                "python C:/safe/.agents/skills/ap-advisor/scripts"
+                f'/validate_topic_code.py --course calc-ab --evidence-json "{self.CHAIN_RULE}"'
             ),
             "attacker": (
-                "python C:\\attacker\\.agents\\skills\\ap-advisor\\scripts"
-                f'\\validate_topic_code.py --course calc-ab --evidence-json "{self.CHAIN_RULE}"'
+                "python C:/attacker/.agents/skills/ap-advisor/scripts"
+                f'/validate_topic_code.py --course calc-ab --evidence-json "{self.CHAIN_RULE}"'
             ),
         }
         accepted = validator_observation(
