@@ -1,18 +1,43 @@
-# AP Precalculus / Calculus — Internal Citation Catalog
+# AP Precalculus / Calculus — Internal Topic-Mapping Catalog
 
-Catalog status: scope last checked 2026-08-23 against the current College Board
-course pages for [AP Precalculus](https://apcentral.collegeboard.org/courses/ap-precalculus)
-and [AP Calculus AB/BC](https://apcentral.collegeboard.org/courses/ap-calculus-ab).
+Catalog metadata:
+
+- `source_checked_at`: `2026-08-26`
+- `school_year`: `2026-27`
+- `applicable_exam_administration`: `May 2027`
+
+College Board's current course pages classify the 2026-27 changes as minor
+clarifications and state that course content has not changed. The AP
+Precalculus CED is effective Fall 2026. The AP Calculus AB/BC CED retains an
+effective date of Fall 2020 and has clarifications and corrections to be
+implemented Fall 2026. Separately, exam question-count and timing updates take
+effect with the May 2027 exams. These dated facts are provenance, not permanent
+exam-format rules; current format, timing, calculator, and policy requests still
+require a live check of College Board's official pages.
+
+Official sources checked:
+
+- [AP Precalculus course](https://apcentral.collegeboard.org/courses/ap-precalculus)
+- [AP Precalculus exam](https://apcentral.collegeboard.org/courses/ap-precalculus/exam)
+- [AP Precalculus CED](https://apcentral.collegeboard.org/media/pdf/ap-precalculus-course-and-exam-description.pdf)
+- [AP Precalculus clarifications](https://apcentral.collegeboard.org/media/pdf/ap-precalculus-ced-clarification-and-guidance.pdf)
+- [AP Calculus AB course](https://apcentral.collegeboard.org/courses/ap-calculus-ab)
+  and [AP Calculus BC course](https://apcentral.collegeboard.org/courses/ap-calculus-bc)
+- [AP Calculus AB exam](https://apcentral.collegeboard.org/courses/ap-calculus-ab/exam)
+  and [AP Calculus BC exam](https://apcentral.collegeboard.org/courses/ap-calculus-bc/exam)
+- [AP Calculus AB/BC CED](https://apcentral.collegeboard.org/media/pdf/ap-calculus-ab-and-bc-course-and-exam-description.pdf)
+- [AP Calculus AB/BC clarifications](https://apcentral.collegeboard.org/media/pdf/ap-calculus-ab-bc-course-and-exam-description-clarifications.pdf)
 
 Topic numbering and unit/topic boundaries follow the Course and Exam
-Description structure so citations line up with common AP materials. Catalog
-titles are concise matching labels: many retain the short CED topic label for
-precision, while some are shortened. This catalog does not reproduce the
-learning objectives, essential knowledge, exclusions, or exam task rules.
-This file is the project's internal matching catalog; College Board remains the
-authority for current course and exam requirements.
-As of the catalog check above, AP Precalculus Units 1–3 are assessed; Unit 4
-remains course content but is not assessed on the AP Exam.
+Description structure so mappings line up with common AP materials. Catalog
+titles are concise internal matching labels; some are shortened or paraphrased.
+They are not quotations from, or citations to, an official College Board
+source. This catalog does not reproduce the learning objectives, essential
+knowledge, exclusions, or exam task rules. College Board remains the authority
+for current course and exam requirements.
+
+For AP Precalculus, Units 1–3 are assessed on the AP Exam. Unit 4 remains course
+content but is not assessed on the AP Exam.
 
 ## AP Precalculus
 - Unit 1 — Polynomial and Rational Functions

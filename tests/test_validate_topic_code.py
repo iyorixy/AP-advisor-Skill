@@ -91,6 +91,18 @@ class NormalizeTests(unittest.TestCase):
     def test_normalizes_curly_apostrophe(self):
         self.assertEqual(vtc.normalize("L’Hospital's Rule"), "l hospital s rule")
 
+    def test_nfkc_normalizes_compatible_unicode_forms(self):
+        self.assertEqual(vtc.normalize("ＦＵＬＬＷＩＤＴＨ ＴＥＸＴ"), "fullwidth text")
+
+    def test_preserves_unicode_letters_while_normalizing_punctuation(self):
+        self.assertEqual(
+            vtc.normalize("中文、日本語・КИРИЛЛИЦА"),
+            "中文 日本語 кириллица",
+        )
+
+    def test_preserves_non_punctuation_symbols(self):
+        self.assertEqual(vtc.normalize("e^x ✓"), "e^x ✓")
+
 
 class ExtractQueryFieldsTests(unittest.TestCase):
     def test_full_citation(self):
@@ -236,6 +248,27 @@ class FindMatchTests(unittest.TestCase):
             "unit 2, topic 2.4 - EXPONENTIAL-function manipulation!",
         )
         self.assertIsNotNone(match)
+
+    def test_curly_apostrophes_and_trailing_punctuation_match(self):
+        match = vtc.find_match(
+            self.topics,
+            "unit 4, topic 4.7 - Using L’Hospital’s Rule for Indeterminate Forms!",
+        )
+        self.assertIsNotNone(match)
+
+    def test_non_ascii_suffixes_do_not_match(self):
+        suffixes = (
+            "完全错误的附加文本",
+            "完全に誤った追加テキスト",
+            "совершенно неверный добавочный текст",
+        )
+        for suffix in suffixes:
+            with self.subTest(suffix=suffix):
+                match = vtc.find_match(
+                    self.topics,
+                    f"Unit 3, Topic 3.1 — The Chain Rule {suffix}",
+                )
+                self.assertIsNone(match)
 
     def test_nonexistent_topic_number_fails(self):
         match = vtc.find_match(self.topics, "Unit 5, Topic 5.99 — Made Up Topic")
@@ -471,6 +504,22 @@ class CliTests(unittest.TestCase):
         )
         self.assertIn("META — topic_exam_scope: assessed", stdout)
         self.assertEqual(stderr, "")
+
+    def test_evidence_json_rejects_non_ascii_suffix(self):
+        query = "Unit 3, Topic 3.1 — The Chain Rule 完全错误的附加文本"
+        exit_code, stdout, stderr = run_main(
+            "--course",
+            "calc-ab",
+            "--evidence-json",
+            query,
+        )
+        self.assertEqual(exit_code, 1)
+        self.assertEqual(stderr, "")
+        evidence = json.loads(stdout)
+        self.assertEqual(evidence["overall_status"], "fail")
+        self.assertEqual(evidence["results"][0]["status"], "fail")
+        self.assertEqual(evidence["results"][0]["input"], query)
+        self.assertIn("no exact match", evidence["results"][0]["message"])
 
     def test_multiple_citations_all_pass(self):
         exit_code, stdout, stderr = run_main(

@@ -8,19 +8,24 @@ and dependency-free — please keep changes in that spirit.
 ### 1. Propose support for another AP subject
 
 Adding a framework file alone does not add subject support. Treat a new subject
-as a coordinated integration: define its course and exam boundaries, then
+as a coordinated integration: define its topic-level catalog and exam-scope
+boundaries, then
 update Skill routing, validator course configuration, machine-readable schemas,
 tests, behavior evals, and documentation together. Do not reuse
 Calculus-specific planning assumptions without subject-specific review. A
 catalog-only contribution must not claim that the subject is supported.
 
-Document the source and effective school year for any catalog data. Keep the
-catalog limited to the labels and scope metadata needed by the Skill; do not
-copy a complete Course and Exam Description into the repository.
+For catalog data, record official source URLs, `source_checked_at`,
+`school_year`, and the applicable exam administration. Distinguish course
+content or clarification effective dates from exam-format and timing effective
+dates. Keep the catalog limited to the labels and scope metadata needed by the
+Skill; do not copy a complete Course and Exam Description into the repository.
+Internal catalog labels are mappings, not official-source quotations or
+citations.
 
 ### 2. Correct or refine the existing outline
 
-If you spot a unit/topic name that's wrong, out of order, or missing,
+If you spot an internal unit/topic mapping that's wrong, out of order, or missing,
 open a PR editing `references/ap-calc-framework.md` directly. Keep the
 existing two-space/four-space indentation style — `scripts/validate_topic_code.py`
 parses the file structurally, so formatting matters. After editing, re-run
@@ -48,7 +53,8 @@ edge case you're fixing to `tests/test_validate_topic_code.py` — it's plain
 
 ### 4. Change Skill behavior
 
-When changing routing, scope, output, review, or advisor instructions, add or
+When changing routing, topic-level catalog scope, output, review, or Advisor
+instructions, add or
 update a case in `evals/cases.jsonl`. Keep automated assertions limited to
 stable invariants; put semantic judgments that need human review in
 `manual_checks`. `must_contain` and `must_not_contain` are literal,
@@ -67,8 +73,20 @@ which searches all string values as well as keys. Do not weaken the
 evidence checks to command-name or keyword detection: only completed
 `--evidence-json` runs with a matching staged-script path, course, mode, input
 multiset, exit code, and output envelope may support
-`citation_validation.automated_status=pass`. All citations for one case share
-one course/style group and must be covered by one successful grouped run.
+`citation_validation.automated_status=pass`. `citation_validation` and
+`ap-oriented` are retained machine-compatibility names: they mean internal
+Topic-mapping validation and assessed-Topic scope, not an official-source
+citation or full exam alignment. All mappings for one case share one
+course/style group and must be covered by one successful grouped run.
+
+Use `exam-oriented` in human-facing copy. It means only that every mapped Topic
+is marked `assessed`; it does not prove question type, calculator conditions,
+representation mix, rubric or scoring, weighting, timing, or complete exam
+alignment. Keep difficulty observable: `foundational` uses supplied or immediate
+prerequisites, a short direct path, and no representation conversion;
+`standard` uses routine prerequisites, linked steps, and at most a familiar
+conversion; `challenge` combines prerequisites, non-routine decisions, and an
+integral representation conversion or justification.
 
 For plain-text cases this proves the command course/mode and exact visible-text
 occurrences under the runner's conservative parser, not the semantics of
@@ -84,15 +102,26 @@ default fail-closed. Add adversarial tests for any event-field or
 command-parsing change.
 
 `scripts/run_behavior_evals.py` validates the corpus only and does not invoke a
-model by default. To run one live case deliberately, use an installed,
-authenticated Codex CLI:
+model by default. Its `VALID` output is not a behavior `PASS`; without an
+explicit live run, model behavior is `NOT RUN`. To run one live case
+deliberately, use an installed, authenticated Codex CLI:
 
 ```bash
 python scripts/run_behavior_evals.py --run --case CASE_ID
 ```
 
 Live runs may consume account usage and write ignored results under
-`eval-results/`. They use a temporary read-only repository and ignore the
+`eval-results/`. Automated shape, literal, and validator-receipt success is
+`CONTRACT-PASS`, not overall behavior `PASS`. Any unadjudicated `manual_checks`
+make the overall status `MANUAL REVIEW REQUIRED`; an automated contract failure
+is `FAIL`. Behavior-level `PASS` is reserved for automated contract success plus
+successful adjudication of every manual item. The current runner has no manual
+adjudication input and does not issue that status itself. Lower-case Topic
+validator `pass` is a separate contract. Legacy result fields `automated_passed`
+and `automated_pass` are deprecated compatibility aliases for the automated
+contract boolean only.
+
+Live runs use a temporary read-only repository and ignore the
 user's `config.toml` by default; pass `--use-user-config` only when a custom
 provider or model configuration is required. Live runs are not part of CI.
 

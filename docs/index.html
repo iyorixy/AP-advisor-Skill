@@ -185,10 +185,10 @@
   <header class="hero">
     <h1 class="title"><code>ap-advisor</code></h1>
     <p class="tagline">
-      <span data-lang="en">A Codex Skill that generates, reviews, and prioritizes AP Precalculus / Calculus AB / BC study content using a bundled citation catalog.</span>
-      <span data-lang="zh">一个 Codex Skill，使用仓库内的引用目录生成、审阅和安排 AP Precalculus、AP Calculus AB/BC 学习内容。</span>
+      <span data-lang="en">A Codex Skill that uses learner evidence to diagnose, review, generate, and prioritize AP Precalculus / Calculus AB / BC study work.</span>
+      <span data-lang="zh">一个根据学习者作答证据诊断、审阅、生成并安排 AP Precalculus、AP Calculus AB/BC 学习任务优先级的 Codex Skill。</span>
     </p>
-    <a class="btn-primary" href="https://github.com/iyorixy/ap-advisor" target="_blank" rel="noopener">
+    <a class="btn-primary" href="https://github.com/iyorixy/APadvisor" target="_blank" rel="noopener">
       <span data-lang="en">View on GitHub</span>
       <span data-lang="zh">查看 GitHub 仓库</span>
     </a>
@@ -198,20 +198,20 @@
     <h2><span data-lang="en">What it does</span><span data-lang="zh">功能介绍</span></h2>
     <div data-lang="en">
       <ul class="feature-list">
-        <li>Labels generated content with a Unit/Topic from the bundled citation catalog — e.g. <code>Unit 2, Topic 2.4 — Exponential Function Manipulation</code>.</li>
-        <li>Keeps learning difficulty separate from instructional or AP-oriented style.</li>
-        <li>Explanations state the underlying principle before any application, and include an application when it materially helps.</li>
-        <li>Given weak topics and/or an exam date, produces a suggested review order for the learner to evaluate.</li>
-        <li>Checks every citation label before showing it, normally with the bundled script, and reports when automated validation cannot run.</li>
+        <li>Separates conceptual, modeling, procedural, representation, justification, reading, and pacing problems from actual response evidence.</li>
+        <li>Prioritizes one to three interventions, each with a reason, concrete practice method, measurable exit standard, and unseen transfer retest.</li>
+        <li>Maps generated content and recommendations to an internal Unit/Topic catalog — e.g. <code>Unit 2, Topic 2.4 — Exponential Function Manipulation</code>.</li>
+        <li>Keeps observable learning difficulty separate from instructional or exam-oriented scope.</li>
+        <li>Validates every displayed Topic mapping and reports when automated validation is <code>NOT RUN</code>.</li>
       </ul>
     </div>
     <div data-lang="zh">
       <ul class="feature-list">
-        <li>每次生成内容都会标注仓库引用目录中的 Unit/Topic，例如 <code>Unit 2, Topic 2.4 — Exponential Function Manipulation</code>。</li>
-        <li>把学习难度与教学型或 AP-oriented 风格分开表达。</li>
-        <li>讲解内容先讲原理；实际应用场景只在确实有助于理解时加入。</li>
-        <li>根据你指出的薄弱知识点和/或考试日期，给出一份需要由学习者评估的复习顺序建议。</li>
-        <li>展示引用前检查每个引用标签；正常使用仓库脚本，并在自动校验无法运行时明确报告。</li>
+        <li>从真实作答证据区分概念理解、建模、程序计算、表示转换、数学论证、读题和时间管理问题。</li>
+        <li>优先给出一至三个干预任务，每项包含理由、具体练法、可测退出标准和未见迁移复测。</li>
+        <li>把生成内容和建议映射到内部 Unit/Topic 目录，例如 <code>Unit 2, Topic 2.4 — Exponential Function Manipulation</code>。</li>
+        <li>把可观察的学习难度与教学型或面向考试的范围分开表达。</li>
+        <li>展示前校验每个 Topic 映射，并在自动校验未运行时明确报告 <code>NOT RUN</code>。</li>
       </ul>
     </div>
   </section>
@@ -222,7 +222,7 @@
       <span data-lang="en">Clone the repo, then copy it into your Codex skills directory:</span>
       <span data-lang="zh">克隆仓库，然后把它复制到 Codex 的 skills 目录下：</span>
     </p>
-    <pre class="code-block"><button class="copy-btn" id="copyBtn" type="button"><span data-lang="en">Copy</span><span data-lang="zh">复制</span></button><code id="installCmd">git clone https://github.com/iyorixy/ap-advisor.git
+    <pre class="code-block"><button class="copy-btn" id="copyBtn" type="button"><span data-lang="en">Copy</span><span data-lang="zh">复制</span></button><code id="installCmd">git clone https://github.com/iyorixy/APadvisor.git ap-advisor
 
 # Codex
 mkdir -p ~/.agents/skills
@@ -231,8 +231,8 @@ cp -r ap-advisor ~/.agents/skills/ap-advisor
 mkdir -p .agents/skills
 cp -r ap-advisor .agents/skills/ap-advisor</code></pre>
     <p class="body-text" style="margin-top: 14px; font-size: 0.9rem;">
-      <span data-lang="en">Requires Python 3.10+ (standard library only) on the machine running the agent, for the citation validator script.</span>
-      <span data-lang="zh">运行 agent 的机器上需要 Python 3.10+（仅用标准库），用于运行引用校验脚本。</span>
+      <span data-lang="en">Requires Python 3.10+ (standard library only) on the machine running the agent, for the Topic-mapping validator.</span>
+      <span data-lang="zh">运行 agent 的机器上需要 Python 3.10+（仅用标准库），用于运行 Topic 映射校验脚本。</span>
     </p>
   </section>
 
@@ -240,12 +240,12 @@ cp -r ap-advisor .agents/skills/ap-advisor</code></pre>
     <h2><span data-lang="en">Why this exists</span><span data-lang="zh">为什么做这个</span></h2>
     <div class="card">
       <p class="body-text">
-        <span data-lang="en">Ask a generic AI agent to "make me some AP Calc practice problems" and you may get course-scope mixups or invented Unit/Topic labels. AP Advisor checks citation labels against an internal catalog before presenting them. The validator proves exact catalog matching and topic-level scope only; it does not independently prove mathematical correctness, topical fit, learning-objective coverage, exclusions, task format, or calculator conditions.</span>
-        <span data-lang="zh">让一个普通的 AI 助手“帮我出几道 AP 微积分练习题”，可能会遇到课程范围混用或凭空捏造 Unit/Topic 标签。AP Advisor 会在展示前根据内部目录检查引用标签。校验器只能证明目录精确匹配和 Topic 层级范围；它不能独立证明数学正确、内容符合所引 Topic，也不能证明 Learning Objectives、排除项、题型或计算器条件全部满足。</span>
+        <span data-lang="en">Accuracy alone does not reveal a root cause. AP Advisor uses written work, error patterns, time, confidence, deadlines, and available study time to choose a small measurable intervention; it does not claim mastery before an unseen transfer retest. Topic mapping is a safety guardrail, not the product goal.</span>
+        <span data-lang="zh">单看正确率不能说明根因。AP Advisor 结合书面作答、错误模式、耗时、信心、截止时间和可用学习时间，选择最小且可测的干预；完成未见迁移复测前不声称已经掌握。Topic 映射是安全护栏，不是产品目标。</span>
       </p>
       <p class="body-text" style="margin-top: 12px;">
-        <span data-lang="en">Machine-readable validator evidence binds the selected course and AP-oriented mode to every exact citation and topic scope. A command merely starting is not treated as a passing validation.</span>
-        <span data-lang="zh">机器可读的校验证据会把所选课程与 AP-oriented 模式绑定到每条精确引用及其 Topic 范围；仅仅启动过命令不会被视为校验通过。</span>
+        <span data-lang="en">The Unicode-aware validator checks normalized exact internal labels and topic-level catalog scope. Internal labels are not official-source citations. Human-facing prose says exam-oriented; legacy machine tokens such as <code>ap-oriented</code> mean only that every mapped Topic is marked assessed. They do not prove mathematics, topical fit, question type, calculator conditions, representation mix, rubric or scoring, or complete exam alignment.</span>
+        <span data-lang="zh">支持 Unicode 的校验器只检查规范化精确内部标签和 Topic 层级目录范围。内部标签不是官方来源引用。面向用户的文案使用“面向考试”；兼容机器 token <code>ap-oriented</code> 只表示所有映射 Topic 均标记为 assessed，不证明数学、内容与 Topic 的适配、题型、计算器条件、表示形式、rubric、计分方式或完整考试对齐。</span>
       </p>
     </div>
   </section>
@@ -253,9 +253,9 @@ cp -r ap-advisor .agents/skills/ap-advisor</code></pre>
   <footer>
     <p>
       <span data-lang="en">MIT License — see the </span><span data-lang="zh">MIT 许可证 — 详见</span>
-      <a href="https://github.com/iyorixy/ap-advisor/blob/main/LICENSE" target="_blank" rel="noopener">LICENSE</a>
+      <a href="https://github.com/iyorixy/APadvisor/blob/main/LICENSE" target="_blank" rel="noopener">LICENSE</a>
       <span data-lang="en"> file. Repository: </span><span data-lang="zh">文件。仓库地址：</span>
-      <a href="https://github.com/iyorixy/ap-advisor" target="_blank" rel="noopener">github.com/iyorixy/ap-advisor</a>
+      <a href="https://github.com/iyorixy/APadvisor" target="_blank" rel="noopener">github.com/iyorixy/APadvisor</a>
     </p>
     <p>
       <span data-lang="en">Open source — contributions welcome.</span>

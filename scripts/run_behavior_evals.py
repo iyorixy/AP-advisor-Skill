@@ -8,7 +8,7 @@ read-only repository and ignore the user's ``config.toml`` unless
 ``--use-user-config`` is supplied.
 
 Exit codes:
-    0: corpus is valid and (when run) every automated assertion passed
+    0: corpus is valid and (when run) every automated contract assertion met
     1: at least one live behavioral assertion failed
     2: invalid corpus, configuration problem, or runner failure
 """
@@ -101,6 +101,10 @@ JSON_CONTRACT_FIELDS = {
 VALIDATOR_SCHEMA_VERSION = 1
 VALIDATOR_NAME = "ap-advisor-topic-code"
 REQUIRED_LAUNCHER_FAMILIES = {"python3", "python", "py-3"}
+CONTRACT_PASS = "CONTRACT-PASS"
+MANUAL_REVIEW_REQUIRED = "MANUAL REVIEW REQUIRED"
+NOT_RUN = "NOT RUN"
+FAIL = "FAIL"
 CATALOG_TOPIC_REFERENCE = re.compile(
     r"(?<![A-Za-z0-9])topic[\W_]+\d+\.\d+(?!\d)(?!\.\d)", re.IGNORECASE
 )
@@ -2166,6 +2170,18 @@ def evaluate_case(
     return failures
 
 
+def _evaluation_statuses(
+    *, automated_passed: bool, manual_review_required: bool
+) -> tuple[str, str]:
+    """Return contract and overall statuses without implying semantic review."""
+
+    if not automated_passed:
+        return FAIL, FAIL
+    if manual_review_required:
+        return CONTRACT_PASS, MANUAL_REVIEW_REQUIRED
+    return CONTRACT_PASS, CONTRACT_PASS
+
+
 def _copy_skill(temp_repo: Path) -> Path:
     skill_target = temp_repo / ".agents" / "skills" / "ap-advisor"
     try:
@@ -2335,8 +2351,8 @@ def main(argv: list[str] | None = None) -> int:
         cases = select_cases(load_cases(args.corpus), args.case_ids)
         if not args.run:
             print(
-                f"VALID: {len(cases)} selected case(s); corpus-only mode, "
-                "no model calls or result writes"
+                f"VALID: {len(cases)} selected case(s); CORPUS CONTRACT ONLY; "
+                f"LIVE MODEL EVAL: {NOT_RUN}; no model calls or result writes"
             )
             return 0
         if args.timeout <= 0:
@@ -2354,11 +2370,21 @@ def main(argv: list[str] | None = None) -> int:
                 use_user_config=args.use_user_config,
             )
             failures = evaluate_case(case, message, validator_evidence)
-            any_assertion_failure = any_assertion_failure or bool(failures)
+            automated_passed = not failures
+            manual_review_required = bool(case.manual_checks)
+            contract_status, overall_status = _evaluation_statuses(
+                automated_passed=automated_passed,
+                manual_review_required=manual_review_required,
+            )
+            any_assertion_failure = any_assertion_failure or not automated_passed
             results.append(
                 {
                     "id": case.id,
-                    "automated_passed": not failures,
+                    "contract_status": contract_status,
+                    "overall_status": overall_status,
+                    # Deprecated compatibility alias. This means only that the
+                    # automated contract checks found no failure.
+                    "automated_passed": automated_passed,
                     "failures": failures,
                     "validator_observed": validator_evidence.observed,
                     "validator_evidence": validator_evidence.as_dict(),
@@ -2367,17 +2393,29 @@ def main(argv: list[str] | None = None) -> int:
                     "stderr": stderr,
                 }
             )
-            print(f"{'AUTO-PASS' if not failures else 'AUTO-FAIL'}: {case.id}")
+            print(
+                f"{contract_status}: {case.id}; OVERALL: {overall_status}"
+            )
 
+        manual_review_required = any(case.manual_checks for case in cases)
+        contract_status, overall_status = _evaluation_statuses(
+            automated_passed=not any_assertion_failure,
+            manual_review_required=manual_review_required,
+        )
         payload = {
             "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(),
             "corpus": str(args.corpus.resolve()),
             "used_user_config": args.use_user_config,
+            "contract_status": contract_status,
+            "overall_status": overall_status,
+            # Deprecated compatibility aliases. They describe the automated
+            # contract layer and pending-review flag, not an overall behavior pass.
             "automated_pass": not any_assertion_failure,
-            "manual_review_required": any(case.manual_checks for case in cases),
+            "manual_review_required": manual_review_required,
             "results": results,
         }
         output_path = write_results(args.output_dir, payload)
+        print(f"OVERALL: {overall_status}")
         print(f"RESULTS: {output_path}")
         return 1 if any_assertion_failure else 0
     except RunnerError as exc:

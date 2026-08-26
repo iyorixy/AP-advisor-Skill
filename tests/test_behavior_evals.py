@@ -147,6 +147,7 @@ class CorpusTests(unittest.TestCase):
             "calc-ab-chain-rule-review",
             "calc-ab-correct-review",
             "calc-ab-correct-conclusion-underjustified-review",
+            "calc-ab-diagnostic-advisor-zh",
             "calc-ab-json-practice-no-answer",
             "calc-ab-broad-weakness-advisor",
             "calc-bc-multitopic-advisor",
@@ -163,6 +164,27 @@ class CorpusTests(unittest.TestCase):
             "10.11 Finding Taylor Polynomial Approximations of Functions",
             by_id["calc-bc-json-success"].expect["must_contain"],
         )
+
+    def test_chinese_diagnostic_advisor_keeps_semantics_in_manual_review(self):
+        by_id = {case.id: case for case in self.cases}
+        case = by_id["calc-ab-diagnostic-advisor-zh"]
+        self.assertEqual(case.category, "advisor")
+        self.assertIn("请用中文", case.prompt)
+        self.assertEqual(case.expect["must_contain"], [])
+        self.assertEqual(case.expect["must_not_contain"], [])
+        manual_checks = "\n".join(case.manual_checks)
+        self.assertIn("measurable exit criterion", manual_checks)
+        self.assertIn("unseen transfer problem", manual_checks)
+
+    def test_multitopic_advisor_prioritization_is_not_a_keyword_contract(self):
+        by_id = {case.id: case for case in self.cases}
+        case = by_id["calc-bc-multitopic-advisor"]
+        self.assertIn("one to three review tasks", case.prompt)
+        self.assertEqual(case.expect["must_contain"], [])
+        self.assertEqual(case.expect["must_not_contain"], [])
+        manual_checks = "\n".join(case.manual_checks)
+        self.assertIn("one to three minimal review tasks", manual_checks)
+        self.assertIn("rather than inferred from catalog order", manual_checks)
 
     def test_text_validator_cases_declare_expected_course_and_mode(self):
         for case in self.cases:
@@ -2114,6 +2136,67 @@ class AutomatedAssertionTests(unittest.TestCase):
             rbe._schema_failures({}, {"oneOf": [{"type": "object"}]})
 
 
+class BehaviorStatusSemanticsTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.cases = {case.id: case for case in rbe.load_cases(CORPUS_PATH)}
+
+    @staticmethod
+    def statuses(case, failures):
+        return rbe._evaluation_statuses(
+            automated_passed=not failures,
+            manual_review_required=bool(case.manual_checks),
+        )
+
+    def test_bc_only_generation_can_contract_pass_but_requires_manual_review(self):
+        case = self.cases["explicit-ambiguous-bc-only-no-question"]
+        message = (
+            "Here is the requested Taylor-polynomial practice problem: "
+            "find the third-degree polynomial and show your work."
+        )
+
+        failures = rbe.evaluate_case(case, message, NO_VALIDATOR)
+
+        self.assertEqual(failures, [])
+        contract_status, overall_status = self.statuses(case, failures)
+        self.assertEqual(contract_status, rbe.CONTRACT_PASS)
+        self.assertEqual(overall_status, rbe.MANUAL_REVIEW_REQUIRED)
+        self.assertNotEqual(overall_status, "PASS")
+
+    def test_wrong_math_with_valid_topic_receipt_requires_manual_review(self):
+        case = self.cases["calc-ab-chain-rule-review"]
+        citation = "Unit 3, Topic 3.1 — The Chain Rule"
+        message = f"{citation}\nThe derivative is 2x sin(x^2)."
+        observation = validator_observation(
+            course="calc-ab",
+            citations=[(citation, "assessed")],
+        )
+
+        failures = rbe.evaluate_case(case, message, observation)
+
+        self.assertEqual(failures, [])
+        contract_status, overall_status = self.statuses(case, failures)
+        self.assertEqual(contract_status, rbe.CONTRACT_PASS)
+        self.assertEqual(overall_status, rbe.MANUAL_REVIEW_REQUIRED)
+        self.assertNotEqual(overall_status, "PASS")
+
+    def test_automatic_failure_overrides_pending_manual_review(self):
+        self.assertEqual(
+            rbe._evaluation_statuses(
+                automated_passed=False,
+                manual_review_required=True,
+            ),
+            (rbe.FAIL, rbe.FAIL),
+        )
+        self.assertEqual(
+            rbe._evaluation_statuses(
+                automated_passed=True,
+                manual_review_required=False,
+            ),
+            (rbe.CONTRACT_PASS, rbe.CONTRACT_PASS),
+        )
+
+
 class SafeDefaultModeTests(unittest.TestCase):
     def test_default_mode_never_invokes_codex_or_writes_results(self):
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -2135,6 +2218,9 @@ class SafeDefaultModeTests(unittest.TestCase):
                     ]
                 )
         self.assertEqual(exit_code, 0)
+        self.assertIn("VALID:", stdout.getvalue())
+        self.assertIn("CORPUS CONTRACT ONLY", stdout.getvalue())
+        self.assertIn("LIVE MODEL EVAL: NOT RUN", stdout.getvalue())
         self.assertIn("no model calls or result writes", stdout.getvalue())
         self.assertFalse(output_dir.exists())
 
@@ -2150,7 +2236,13 @@ class SafeDefaultModeTests(unittest.TestCase):
 
     def test_live_assertion_failure_returns_exit_one_without_real_model_call(self):
         stdout = io.StringIO()
-        with tempfile.TemporaryDirectory() as temp_dir, mock.patch.object(
+        captured: dict = {}
+
+        def capture_results(_output_dir, payload):
+            captured.update(payload)
+            return Path("result.json")
+
+        with mock.patch.object(
             rbe, "_resolve_executable", return_value="codex"
         ), mock.patch.object(
             rbe,
@@ -2159,7 +2251,7 @@ class SafeDefaultModeTests(unittest.TestCase):
         ), mock.patch.object(
             rbe,
             "write_results",
-            return_value=Path(temp_dir) / "result.json",
+            side_effect=capture_results,
         ), redirect_stdout(stdout):
             exit_code = rbe.main(
                 [
@@ -2171,7 +2263,16 @@ class SafeDefaultModeTests(unittest.TestCase):
                 ]
             )
         self.assertEqual(exit_code, 1)
-        self.assertIn("AUTO-FAIL", stdout.getvalue())
+        self.assertIn("FAIL: implicit-precalc-generate", stdout.getvalue())
+        self.assertNotIn("AUTO-FAIL", stdout.getvalue())
+        self.assertEqual(captured["contract_status"], rbe.FAIL)
+        self.assertEqual(captured["overall_status"], rbe.FAIL)
+        self.assertFalse(captured["automated_pass"])
+        self.assertTrue(captured["manual_review_required"])
+        result = captured["results"][0]
+        self.assertEqual(result["contract_status"], rbe.FAIL)
+        self.assertEqual(result["overall_status"], rbe.FAIL)
+        self.assertFalse(result["automated_passed"])
 
     def test_live_success_saves_structured_validator_evidence_without_model_call(self):
         citation = "Unit 2, Topic 2.4 — Exponential Function Manipulation"
@@ -2213,8 +2314,20 @@ class SafeDefaultModeTests(unittest.TestCase):
                 ]
             )
         self.assertEqual(exit_code, 0)
-        self.assertIn("AUTO-PASS", stdout.getvalue())
+        self.assertIn("CONTRACT-PASS", stdout.getvalue())
+        self.assertIn("MANUAL REVIEW REQUIRED", stdout.getvalue())
+        self.assertEqual(captured["contract_status"], rbe.CONTRACT_PASS)
+        self.assertEqual(
+            captured["overall_status"], rbe.MANUAL_REVIEW_REQUIRED
+        )
+        self.assertTrue(captured["automated_pass"])
+        self.assertTrue(captured["manual_review_required"])
         result = captured["results"][0]
+        self.assertEqual(result["contract_status"], rbe.CONTRACT_PASS)
+        self.assertEqual(
+            result["overall_status"], rbe.MANUAL_REVIEW_REQUIRED
+        )
+        self.assertTrue(result["automated_passed"])
         self.assertTrue(result["validator_observed"])
         self.assertEqual(result["validator_evidence"]["accepted_run_count"], 1)
         self.assertNotIn("validator_called", result)

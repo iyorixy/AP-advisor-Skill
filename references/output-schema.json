@@ -1,24 +1,24 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "AP Advisor Generated Content",
-  "description": "Output shape for one generated AP Precalculus / Calculus AB / Calculus BC learning item. Reviews and study plans use their own human-readable formats.",
+  "description": "Output shape for one generated AP Precalculus / Calculus AB / Calculus BC learning item. Reviews and Advisor plans use their own human-readable formats. Legacy machine names containing citation or ap-oriented are compatibility terms, not official-source citation or full exam-alignment claims.",
   "type": "object",
   "required": ["course", "unit", "topic", "topic_exam_scope", "type", "difficulty", "style", "citation_validation", "content"],
   "properties": {
     "course": {
       "type": "string",
       "enum": ["precalculus", "calc-ab", "calc-bc"],
-      "description": "Course key used by the citation validator."
+      "description": "Course key used by the internal Topic-mapping validator."
     },
     "unit": {
       "type": "string",
       "pattern": "^Unit (?:[1-9]|10)$",
-      "description": "Unit number from the validated citation, e.g. 'Unit 2'."
+      "description": "Unit number from the validated internal catalog mapping, e.g. 'Unit 2'."
     },
     "topic": {
       "type": "string",
       "pattern": "^[1-9][0-9]*\\.[1-9][0-9]* .+$",
-      "description": "Topic code and catalog title from the validator, without scope markers, e.g. '2.4 Exponential Function Manipulation'."
+      "description": "Topic code and internal catalog label from the validator, without scope markers, e.g. '2.4 Exponential Function Manipulation'. The label is not an official-source quotation or citation."
     },
     "topic_exam_scope": {
       "type": "string",
@@ -33,25 +33,26 @@
     "difficulty": {
       "type": "string",
       "enum": ["foundational", "standard", "challenge"],
-      "description": "Cognitive and prerequisite demand, independent of AP-oriented style."
+      "description": "Observable demand, independent of style. foundational supplies or recalls immediate prerequisites, uses a short direct reasoning path, and requires no representation conversion; standard assumes routine prerequisites, uses multiple linked steps, and may require a familiar representation conversion; challenge requires selecting and combining multiple prerequisites, non-routine multi-step decisions, and an integral representation conversion or mathematical justification."
     },
     "style": {
       "type": "string",
       "enum": ["instructional", "ap-oriented"],
-      "description": "ap-oriented means original course-shaped practice, not official College Board material or proof of full exam alignment."
+      "description": "Human-facing prose should say exam-oriented. ap-oriented is the retained compatibility token and means only that every mapped Topic is marked assessed. It does not establish AP Exam question type, calculator conditions, representation mix, rubric or scoring, weighting, timing, or complete exam alignment."
     },
     "citation_validation": {
       "type": "object",
+      "description": "Legacy field name retained for compatibility. This records internal catalog Topic-mapping validation, not an official-source citation and not an overall model-behavior judgment.",
       "required": ["catalog_match", "automated_status"],
       "properties": {
         "catalog_match": {
           "const": "exact",
-          "description": "The unit/topic citation exactly matches the bundled catalog."
+          "description": "The unit/topic label matches the bundled catalog after documented Unicode-aware normalization. Added letters in any script are not ignored."
         },
         "automated_status": {
           "type": "string",
           "enum": ["pass", "not_run"],
-          "description": "Whether the bundled citation validator ran successfully. not_run requires an exact manual catalog lookup."
+          "description": "Topic-mapping validator receipt status only. pass does not prove mathematical correctness, content-to-Topic fit, teaching quality, or overall model behavior. not_run requires an exact manual catalog lookup and must not be reported as pass."
         }
       },
       "additionalProperties": false
@@ -59,7 +60,7 @@
     "supporting_topics": {
       "type": "array",
       "minItems": 1,
-      "description": "Optional validated supporting catalog topics materially used by the item.",
+      "description": "Optional validated supporting internal catalog Topic mappings materially used by the item.",
       "items": {
         "type": "object",
         "required": ["unit", "topic", "topic_exam_scope"],

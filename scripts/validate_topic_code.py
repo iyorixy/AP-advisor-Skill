@@ -32,6 +32,7 @@ import difflib
 import json
 import re
 import sys
+import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -181,10 +182,14 @@ def parse_framework(path: Path) -> list[Topic]:
 
 
 def normalize(text: str) -> str:
-    text = text.lower()
-    text = text.replace("’", "'")
-    text = re.sub(r"[^a-z0-9]+", " ", text)
-    return text.strip()
+    text = unicodedata.normalize("NFKC", text).casefold()
+    normalized_chars = (
+        " "
+        if char.isspace() or unicodedata.category(char).startswith("P")
+        else char
+        for char in text
+    )
+    return " ".join("".join(normalized_chars).split())
 
 
 def extract_query_fields(query: str):
