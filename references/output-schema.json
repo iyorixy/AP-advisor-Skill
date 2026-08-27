@@ -114,7 +114,7 @@
     },
     "citation_validation": {
       "type": "object",
-      "description": "Legacy field name for an internal Topic-mapping receipt; never a mathematical or behavior PASS.",
+      "description": "Internal Topic-mapping receipt; never proof of mathematical correctness.",
       "required": ["catalog_match", "automated_status"],
       "properties": {
         "catalog_match": {"const": "exact"},

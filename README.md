@@ -3,109 +3,79 @@
 # AP Advisor
 
 A dependency-free Codex Skill for AP Precalculus, AP Calculus AB, and AP
-Calculus BC generation, review, and evidence-based study intervention.
+Calculus BC. It can generate original study content, review learner work, and
+turn learner evidence into a small, measurable study intervention.
 
-The Skill keeps four claims separate:
+The Skill keeps Topic mapping, course scope, exam-task metadata, and
+mathematical correctness separate. Its validator checks internal Topic labels
+and selected AP boundaries; it does not certify the mathematics or guarantee an
+exam result.
 
-1. an internal content-Topic label matches exactly;
-2. the Topic and high-risk method fit the requested course;
-3. mathematical practices and exam-task features are stated correctly;
-4. the mathematics and teaching behavior pass human review.
+## Requirements
 
-A Topic-validator receipt proves only (1) and the recorded Topic scope. It is
-not a mathematical or behavior pass.
-
-## Content model
-
-`references/ap-calc-framework.md` is a compact matching catalog.
-`references/ap-content-boundaries.json` adds only decision-changing constraints:
-official-source metadata, high-risk methods, AB/BC dependencies, exclusions,
-and the independent mathematical-practice dimension. It intentionally does not
-copy the CED.
-
-Styles have distinct meanings:
-
-- `instructional`: course learning;
-- `assessed-topic`: every mapped Topic is assessed, without an exam-task claim;
-- `exam-oriented`: also fixes question type, calculator condition,
-  representation(s), and justification requirement.
-
-The old `ap-oriented` token is accepted only as a deprecated alias for
-`assessed-topic`.
-
-Advisor mode uses learner work, accuracy, time, error process, and uncertainty
-to choose one to three interventions. Each has a reason, bounded practice, an
-exit standard, and an unseen transfer retest. No retest result means no mastery
-claim.
+- Codex
+- Python 3.10 or newer; no third-party Python packages
 
 ## Install
 
-Copy this directory to `~/.agents/skills/ap-advisor` or a project-local
-`.agents/skills/ap-advisor`. Runtime requires Python 3.10+ and the standard
-library only.
+### Skill Installer (recommended)
 
-## Deterministic checks
+Ask Codex to install this GitHub repository:
+
+```text
+$skill-installer Install the skill at path . from iyorixy/AP-advisor-Skill as ap-advisor.
+```
+
+Codex detects newly installed skills automatically. If it does not appear,
+restart Codex.
+
+### Manual user installation
+
+PowerShell:
+
+```powershell
+New-Item -ItemType Directory -Force "$HOME\.agents\skills" | Out-Null
+git clone https://github.com/iyorixy/AP-advisor-Skill.git "$HOME\.agents\skills\ap-advisor"
+```
+
+macOS or Linux:
 
 ```bash
-python -m unittest discover -s tests -v
-python scripts/run_behavior_evals.py
+mkdir -p "$HOME/.agents/skills"
+git clone https://github.com/iyorixy/AP-advisor-Skill.git "$HOME/.agents/skills/ap-advisor"
 ```
 
-The second command validates only `evals/cases.jsonl`; it never invokes a model.
+For repository-only use, place the folder at
+`<repository>/.agents/skills/ap-advisor` instead.
 
-The validator compares the entire citation after Unicode NFKC normalization:
+To update a manual user installation:
 
 ```bash
-python scripts/validate_topic_code.py \
-  --course calc-bc --assessed-topic --evidence-json \
-  "Unit 6, Topic 6.11 — Integrating Using Integration by Parts"
+git -C "$HOME/.agents/skills/ap-advisor" pull --ff-only
 ```
 
-Exit codes are `0` pass, `1` mapping/content failure, and `2` setup/data error.
+## Verify and use
 
-## Behavior evaluation and adjudication
+Open `/skills` in Codex and confirm that `ap-advisor` appears, or invoke it
+directly:
 
-Live execution is explicit and may consume account usage:
+```text
+$ap-advisor Review this AP Calculus AB solution and identify the first substantive error.
+```
+
+Optional validator smoke check, run from the installed skill directory (use
+`python3` instead of `python` where needed):
 
 ```bash
-python scripts/run_behavior_evals.py --run --case CASE_ID
+python scripts/validate_topic_code.py --course calc-ab --evidence-json \
+  "Unit 3, Topic 3.1 — The Chain Rule"
 ```
 
-The runner validates the final output and directly calls the bundled validator;
-it does not trust shell commands, launcher attempts, or command-event evidence.
-Saved final outputs can be evaluated without another model call:
+A successful check exits with code `0` and reports
+`"overall_status":"pass"`.
 
-```bash
-python scripts/run_behavior_evals.py \
-  --responses responses.jsonl \
-  --adjudications adjudications.jsonl
-```
-
-Each response line is:
-
-```json
-{"case_id":"CASE_ID","final_output":"..."}
-```
-
-Each adjudication line records who reviewed each check, when, and why:
-
-```json
-{"case_id":"CASE_ID","reviewer":"name","reviewed_at":"2026-08-27T12:00:00Z","checks":[{"id":"manual-1","status":"pass","evidence":"Checked the derivative independently."}]}
-```
-
-Statuses are intentionally separate:
-
-- `CONTRACT-PASS`: deterministic final-output checks passed;
-- `MANUAL REVIEW REQUIRED`: at least one manual check is missing;
-- `PASS`: contract and every manual check passed;
-- `FAIL`: the contract or any manual check failed;
-- `NOT RUN`: no model behavior was executed.
-
-GitHub Actions runs deterministic tests only, on Linux and Windows. Live results
-are written to ignored `eval-results/` files.
-
-## License
+## License and AP notice
 
 MIT. “AP” is a College Board trademark. This project is neither published nor
-endorsed by College Board; verify current exam-critical facts against current
-official sources.
+endorsed by College Board. Verify current exam-critical facts against current
+official College Board sources.

@@ -77,9 +77,6 @@ changes fail. Use the returned canonical `citation` and `topic_exam_scope`.
 - If Python cannot start, do an exact catalog lookup and report `NOT RUN`, never
   `pass`.
 
-Behavior `PASS` is separate: it requires the automated final-output contract
-and a completed, successful human adjudication of every semantic check.
-
 For machine-readable generated items, read `references/output-schema.json`.
 For an impossible machine-readable request, emit one object matching
 `references/machine-error-schema.json`. Reviews and Advisor plans remain concise
