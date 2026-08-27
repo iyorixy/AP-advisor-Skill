@@ -1,31 +1,13 @@
 #!/usr/bin/env python3
+"""Validate exact AP Advisor Topic mappings and high-risk content boundaries.
+
+The matcher compares the entire citation after Unicode NFKC normalization.
+It intentionally does not extract a plausible Topic from surrounding text.
+
+Exit codes: 0 pass, 1 invalid mapping/content claim, 2 setup/data error.
 """
-validate_topic_code.py
 
-Validates that a Unit/Topic citation string (e.g. produced by an AI agent
-generating AP Precalculus / Calculus content) actually corresponds to a real
-entry in references/ap-calc-framework.md.
-
-Requires Python 3.10 or newer. Standard-library only; no network access or
-third-party dependencies.
-
-Usage:
-    python3 scripts/validate_topic_code.py "Unit 1, Topic 1.2 — Rates of Change"
-    python3 scripts/validate_topic_code.py "Unit 1, Topic 1.2 — Rates of Change" "Unit 2, Topic 2.4 — Exponential Function Manipulation"
-    python3 scripts/validate_topic_code.py --framework references/other.md "..."
-    python3 scripts/validate_topic_code.py --course calc-ab "Unit 6, Topic 6.11 — ..."
-    python3 scripts/validate_topic_code.py --course precalculus --ap-oriented "..."
-    python3 scripts/validate_topic_code.py --course calc-bc --evidence-json "..."
-
---course restricts matching to one of {precalculus, calc-ab, calc-bc}. For
-calc-ab, topics marked (BC)-only in the framework (at the unit or topic
-level) are rejected even if the number/title otherwise match.
-
-Exit codes:
-    0  -> every citation matched and passed the requested scope checks
-    1  -> at least one citation failed content or exam-scope validation
-    2  -> command-line, framework configuration, or framework data error
-"""
+from __future__ import annotations
 
 import argparse
 import difflib
@@ -35,29 +17,33 @@ import sys
 import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any, Iterable
 
-DEFAULT_FRAMEWORK_PATH = Path(__file__).resolve().parent.parent / "references" / "ap-calc-framework.md"
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+DEFAULT_FRAMEWORK_PATH = REPO_ROOT / "references" / "ap-calc-framework.md"
+DEFAULT_BOUNDARIES_PATH = REPO_ROOT / "references" / "ap-content-boundaries.json"
+COURSES = {"precalculus", "calc-ab", "calc-bc"}
+EVIDENCE_SCHEMA_VERSION = 2
+EVIDENCE_VALIDATOR = "ap-advisor-topic-code"
 
 RE_COURSE = re.compile(r"^##\s+(.+?)\s*$")
 RE_UNIT = re.compile(r"^-\s+Unit\s+(\d+)\s+—\s+(.+?)\s*$")
-RE_TOPIC_START = re.compile(r"^ {2}-\s+(.+?)\s*$")
+RE_TOPIC = re.compile(r"^ {2}-\s+(.+?)\s*$")
 RE_CONTINUATION = re.compile(r"^ {4}(?!-)(.+?)\s*$")
 RE_TOPIC_CODE = re.compile(r"^(\d+\.\d+)\s+(.+?)\s*$")
-RE_BC_MARKER = re.compile(r"\(BC\)\s*$")
-RE_NOT_ASSESSED_MARKER = re.compile(r"\s*\(not assessed on AP Exam\)\s*$", re.IGNORECASE)
-
-COURSE_FILTERS = {
-    "precalculus": lambda t: t.course.startswith("AP Precalculus"),
-    "calc-ab": lambda t: t.course.startswith("AP Calculus") and not t.bc_only,
-    "calc-bc": lambda t: t.course.startswith("AP Calculus"),
-}
-
-EVIDENCE_SCHEMA_VERSION = 1
-EVIDENCE_VALIDATOR = "ap-advisor-topic-code"
+RE_BC = re.compile(r"\s*\(BC\)\s*$")
+RE_NOT_ASSESSED = re.compile(
+    r"\s*\(not assessed on AP Exam\)\s*$", re.IGNORECASE
+)
 
 
 class FrameworkParseError(ValueError):
-    """Raised when a framework line looks structural but is malformed."""
+    pass
+
+
+class BoundaryDataError(ValueError):
+    pass
 
 
 @dataclass(frozen=True)
@@ -76,401 +62,472 @@ class Topic:
 
     @property
     def full_citation(self) -> str:
-        return f"{self.course} — Unit {self.unit_num} ({self.unit_title}), Topic {self.topic_num} — {self.topic_title}"
+        return (
+            f"{self.course} — Unit {self.unit_num} ({self.unit_title}), "
+            f"Topic {self.topic_num} — {self.topic_title}"
+        )
 
 
-def parse_framework(path: Path) -> list[Topic]:
+def parse_framework(path: Path = DEFAULT_FRAMEWORK_PATH) -> list[Topic]:
     lines = path.read_text(encoding="utf-8").splitlines()
-
     topics: list[Topic] = []
-    course = None
-    unit_num = None
-    unit_title = None
-    unit_bc_only = False
-    unit_not_assessed = False
+    course = unit_num = unit_title = None
+    unit_bc_only = unit_not_assessed = False
+    index = 0
 
-    i = 0
-    while i < len(lines):
-        line = lines[i]
-
-        m_course = RE_COURSE.match(line)
-        if m_course:
-            course = m_course.group(1)
-            unit_num = None
-            unit_title = None
-            unit_bc_only = False
-            unit_not_assessed = False
-            i += 1
+    while index < len(lines):
+        line = lines[index]
+        if match := RE_COURSE.match(line):
+            course = match.group(1)
+            unit_num = unit_title = None
+            unit_bc_only = unit_not_assessed = False
+            index += 1
             continue
-
-        m_unit = RE_UNIT.match(line)
-        if m_unit:
-            unit_num = m_unit.group(1)
-            raw_unit_title = m_unit.group(2)
-            unit_bc_only = bool(RE_BC_MARKER.search(raw_unit_title))
-            unit_not_assessed = bool(RE_NOT_ASSESSED_MARKER.search(raw_unit_title))
-            unit_title = RE_BC_MARKER.sub("", raw_unit_title).rstrip()
-            unit_title = RE_NOT_ASSESSED_MARKER.sub("", unit_title).rstrip()
-            i += 1
+        if match := RE_UNIT.match(line):
+            unit_num, raw_title = match.groups()
+            unit_bc_only = bool(RE_BC.search(raw_title))
+            unit_not_assessed = bool(RE_NOT_ASSESSED.search(raw_title))
+            unit_title = RE_NOT_ASSESSED.sub("", RE_BC.sub("", raw_title)).rstrip()
+            index += 1
             continue
-
         if re.match(r"^\s*-\s+Unit\b", line):
-            raise FrameworkParseError(
-                f"malformed unit entry at line {i + 1}: {line!r}"
-            )
-
-        m_topic_start = RE_TOPIC_START.match(line)
-        if m_topic_start:
-            topic_line_number = i + 1
-            buf = [m_topic_start.group(1)]
-            i += 1
-            while i < len(lines):
-                m_cont = RE_CONTINUATION.match(lines[i])
-                if not m_cont:
-                    break
-                buf.append(m_cont.group(1))
-                i += 1
-
-            joined = " ".join(buf)
-            for chunk in joined.split("/"):
-                chunk = chunk.strip()
-                if not chunk:
-                    continue
-                m_code = RE_TOPIC_CODE.match(chunk)
-                if not m_code:
+            raise FrameworkParseError(f"malformed unit at line {index + 1}: {line!r}")
+        if match := RE_TOPIC.match(line):
+            line_number = index + 1
+            parts = [match.group(1)]
+            index += 1
+            while index < len(lines) and (continued := RE_CONTINUATION.match(lines[index])):
+                parts.append(continued.group(1))
+                index += 1
+            if course is None or unit_num is None or unit_title is None:
+                raise FrameworkParseError(f"topic before course/unit at line {line_number}")
+            for chunk in " ".join(parts).split("/"):
+                if not (topic_match := RE_TOPIC_CODE.match(chunk.strip())):
                     raise FrameworkParseError(
-                        f"malformed topic entry at line {topic_line_number}: "
-                        f"{chunk!r}"
+                        f"malformed topic at line {line_number}: {chunk.strip()!r}"
                     )
-                topic_num, raw_topic_title = m_code.group(1), m_code.group(2)
-                if course is None or unit_num is None or unit_title is None:
-                    raise FrameworkParseError(
-                        f"topic entry before course/unit at line "
-                        f"{topic_line_number}: {chunk!r}"
-                    )
-                topic_bc_only = bool(RE_BC_MARKER.search(raw_topic_title))
-                topic_not_assessed = bool(
-                    RE_NOT_ASSESSED_MARKER.search(raw_topic_title)
-                )
-                topic_title = RE_BC_MARKER.sub("", raw_topic_title).rstrip()
-                topic_title = RE_NOT_ASSESSED_MARKER.sub(
-                    "", topic_title
+                topic_num, raw_title = topic_match.groups()
+                topic_bc_only = bool(RE_BC.search(raw_title))
+                topic_not_assessed = bool(RE_NOT_ASSESSED.search(raw_title))
+                topic_title = RE_NOT_ASSESSED.sub(
+                    "", RE_BC.sub("", raw_title)
                 ).rstrip()
-                bc_only = unit_bc_only or topic_bc_only
-                exam_assessed = not (unit_not_assessed or topic_not_assessed)
                 topics.append(
                     Topic(
-                        course=course,
-                        unit_num=unit_num,
-                        unit_title=unit_title,
-                        topic_num=topic_num,
-                        topic_title=topic_title,
-                        bc_only=bc_only,
-                        exam_assessed=exam_assessed,
+                        course,
+                        unit_num,
+                        unit_title,
+                        topic_num,
+                        topic_title,
+                        unit_bc_only or topic_bc_only,
+                        not (unit_not_assessed or topic_not_assessed),
                     )
                 )
             continue
-
         if re.match(r"^\s*-\s+\d+\.\d+\b", line):
             raise FrameworkParseError(
-                f"malformed topic indentation at line {i + 1}: {line!r}"
+                f"malformed topic indentation at line {index + 1}: {line!r}"
             )
-
-        i += 1
-
+        index += 1
     return topics
 
 
-def normalize(text: str) -> str:
-    text = unicodedata.normalize("NFKC", text).casefold()
-    normalized_chars = (
-        " "
-        if char.isspace() or unicodedata.category(char).startswith("P")
-        else char
-        for char in text
-    )
-    return " ".join("".join(normalized_chars).split())
+def framework_data_errors(topics: Iterable[Topic]) -> list[str]:
+    errors: list[str] = []
+    seen: set[tuple[str, str]] = set()
+    for topic in topics:
+        key = (topic.course, topic.topic_num)
+        if key in seen:
+            errors.append(f"duplicate topic {topic.topic_num!r} in {topic.course!r}")
+        seen.add(key)
+        if topic.topic_num.partition(".")[0] != topic.unit_num:
+            errors.append(
+                f"topic {topic.topic_num!r} is under Unit {topic.unit_num} "
+                f"in {topic.course!r}"
+            )
+    return errors
 
 
-def extract_query_fields(query: str):
-    unit_match = re.search(r"\bunit\s+(\d+)\b", query, re.IGNORECASE)
-    unit_num = unit_match.group(1) if unit_match else None
-
-    code_match = re.search(r"\btopic\s+(\d+\.\d+)\b", query, re.IGNORECASE)
-    topic_num = code_match.group(1) if code_match else None
-
-    # The title is everything after the explicitly labeled topic code. Strip
-    # only citation separators; any remaining text must exactly normalize to
-    # the catalog title in find_match().
-    title = None
-    if code_match:
-        title = query[code_match.end():].strip(" \t,-—–:")
-
-    return unit_num, topic_num, (title or None)
+def filter_by_course(topics: Iterable[Topic], course: str | None) -> list[Topic]:
+    if course is None:
+        return list(topics)
+    if course == "precalculus":
+        return [topic for topic in topics if topic.course.startswith("AP Precalculus")]
+    calculus = [topic for topic in topics if topic.course.startswith("AP Calculus")]
+    return calculus if course == "calc-bc" else [t for t in calculus if not t.bc_only]
 
 
-def find_match(topics: list[Topic], query: str) -> Topic | None:
-    unit_num, topic_num, title = extract_query_fields(query)
+def normalize_citation(text: str) -> str:
+    """Apply the only allowed citation normalization."""
 
-    if unit_num is None or topic_num is None or title is None:
-        return None
+    return unicodedata.normalize("NFKC", text)
 
-    norm_title = normalize(title)
-    matches = [
-        t
-        for t in topics
-        if t.unit_num == unit_num
-        and t.topic_num == topic_num
-        and normalize(t.topic_title) == norm_title
-    ]
+
+def find_match(topics: Iterable[Topic], query: str) -> Topic | None:
+    normalized = normalize_citation(query)
+    matches = [topic for topic in topics if normalize_citation(topic.citation) == normalized]
     return matches[0] if len(matches) == 1 else None
 
 
-def closest_candidates(topics: list[Topic], query: str, n: int = 5) -> list[str]:
-    normalized_query = normalize(query)
+def closest_candidates(topics: Iterable[Topic], query: str, n: int = 5) -> list[str]:
+    normalized = normalize_citation(query)
     ranked = sorted(
         topics,
         key=lambda topic: difflib.SequenceMatcher(
-            None, normalized_query, normalize(topic.citation)
+            None, normalized, normalize_citation(topic.citation)
         ).ratio(),
         reverse=True,
     )
     return [topic.full_citation for topic in ranked[: max(n, 0)]]
 
 
-def filter_by_course(topics: list[Topic], course: str | None) -> list[Topic]:
-    if course is None:
-        return topics
-    return [t for t in topics if COURSE_FILTERS[course](t)]
-
-
-def framework_data_errors(topics: list[Topic]) -> list[str]:
-    errors: list[str] = []
-    seen: set[tuple[str, str]] = set()
-
-    for topic in topics:
-        key = (topic.course, topic.topic_num)
-        if key in seen:
-            errors.append(
-                f"duplicate topic code {topic.topic_num!r} in course {topic.course!r}"
-            )
-        seen.add(key)
-
-        topic_unit = topic.topic_num.partition(".")[0]
-        if topic_unit != topic.unit_num:
-            errors.append(
-                f"topic {topic.topic_num!r} is listed under Unit {topic.unit_num} "
-                f"in course {topic.course!r}"
-            )
-
-    return errors
-
-
-def emit_evidence(
+def validate_citations(
+    citations: Iterable[str],
     *,
-    course: str | None,
-    ap_oriented: bool,
-    overall_status: str,
-    results: list[dict[str, object]],
-    error: str | None = None,
-) -> None:
-    """Write one stable JSON evidence object for machine consumers."""
+    course: str | None = None,
+    assessed_topic: bool = False,
+    framework_path: Path = DEFAULT_FRAMEWORK_PATH,
+) -> tuple[int, dict[str, Any]]:
+    """Return an exit code and stable evidence without printing."""
 
-    payload: dict[str, object] = {
+    if course is not None and course not in COURSES:
+        return 2, _error_evidence(course, assessed_topic, f"unknown course {course!r}")
+    citations = list(citations)
+    if not citations:
+        return 2, _error_evidence(course, assessed_topic, "no citations supplied")
+    try:
+        all_topics = parse_framework(framework_path)
+    except (FrameworkParseError, OSError, UnicodeError) as exc:
+        return 2, _error_evidence(
+            course, assessed_topic, f"could not load framework: {exc}"
+        )
+    errors = framework_data_errors(all_topics)
+    if not all_topics or errors:
+        detail = "; ".join(errors) if errors else "no topics parsed"
+        return 2, _error_evidence(course, assessed_topic, f"invalid framework: {detail}")
+
+    topics = filter_by_course(all_topics, course)
+    results: list[dict[str, Any]] = []
+    failed = False
+    for query in citations:
+        match = find_match(topics, query)
+        if match is None and course == "calc-ab":
+            bc_match = find_match(filter_by_course(all_topics, "calc-bc"), query)
+            if bc_match is not None and bc_match.bc_only:
+                results.append(
+                    _failed_result(
+                        query,
+                        f"{bc_match.full_citation} is BC-only and invalid for AP Calculus AB",
+                        bc_match,
+                    )
+                )
+                failed = True
+                continue
+        if match is None:
+            results.append(
+                {
+                    "input": query,
+                    "status": "fail",
+                    "message": f"no NFKC exact match for: {query}",
+                    "candidates": closest_candidates(topics, query),
+                }
+            )
+            failed = True
+        elif assessed_topic and not match.exam_assessed:
+            results.append(
+                _failed_result(
+                    query,
+                    f"{match.full_citation} is not assessed and cannot be used "
+                    "as assessed-topic content",
+                    match,
+                )
+            )
+            failed = True
+        else:
+            results.append(
+                {
+                    "input": query,
+                    "status": "pass",
+                    "citation": match.citation,
+                    "topic_exam_scope": (
+                        "assessed" if match.exam_assessed else "not-assessed"
+                    ),
+                }
+            )
+    payload = _base_evidence(course, assessed_topic, "fail" if failed else "pass")
+    payload["results"] = results
+    return (1 if failed else 0), payload
+
+
+def _base_evidence(
+    course: str | None, assessed_topic: bool, overall_status: str
+) -> dict[str, Any]:
+    return {
         "schema_version": EVIDENCE_SCHEMA_VERSION,
         "validator": EVIDENCE_VALIDATOR,
         "course": course or "unfiltered",
-        "ap_oriented": ap_oriented,
+        "assessed_topic": assessed_topic,
         "overall_status": overall_status,
-        "results": results,
+        "results": [],
     }
-    if error is not None:
-        payload["error"] = error
-    print(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
 
 
-def report_configuration_error(args: argparse.Namespace, message: str) -> int:
-    """Report an exit-2 error without mixing human text into JSON evidence."""
+def _error_evidence(
+    course: str | None, assessed_topic: bool, message: str
+) -> dict[str, Any]:
+    payload = _base_evidence(course, assessed_topic, "error")
+    payload["error"] = message
+    return payload
 
-    if args.evidence_json:
-        emit_evidence(
-            course=args.course,
-            ap_oriented=args.ap_oriented,
-            overall_status="error",
-            results=[],
-            error=message,
+
+def _failed_result(query: str, message: str, topic: Topic) -> dict[str, Any]:
+    return {
+        "input": query,
+        "status": "fail",
+        "citation": topic.citation,
+        "topic_exam_scope": "assessed" if topic.exam_assessed else "not-assessed",
+        "message": message,
+    }
+
+
+def load_boundaries(path: Path = DEFAULT_BOUNDARIES_PATH) -> dict[str, Any]:
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise BoundaryDataError(f"could not load content boundaries: {exc}") from exc
+    required = {
+        "schema_version",
+        "sources",
+        "mathematical_practices",
+        "high_risk_methods",
+        "topic_dependencies",
+        "exclusions",
+    }
+    if not isinstance(value, dict) or not required <= value.keys():
+        raise BoundaryDataError("content-boundary object is missing required fields")
+    if value["schema_version"] != 1 or not isinstance(value["sources"], list):
+        raise BoundaryDataError("unsupported schema version or invalid sources")
+    sources = value["sources"]
+    if not sources or any(
+        not isinstance(item, dict)
+        or not isinstance(item.get("id"), str)
+        or not isinstance(item.get("url"), str)
+        or not item["url"].startswith("https://apcentral.collegeboard.org/")
+        for item in sources
+    ):
+        raise BoundaryDataError("sources must contain official AP Central metadata")
+    source_ids = {item["id"] for item in sources}
+    if len(source_ids) != len(sources):
+        raise BoundaryDataError("source ids must be unique")
+    practices = value["mathematical_practices"]
+    if (
+        not isinstance(practices, dict)
+        or set(practices) != {"precalculus", "calculus"}
+        or any(
+            not isinstance(items, list)
+            or not items
+            or any(not isinstance(item, str) or not item for item in items)
+            for items in practices.values()
         )
-    else:
-        print(f"ERROR — {message}", file=sys.stderr)
-    return 2
+    ):
+        raise BoundaryDataError("mathematical_practices is invalid")
+    for section in ("high_risk_methods", "topic_dependencies"):
+        if not isinstance(value[section], dict):
+            raise BoundaryDataError(f"{section} must be an object")
+        for key, item in value[section].items():
+            if not isinstance(item, dict) or item.get("source") not in source_ids:
+                raise BoundaryDataError(f"{section}.{key} has an invalid source")
+    for key, item in value["high_risk_methods"].items():
+        if (
+            not isinstance(item.get("allowed_courses"), list)
+            or any(course not in COURSES for course in item["allowed_courses"])
+            or not isinstance(item.get("allowed_content_topics"), list)
+            or not isinstance(item.get("reason"), str)
+        ):
+            raise BoundaryDataError(f"high_risk_methods.{key} is invalid")
+    for key, item in value["topic_dependencies"].items():
+        if (
+            not isinstance(item.get("requires_content_topics"), list)
+            or not isinstance(item.get("reason"), str)
+        ):
+            raise BoundaryDataError(f"topic_dependencies.{key} is invalid")
+    if not isinstance(value["exclusions"], list) or any(
+        not isinstance(item, dict)
+        or item.get("source") not in source_ids
+        or item.get("course") not in COURSES
+        or not isinstance(item.get("content_topic_prefix"), str)
+        or not isinstance(item.get("excluded_from"), str)
+        or not isinstance(item.get("reason"), str)
+        for item in value["exclusions"]
+    ):
+        raise BoundaryDataError("exclusions contain invalid records or sources")
+    return value
+
+
+def validate_content_boundary(
+    *,
+    course: str,
+    content_topic: str,
+    supporting_topics: Iterable[str] = (),
+    methods: Iterable[str] = (),
+    mathematical_practices: Iterable[str] = (),
+    assessed_topic: bool = False,
+    boundaries_path: Path = DEFAULT_BOUNDARIES_PATH,
+) -> list[str]:
+    """Validate the small set of decision-changing AP content constraints."""
+
+    data = load_boundaries(boundaries_path)
+    failures: list[str] = []
+    supporting = set(supporting_topics)
+    if course not in COURSES:
+        return [f"unknown course {course!r}"]
+
+    practice_family = "precalculus" if course == "precalculus" else "calculus"
+    allowed_practices = set(data["mathematical_practices"][practice_family])
+    for practice in mathematical_practices:
+        if practice not in allowed_practices:
+            failures.append(
+                f"mathematical practice {practice!r} is invalid for {course}"
+            )
+
+    for method in methods:
+        constraint = data["high_risk_methods"].get(method)
+        if constraint is None:
+            failures.append(f"unknown high-risk method {method!r}")
+            continue
+        if course not in constraint["allowed_courses"]:
+            failures.append(constraint["reason"])
+        elif content_topic not in constraint["allowed_content_topics"]:
+            failures.append(
+                f"method {method!r} cannot be mapped to content Topic {content_topic}; "
+                + constraint["reason"]
+            )
+        if content_topic in constraint.get("forbidden_content_topics", []):
+            failures.append(
+                f"method {method!r} is explicitly excluded from Topic {content_topic}"
+            )
+
+    dependency = data["topic_dependencies"].get(f"{course}:{content_topic}")
+    if dependency:
+        missing = set(dependency["requires_content_topics"]) - supporting
+        if missing:
+            failures.append(
+                f"Topic {content_topic} is missing required supporting Topic(s): "
+                + ", ".join(sorted(missing))
+            )
+
+    if assessed_topic:
+        for exclusion in data["exclusions"]:
+            if (
+                exclusion["course"] == course
+                and content_topic.startswith(exclusion["content_topic_prefix"])
+                and exclusion["excluded_from"] == "assessed-topic"
+            ):
+                failures.append(exclusion["reason"])
+    return failures
+
+
+def _print_human(payload: dict[str, Any]) -> None:
+    if payload["overall_status"] == "error":
+        print(f"ERROR — {payload['error']}", file=sys.stderr)
+        return
+    for result in payload["results"]:
+        if result["status"] == "pass":
+            print(f"OK — matched: {result['citation']}")
+            print(f"META — topic_exam_scope: {result['topic_exam_scope']}")
+        else:
+            print(f"FAIL — {result['message']}")
+            for candidate in result.get("candidates", []):
+                print(f"  - {candidate}")
+    boundary = payload.get("content_boundary")
+    if boundary:
+        for failure in boundary["failures"]:
+            print(f"FAIL — {failure}")
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("citation", nargs="+", help="one or more complete citations")
+    parser.add_argument("--framework", type=Path, default=DEFAULT_FRAMEWORK_PATH)
+    parser.add_argument("--boundaries", type=Path, default=DEFAULT_BOUNDARIES_PATH)
+    parser.add_argument("--course", choices=sorted(COURSES))
+    style = parser.add_mutually_exclusive_group()
+    style.add_argument(
+        "--assessed-topic",
+        action="store_true",
+        help="require every mapping to be assessed; this is not exam-oriented",
+    )
+    style.add_argument(
+        "--ap-oriented",
+        dest="legacy_ap_oriented",
+        action="store_true",
+        help="deprecated alias for --assessed-topic",
+    )
+    parser.add_argument("--method", action="append", default=[])
+    parser.add_argument(
+        "--mathematical-practice", dest="practices", action="append", default=[]
+    )
+    parser.add_argument("--evidence-json", action="store_true")
+    return parser
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description="Validate a Unit/Topic citation against a framework outline.",
+    args = build_parser().parse_args(argv)
+    assessed_topic = args.assessed_topic or args.legacy_ap_oriented
+    code, payload = validate_citations(
+        args.citation,
+        course=args.course,
+        assessed_topic=assessed_topic,
+        framework_path=args.framework,
     )
-    parser.add_argument(
-        "citation",
-        nargs="+",
-        help='one or more citations, e.g. "Unit N, Topic X.Y — Topic Title"',
-    )
-    parser.add_argument(
-        "--framework",
-        type=Path,
-        default=DEFAULT_FRAMEWORK_PATH,
-        help="path to the framework outline (default: references/ap-calc-framework.md)",
-    )
-    parser.add_argument(
-        "--course",
-        choices=sorted(COURSE_FILTERS),
-        default=None,
-        help=(
-            "restrict matching to this course variant. For 'calc-ab', topics "
-            "marked (BC)-only in the framework (at the unit or topic level) "
-            "are rejected even when the topic number/title otherwise match. "
-            "Omit when the requested course isn't known or doesn't need this "
-            "distinction (e.g. AP Precalculus content matched without a "
-            "course filter still works as before)."
-        ),
-    )
-    parser.add_argument(
-        "--ap-oriented",
-        "--exam-style",
-        dest="ap_oriented",
-        action="store_true",
-        help=(
-            "reject topics that are part of the course but not assessed on its "
-            "AP exam; --exam-style is retained as a compatibility alias"
-        ),
-    )
-    parser.add_argument(
-        "--evidence-json",
-        action="store_true",
-        help=(
-            "write exactly one versioned JSON evidence object instead of "
-            "human-readable validation lines"
-        ),
-    )
-    args = parser.parse_args(argv)
-
-    framework_path = args.framework
-
-    if not framework_path.is_file():
-        return report_configuration_error(
-            args, f"framework file not found at {framework_path}"
-        )
-
-    try:
-        all_topics = parse_framework(framework_path)
-    except FrameworkParseError as exc:
-        return report_configuration_error(args, f"invalid framework data: {exc}")
-    except (OSError, UnicodeError) as exc:
-        return report_configuration_error(args, f"could not read framework file: {exc}")
-
-    if not all_topics:
-        return report_configuration_error(
-            args, "no topics parsed from framework file; parser or file may be broken"
-        )
-
-    data_errors = framework_data_errors(all_topics)
-    if data_errors:
-        return report_configuration_error(
-            args, "invalid framework data: " + "; ".join(data_errors)
-        )
-
-    topics = filter_by_course(all_topics, args.course)
-    if not topics:
-        return report_configuration_error(
-            args, f"no topics found for course filter {args.course!r}"
-        )
-
-    failed = False
-    evidence_results: list[dict[str, object]] = []
-    for raw_query in args.citation:
-        query = raw_query.strip()
-        match = find_match(topics, query)
-        if match is not None:
-            scope = "assessed" if match.exam_assessed else "not-assessed"
-            if args.ap_oriented and not match.exam_assessed:
-                message = (
-                    f"{match.full_citation} is not assessed on the AP exam "
-                    "and cannot be used with --ap-oriented"
-                )
-                evidence_results.append(
-                    {
-                        "input": query,
-                        "status": "fail",
-                        "citation": match.citation,
-                        "topic_exam_scope": scope,
-                        "message": message,
+    if code != 2 and (args.method or args.practices):
+        if args.course is None:
+            code, payload = 2, _error_evidence(
+                None, assessed_topic, "--course is required for content-boundary checks"
+            )
+        else:
+            passed = [row for row in payload["results"] if row["status"] == "pass"]
+            if passed:
+                topic_numbers = [
+                    row["citation"].split(", Topic ", 1)[1].split(" ", 1)[0]
+                    for row in passed
+                ]
+                try:
+                    failures = validate_content_boundary(
+                        course=args.course,
+                        content_topic=topic_numbers[0],
+                        supporting_topics=topic_numbers[1:],
+                        methods=args.method,
+                        mathematical_practices=args.practices,
+                        assessed_topic=assessed_topic,
+                        boundaries_path=args.boundaries,
+                    )
+                except BoundaryDataError as exc:
+                    code, payload = 2, _error_evidence(
+                        args.course, assessed_topic, str(exc)
+                    )
+                else:
+                    payload["content_boundary"] = {
+                        "status": "fail" if failures else "pass",
+                        "failures": failures,
                     }
-                )
-                if not args.evidence_json:
-                    print(f"FAIL — {message}")
-                failed = True
-            else:
-                evidence_results.append(
-                    {
-                        "input": query,
-                        "status": "pass",
-                        "citation": match.citation,
-                        "topic_exam_scope": scope,
-                    }
-                )
-                if not args.evidence_json:
-                    print(f"OK — matched: {match.citation}")
-                    print(f"META — topic_exam_scope: {scope}")
-            continue
-
-        if args.course == "calc-ab":
-            bc_match = find_match(filter_by_course(all_topics, "calc-bc"), query)
-            if bc_match is not None and bc_match.bc_only:
-                message = (
-                    f"{bc_match.full_citation} is BC-only and is not valid "
-                    "for AP Calculus AB"
-                )
-                evidence_results.append(
-                    {
-                        "input": query,
-                        "status": "fail",
-                        "citation": bc_match.citation,
-                        "topic_exam_scope": (
-                            "assessed" if bc_match.exam_assessed else "not-assessed"
-                        ),
-                        "message": message,
-                    }
-                )
-                if not args.evidence_json:
-                    print(f"FAIL — {message}")
-                failed = True
-                continue
-
-        candidates = closest_candidates(topics, query)
-        message = f"no exact match for: {query}"
-        evidence_results.append(
-            {
-                "input": query,
-                "status": "fail",
-                "message": message,
-                "candidates": candidates,
-            }
-        )
-        if not args.evidence_json:
-            print(f"FAIL — {message}")
-            print("Closest candidates:")
-            for candidate in candidates:
-                print(f"  - {candidate}")
-        failed = True
-
+                    if failures:
+                        payload["overall_status"] = "fail"
+                        code = 1
     if args.evidence_json:
-        emit_evidence(
-            course=args.course,
-            ap_oriented=args.ap_oriented,
-            overall_status="fail" if failed else "pass",
-            results=evidence_results,
-        )
-    return 1 if failed else 0
+        print(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
+    else:
+        _print_human(payload)
+    return code
+
+
+def _configure_utf8() -> None:
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is not None:
+            reconfigure(encoding="utf-8", errors="strict")
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    _configure_utf8()
+    raise SystemExit(main())

@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "source_checked_at": "2026-08-27",
+  "school_year": "2026-27",
+  "applicable_exam_administration": "May 2027",
+  "sources": [
+    {
+      "id": "calculus-ced",
+      "url": "https://apcentral.collegeboard.org/media/pdf/ap-calculus-ab-and-bc-course-and-exam-description.pdf",
+      "version": "Fall 2020 CED with 2026-27 clarifications",
+      "locators": ["pp. 15-16", "p. 127", "pp. 159-162", "pp. 204-206"]
+    },
+    {
+      "id": "calculus-course-update",
+      "url": "https://apcentral.collegeboard.org/courses/ap-calculus-bc",
+      "version": "2026-27 course page"
+    },
+    {
+      "id": "precalculus-practices",
+      "url": "https://apcentral.collegeboard.org/media/pdf/offer-ap-precalculus.pdf",
+      "version": "current AP Central overview",
+      "locators": ["Mathematical Practices", "p. 13"]
+    }
+  ],
+  "mathematical_practices": {
+    "precalculus": [
+      "precalc-1-procedural-symbolic-fluency",
+      "precalc-2-multiple-representations",
+      "precalc-3-communication-reasoning"
+    ],
+    "calculus": [
+      "calc-1-implementing-processes",
+      "calc-2-connecting-representations",
+      "calc-3-justification",
+      "calc-4-communication-notation"
+    ]
+  },
+  "high_risk_methods": {
+    "integration-by-parts": {
+      "allowed_courses": ["calc-bc"],
+      "allowed_content_topics": ["6.11", "6.14"],
+      "reason": "Integration by parts is BC-only Topic 6.11; it is not AP Calculus AB content.",
+      "source": "calculus-ced"
+    },
+    "shell-method": {
+      "allowed_courses": [],
+      "allowed_content_topics": [],
+      "forbidden_content_topics": ["8.9", "8.10", "8.11", "8.12"],
+      "reason": "The cataloged AP volume methods are disc and washer methods; shell-method enrichment must not be mapped to those assessed Topics.",
+      "source": "calculus-ced"
+    }
+  },
+  "topic_dependencies": {
+    "calc-bc:10.12": {
+      "requires_content_topics": ["10.11"],
+      "reason": "Using a Lagrange error bound depends on constructing or using the relevant Taylor polynomial approximation.",
+      "source": "calculus-ced"
+    }
+  },
+  "exclusions": [
+    {
+      "id": "precalculus-unit-4-exam",
+      "course": "precalculus",
+      "content_topic_prefix": "4.",
+      "excluded_from": "assessed-topic",
+      "reason": "AP Precalculus Unit 4 is course content but is not assessed on the AP Exam.",
+      "source": "precalculus-practices"
+    }
+  ]
+}

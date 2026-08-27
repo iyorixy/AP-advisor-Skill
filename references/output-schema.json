@@ -1,74 +1,77 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "AP Advisor Generated Content",
-  "description": "Output shape for one generated AP Precalculus / Calculus AB / Calculus BC learning item. Reviews and Advisor plans use their own human-readable formats. Legacy machine names containing citation or ap-oriented are compatibility terms, not official-source citation or full exam-alignment claims.",
+  "description": "One generated item. Topic mapping, mathematical practice, and exam-task metadata are separate claims.",
   "type": "object",
-  "required": ["course", "unit", "topic", "topic_exam_scope", "type", "difficulty", "style", "citation_validation", "content"],
+  "required": [
+    "course",
+    "unit",
+    "topic",
+    "topic_exam_scope",
+    "type",
+    "difficulty",
+    "style",
+    "mathematical_practices",
+    "methods",
+    "supporting_topics",
+    "citation_validation",
+    "content"
+  ],
   "properties": {
     "course": {
       "type": "string",
-      "enum": ["precalculus", "calc-ab", "calc-bc"],
-      "description": "Course key used by the internal Topic-mapping validator."
+      "enum": ["precalculus", "calc-ab", "calc-bc"]
     },
     "unit": {
       "type": "string",
-      "pattern": "^Unit (?:[1-9]|10)$",
-      "description": "Unit number from the validated internal catalog mapping, e.g. 'Unit 2'."
+      "pattern": "^Unit (?:[1-9]|10)$"
     },
     "topic": {
       "type": "string",
       "pattern": "^[1-9][0-9]*\\.[1-9][0-9]* .+$",
-      "description": "Topic code and internal catalog label from the validator, without scope markers, e.g. '2.4 Exponential Function Manipulation'. The label is not an official-source quotation or citation."
+      "description": "Primary internal content-Topic label, not an official quotation."
     },
     "topic_exam_scope": {
       "type": "string",
-      "enum": ["assessed", "not-assessed"],
-      "description": "Topic-level scope recorded in the bundled catalog. This does not certify that the generated content satisfies every AP Exam learning objective, exclusion, format, or calculator condition."
+      "enum": ["assessed", "not-assessed"]
     },
     "type": {
       "type": "string",
-      "enum": ["explanation", "practice_problem", "worked_example"],
-      "description": "The kind of content being generated."
+      "enum": ["explanation", "practice_problem", "worked_example"]
     },
     "difficulty": {
       "type": "string",
-      "enum": ["foundational", "standard", "challenge"],
-      "description": "Observable demand, independent of style. foundational supplies or recalls immediate prerequisites, uses a short direct reasoning path, and requires no representation conversion; standard assumes routine prerequisites, uses multiple linked steps, and may require a familiar representation conversion; challenge requires selecting and combining multiple prerequisites, non-routine multi-step decisions, and an integral representation conversion or mathematical justification."
+      "enum": ["foundational", "standard", "challenge"]
     },
     "style": {
       "type": "string",
-      "enum": ["instructional", "ap-oriented"],
-      "description": "Human-facing prose should say exam-oriented. ap-oriented is the retained compatibility token and means only that every mapped Topic is marked assessed. It does not establish AP Exam question type, calculator conditions, representation mix, rubric or scoring, weighting, timing, or complete exam alignment."
+      "enum": ["instructional", "assessed-topic", "exam-oriented", "ap-oriented"],
+      "description": "assessed-topic means only assessed Topic scope. exam-oriented additionally requires explicit exam_features. ap-oriented is a deprecated alias for assessed-topic."
     },
-    "citation_validation": {
-      "type": "object",
-      "description": "Legacy field name retained for compatibility. This records internal catalog Topic-mapping validation, not an official-source citation and not an overall model-behavior judgment.",
-      "required": ["catalog_match", "automated_status"],
-      "properties": {
-        "catalog_match": {
-          "const": "exact",
-          "description": "The unit/topic label matches the bundled catalog after documented Unicode-aware normalization. Added letters in any script are not ignored."
-        },
-        "automated_status": {
-          "type": "string",
-          "enum": ["pass", "not_run"],
-          "description": "Topic-mapping validator receipt status only. pass does not prove mathematical correctness, content-to-Topic fit, teaching quality, or overall model behavior. not_run requires an exact manual catalog lookup and must not be reported as pass."
-        }
+    "mathematical_practices": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string"},
+      "description": "Practice dimension, recorded separately from the content Topic."
+    },
+    "methods": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": ["integration-by-parts", "shell-method"]
       },
-      "additionalProperties": false
+      "description": "Declare only high-risk methods from ap-content-boundaries.json; use [] when none is present."
     },
     "supporting_topics": {
       "type": "array",
-      "minItems": 1,
-      "description": "Optional validated supporting internal catalog Topic mappings materially used by the item.",
+      "uniqueItems": true,
       "items": {
         "type": "object",
         "required": ["unit", "topic", "topic_exam_scope"],
         "properties": {
-          "unit": {
-            "type": "string",
-            "pattern": "^Unit (?:[1-9]|10)$"
-          },
+          "unit": {"type": "string", "pattern": "^Unit (?:[1-9]|10)$"},
           "topic": {
             "type": "string",
             "pattern": "^[1-9][0-9]*\\.[1-9][0-9]* .+$"
@@ -81,40 +84,56 @@
         "additionalProperties": false
       }
     },
+    "exam_features": {
+      "type": "object",
+      "required": ["question_type", "calculator", "representations", "justification"],
+      "properties": {
+        "question_type": {
+          "type": "string",
+          "enum": ["multiple-choice", "free-response"]
+        },
+        "calculator": {
+          "type": "string",
+          "enum": ["required", "not-permitted"]
+        },
+        "representations": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": ["analytical", "graphical", "numerical", "tabular", "verbal"]
+          }
+        },
+        "justification": {
+          "type": "string",
+          "enum": ["required", "not-required"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "citation_validation": {
+      "type": "object",
+      "description": "Legacy field name for an internal Topic-mapping receipt; never a mathematical or behavior PASS.",
+      "required": ["catalog_match", "automated_status"],
+      "properties": {
+        "catalog_match": {"const": "exact"},
+        "automated_status": {
+          "type": "string",
+          "enum": ["pass", "not_run"]
+        }
+      },
+      "additionalProperties": false
+    },
     "content": {
       "type": "object",
-      "description": "Type-specific body. Required sub-fields depend on the value of 'type'.",
       "properties": {
-        "principle": {
-          "type": "string",
-          "minLength": 1,
-          "description": "Required for type=explanation. Core concept/rule explained first, before any application."
-        },
-        "real_world_application": {
-          "type": "string",
-          "minLength": 1,
-          "description": "Optional for type=explanation. A concrete scenario when it materially clarifies the principle."
-        },
-        "problem_statement": {
-          "type": "string",
-          "minLength": 1,
-          "description": "Required for type=practice_problem or type=worked_example."
-        },
-        "final_answer": {
-          "type": "string",
-          "minLength": 1,
-          "description": "Optional concise answer for a practice problem when the user requests an answer or answer key."
-        },
-        "solution": {
-          "type": "string",
-          "minLength": 1,
-          "description": "Required for type=worked_example and optional for type=practice_problem. Full worked reasoning, not just the final answer."
-        },
-        "common_mistake": {
-          "type": "string",
-          "minLength": 1,
-          "description": "Optional topic-specific pitfall without an unsupported prevalence claim."
-        }
+        "principle": {"type": "string", "minLength": 1},
+        "real_world_application": {"type": "string", "minLength": 1},
+        "problem_statement": {"type": "string", "minLength": 1},
+        "final_answer": {"type": "string", "minLength": 1},
+        "solution": {"type": "string", "minLength": 1},
+        "common_mistake": {"type": "string", "minLength": 1}
       },
       "additionalProperties": false
     }
@@ -122,70 +141,82 @@
   "additionalProperties": false,
   "allOf": [
     {
-      "if": {
-        "properties": { "type": { "const": "explanation" } }
-      },
+      "if": {"properties": {"type": {"const": "explanation"}}},
+      "then": {"properties": {"content": {"required": ["principle"]}}}
+    },
+    {
+      "if": {"properties": {"type": {"const": "practice_problem"}}},
+      "then": {"properties": {"content": {"required": ["problem_statement"]}}}
+    },
+    {
+      "if": {"properties": {"type": {"const": "worked_example"}}},
       "then": {
         "properties": {
-          "content": {
-            "required": ["principle"]
-          }
+          "content": {"required": ["problem_statement", "solution"]}
         }
       }
     },
     {
-      "if": {
-        "properties": { "type": { "const": "practice_problem" } }
-      },
+      "if": {"properties": {"course": {"const": "precalculus"}}},
       "then": {
         "properties": {
-          "content": {
-            "required": ["problem_statement"]
-          }
-        }
-      }
-    },
-    {
-      "if": {
-        "properties": { "type": { "const": "worked_example" } }
-      },
-      "then": {
-        "properties": {
-          "content": {
-            "required": ["problem_statement", "solution"]
-          }
-        }
-      }
-    },
-    {
-      "if": {
-        "properties": { "topic_exam_scope": { "const": "not-assessed" } }
-      },
-      "then": {
-        "properties": {
-          "style": {
-            "const": "instructional"
-          }
-        }
-      }
-    },
-    {
-      "if": {
-        "properties": { "style": { "const": "ap-oriented" } }
-      },
-      "then": {
-        "properties": {
-          "supporting_topics": {
+          "mathematical_practices": {
             "items": {
-              "properties": {
-                "topic_exam_scope": {
-                  "const": "assessed"
-                }
-              }
+              "enum": [
+                "precalc-1-procedural-symbolic-fluency",
+                "precalc-2-multiple-representations",
+                "precalc-3-communication-reasoning"
+              ]
             }
           }
         }
       }
+    },
+    {
+      "if": {
+        "properties": {"course": {"enum": ["calc-ab", "calc-bc"]}}
+      },
+      "then": {
+        "properties": {
+          "mathematical_practices": {
+            "items": {
+              "enum": [
+                "calc-1-implementing-processes",
+                "calc-2-connecting-representations",
+                "calc-3-justification",
+                "calc-4-communication-notation"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"topic_exam_scope": {"const": "not-assessed"}}},
+      "then": {"properties": {"style": {"const": "instructional"}}}
+    },
+    {
+      "if": {
+        "properties": {
+          "style": {
+            "enum": ["assessed-topic", "exam-oriented", "ap-oriented"]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "topic_exam_scope": {"const": "assessed"},
+          "supporting_topics": {
+            "items": {
+              "properties": {"topic_exam_scope": {"const": "assessed"}}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"style": {"const": "exam-oriented"}}},
+      "then": {"required": ["exam_features"]}
     }
   ]
 }

@@ -9,12 +9,13 @@ permissions:
 
 jobs:
   test:
-    name: Python ${{ matrix.python-version }}
-    runs-on: ubuntu-latest
+    name: ${{ matrix.os }} / Python ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.14"]
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.13", "3.14"]
 
     steps:
       - name: Check out repository
@@ -34,6 +35,10 @@ jobs:
         run: |
           python -m json.tool references/output-schema.json
           python -m json.tool references/machine-error-schema.json
+          python -m json.tool references/ap-content-boundaries.json
 
       - name: Validate behavior eval corpus
         run: python scripts/run_behavior_evals.py
+
+      - name: Validate UTF-8 CLI
+        run: python -X utf8 scripts/validate_topic_code.py --course calc-ab --evidence-json "Ｕｎｉｔ　３，　Ｔｏｐｉｃ　３．１　—　Ｔｈｅ　Ｃｈａｉｎ　Ｒｕｌｅ"
