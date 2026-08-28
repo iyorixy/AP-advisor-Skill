@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate exact AP Advisor Topic mappings and high-risk content boundaries.
+"""Validate exact AP Precalculus and Calculus Advisor Topic mappings and high-risk content boundaries.
 
 The matcher compares the entire citation after Unicode NFKC normalization.
 It intentionally does not extract a plausible Topic from surrounding text.
@@ -25,7 +25,7 @@ DEFAULT_FRAMEWORK_PATH = REPO_ROOT / "references" / "ap-calc-framework.md"
 DEFAULT_BOUNDARIES_PATH = REPO_ROOT / "references" / "ap-content-boundaries.json"
 COURSES = {"precalculus", "calc-ab", "calc-bc"}
 EVIDENCE_SCHEMA_VERSION = 2
-EVIDENCE_VALIDATOR = "ap-advisor-topic-code"
+EVIDENCE_VALIDATOR = "ap-calculus-advisor-topic-code"
 
 RE_COURSE = re.compile(r"^##\s+(.+?)\s*$")
 RE_UNIT = re.compile(r"^-\s+Unit\s+(\d+)\s+—\s+(.+?)\s*$")

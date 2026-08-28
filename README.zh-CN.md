@@ -4,7 +4,7 @@
 
 本仓库包含两个不依赖第三方 Python 包的 Codex Skill：
 
-- `ap-advisor`（仓库根目录）支持 AP Precalculus、AP Calculus AB 和 AP Calculus BC。
+- `ap-calculus-advisor`（仓库根目录）支持 AP Precalculus、AP Calculus AB 和 AP Calculus BC。
 - `ap-psychology-advisor` 支持当前五单元框架下的 AP Psychology。
 
 两个 Skill 都可以生成原创学习内容、审阅学生作答，并根据学习证据给出少量、可衡量的
@@ -23,11 +23,14 @@
 在 Codex 中按需输入以下一条或两条指令：
 
 ```text
-$skill-installer Install the skill at path . from iyorixy/AP-advisor-Skill as ap-advisor.
+$skill-installer Install the skill at path . from iyorixy/AP-advisor-Skill as ap-calculus-advisor.
 $skill-installer Install the skill at path ap-psychology-advisor from iyorixy/AP-advisor-Skill as ap-psychology-advisor.
 ```
 
 Codex 通常会自动发现新安装的 Skill；如果没有显示，请重启 Codex。
+
+如果此前以 `ap-advisor` 安装过此 Skill，请将旧安装替换为
+`ap-calculus-advisor`，以免 Codex 同时发现两个名称。
 
 ### 手动安装到用户目录
 
@@ -35,9 +38,9 @@ PowerShell：
 
 ```powershell
 New-Item -ItemType Directory -Force "$HOME\.agents\skills" | Out-Null
-git clone https://github.com/iyorixy/AP-advisor-Skill.git "$HOME\.agents\skills\ap-advisor"
+git clone https://github.com/iyorixy/AP-advisor-Skill.git "$HOME\.agents\skills\ap-calculus-advisor"
 Copy-Item -Recurse `
-  "$HOME\.agents\skills\ap-advisor\ap-psychology-advisor" `
+  "$HOME\.agents\skills\ap-calculus-advisor\ap-psychology-advisor" `
   "$HOME\.agents\skills\ap-psychology-advisor"
 ```
 
@@ -45,18 +48,18 @@ macOS 或 Linux：
 
 ```bash
 mkdir -p "$HOME/.agents/skills"
-git clone https://github.com/iyorixy/AP-advisor-Skill.git "$HOME/.agents/skills/ap-advisor"
-cp -R "$HOME/.agents/skills/ap-advisor/ap-psychology-advisor" \
+git clone https://github.com/iyorixy/AP-advisor-Skill.git "$HOME/.agents/skills/ap-calculus-advisor"
+cp -R "$HOME/.agents/skills/ap-calculus-advisor/ap-psychology-advisor" \
   "$HOME/.agents/skills/ap-psychology-advisor"
 ```
 
-以上命令会安装两个 Skill；如果只需要数学 Skill，可以跳过复制命令。如果只在某个仓库
+以上命令会安装两个 Skill；如果只需要微积分 Skill，可以跳过复制命令。如果只在某个仓库
 中使用，请把需要的每个 Skill 直接放到 `<repository>/.agents/skills/` 下。
 
-更新手动克隆的数学 Skill：
+更新手动克隆的微积分 Skill：
 
 ```bash
-git -C "$HOME/.agents/skills/ap-advisor" pull --ff-only
+git -C "$HOME/.agents/skills/ap-calculus-advisor" pull --ff-only
 ```
 
 手动更新后，需要再次把 `ap-psychology-advisor` 复制到同级安装目录；使用 Skill
@@ -67,7 +70,7 @@ Installer 时，也可以直接重新安装新版 Skill。
 在 Codex 中打开 `/skills`，确认列表里有已安装的 Skill；也可以直接调用：
 
 ```text
-$ap-advisor 请审阅这份 AP Calculus AB 解答，并指出第一个实质性错误。
+$ap-calculus-advisor 请审阅这份 AP Calculus AB 解答，并指出第一个实质性错误。
 $ap-psychology-advisor 请审阅这份 AP Psychology 作答，并指出第一个实质性错误。
 ```
 

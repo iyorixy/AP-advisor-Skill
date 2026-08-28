@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "AP Advisor Machine-Readable Error",
-  "description": "Output shape used when a requested generated item cannot satisfy AP Advisor's hard constraints.",
+  "title": "AP Precalculus & Calculus Advisor Machine-Readable Error",
+  "description": "Output shape used when a requested generated item cannot satisfy AP Precalculus & Calculus Advisor's hard constraints.",
   "type": "object",
   "required": ["status", "reason", "conflicts", "allowed_alternatives"],
   "properties": {

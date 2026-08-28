@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "AP Advisor Generated Content",
+  "title": "AP Precalculus & Calculus Advisor Generated Content",
   "description": "One generated item. Topic mapping, mathematical practice, and exam-task metadata are separate claims.",
   "type": "object",
   "required": [

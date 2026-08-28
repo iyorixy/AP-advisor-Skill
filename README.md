@@ -4,8 +4,8 @@
 
 This repository contains two dependency-free Codex Skills:
 
-- `ap-advisor` (repository root) supports AP Precalculus, AP Calculus AB, and
-  AP Calculus BC.
+- `ap-calculus-advisor` (repository root) supports AP Precalculus, AP Calculus
+  AB, and AP Calculus BC.
 - `ap-psychology-advisor` supports AP Psychology under the current five-unit
   framework.
 
@@ -26,12 +26,15 @@ subject-matter correctness or guarantee an exam result.
 Ask Codex to install either or both Skills:
 
 ```text
-$skill-installer Install the skill at path . from iyorixy/AP-advisor-Skill as ap-advisor.
+$skill-installer Install the skill at path . from iyorixy/AP-advisor-Skill as ap-calculus-advisor.
 $skill-installer Install the skill at path ap-psychology-advisor from iyorixy/AP-advisor-Skill as ap-psychology-advisor.
 ```
 
 Codex detects newly installed skills automatically. If it does not appear,
 restart Codex.
+
+If you previously installed this Skill as `ap-advisor`, replace that
+installation with `ap-calculus-advisor` so Codex does not discover both names.
 
 ### Manual user installation
 
@@ -39,9 +42,9 @@ PowerShell:
 
 ```powershell
 New-Item -ItemType Directory -Force "$HOME\.agents\skills" | Out-Null
-git clone https://github.com/iyorixy/AP-advisor-Skill.git "$HOME\.agents\skills\ap-advisor"
+git clone https://github.com/iyorixy/AP-advisor-Skill.git "$HOME\.agents\skills\ap-calculus-advisor"
 Copy-Item -Recurse `
-  "$HOME\.agents\skills\ap-advisor\ap-psychology-advisor" `
+  "$HOME\.agents\skills\ap-calculus-advisor\ap-psychology-advisor" `
   "$HOME\.agents\skills\ap-psychology-advisor"
 ```
 
@@ -49,19 +52,19 @@ macOS or Linux:
 
 ```bash
 mkdir -p "$HOME/.agents/skills"
-git clone https://github.com/iyorixy/AP-advisor-Skill.git "$HOME/.agents/skills/ap-advisor"
-cp -R "$HOME/.agents/skills/ap-advisor/ap-psychology-advisor" \
+git clone https://github.com/iyorixy/AP-advisor-Skill.git "$HOME/.agents/skills/ap-calculus-advisor"
+cp -R "$HOME/.agents/skills/ap-calculus-advisor/ap-psychology-advisor" \
   "$HOME/.agents/skills/ap-psychology-advisor"
 ```
 
 These commands install both Skills. Skip the copy command if you only want the
-math Skill. For a repository-only installation, place each desired Skill
-directly under `<repository>/.agents/skills/`.
+`ap-calculus-advisor` Skill. For a repository-only installation, place each
+desired Skill directly under `<repository>/.agents/skills/`.
 
-To update the cloned math Skill:
+To update the cloned calculus Skill:
 
 ```bash
-git -C "$HOME/.agents/skills/ap-advisor" pull --ff-only
+git -C "$HOME/.agents/skills/ap-calculus-advisor" pull --ff-only
 ```
 
 After a manual update, copy `ap-psychology-advisor` to its sibling installation
@@ -73,7 +76,7 @@ Open `/skills` in Codex and confirm that the installed Skill names appear, or
 invoke them directly:
 
 ```text
-$ap-advisor Review this AP Calculus AB solution and identify the first substantive error.
+$ap-calculus-advisor Review this AP Calculus AB solution and identify the first substantive error.
 $ap-psychology-advisor Review this AP Psychology response and identify the first substantive error.
 ```
 
