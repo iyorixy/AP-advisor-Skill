@@ -1,0 +1,5 @@
+interface:
+  display_name: "AP Psychology Advisor"
+  short_description: "AP Psychology study content, review, and intervention"
+  brand_color: "#D97706"
+  default_prompt: "Use $ap-psychology-advisor to review this AP Psychology response and identify the first substantive error."

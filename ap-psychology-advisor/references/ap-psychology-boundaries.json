@@ -1,0 +1,259 @@
+{
+  "schema_version": 1,
+  "source_checked_at": "2026-08-28",
+  "school_year": "2026-27",
+  "applicable_exam_administration": "May 2027",
+  "default_framework": "Fall 2025 CED with October 2025 clarifications",
+  "sources": [
+    {
+      "id": "psychology-ced",
+      "url": "https://apcentral.collegeboard.org/media/pdf/ap-psychology-course-and-exam-description.pdf",
+      "version": "Effective Fall 2025",
+      "locators": ["Course Framework: CED pp. 13-23 (PDF pp. 19-29)", "Course at a Glance: CED pp. 20-22 (PDF pp. 26-28)", "Exam Information: CED pp. 146-149 (PDF pp. 152-155)"]
+    },
+    {
+      "id": "psychology-clarifications",
+      "url": "https://apcentral.collegeboard.org/media/pdf/ap-psychology-course-and-exam-description-clarifications.pdf",
+      "version": "Implemented October 2025",
+      "locators": ["Science Practices Updates", "Course Content Updates", "Exam Updates"]
+    },
+    {
+      "id": "psychology-course-page",
+      "url": "https://apcentral.collegeboard.org/courses/ap-psychology",
+      "version": "2026-27 course page"
+    },
+    {
+      "id": "psychology-exam-page",
+      "url": "https://apcentral.collegeboard.org/courses/ap-psychology/exam",
+      "version": "May 2027 exam page"
+    },
+    {
+      "id": "course-changes",
+      "url": "https://apcentral.collegeboard.org/courses/how-ap-develops-courses-and-exams/course-changes-overview",
+      "version": "2026-27 change table"
+    },
+    {
+      "id": "past-exams",
+      "url": "https://apcentral.collegeboard.org/courses/ap-psychology/exam/past-exam-questions",
+      "version": "current released-question notice"
+    },
+    {
+      "id": "psychology-2026-frq",
+      "url": "https://apcentral.collegeboard.org/media/pdf/ap26-frq-psychology.pdf",
+      "version": "2026 released free-response questions",
+      "locators": ["Directions: PDF p. 2", "AAQ: PDF pp. 3-5", "EBQ: PDF pp. 6-11"]
+    }
+  ],
+  "science_practices": [
+    {"code": "1.A", "family": "1", "name": "Apply concepts and research findings to a scenario"},
+    {"code": "1.B", "family": "1", "name": "Apply cultural context and cognitive biases"},
+    {"code": "2.A", "family": "2", "name": "Determine research design"},
+    {"code": "2.B", "family": "2", "name": "Evaluate experimental design elements"},
+    {"code": "2.C", "family": "2", "name": "Evaluate non-experimental design elements"},
+    {"code": "2.D", "family": "2", "name": "Evaluate research ethics"},
+    {"code": "3.A", "family": "3", "name": "Identify concepts and variables in data"},
+    {"code": "3.B", "family": "3", "name": "Calculate and interpret descriptive statistics and percentile rank"},
+    {"code": "3.C", "family": "3", "name": "Interpret quantitative or qualitative inferential data"},
+    {"code": "4.A", "family": "4", "name": "Propose a defensible claim"},
+    {"code": "4.B", "family": "4", "name": "Use scientific evidence to justify an argument"}
+  ],
+  "exam_tasks": {
+    "multiple-choice": {
+      "allowed_practice_families": ["1", "2", "3"],
+      "required_practice_families": [],
+      "source_count": null,
+      "source": "psychology-ced"
+    },
+    "article-analysis-question": {
+      "allowed_practice_families": ["2", "3", "4"],
+      "required_practice_families": ["2", "3", "4"],
+      "source_count": 1,
+      "required_components": [
+        "research-method",
+        "operational-definition",
+        "statistic-interpretation",
+        "ethical-guideline-and-application",
+        "generalizability-with-study-evidence",
+        "argumentation-and-application"
+      ],
+      "source": "psychology-clarifications"
+    },
+    "evidence-based-question": {
+      "allowed_practice_families": ["1", "4"],
+      "required_practice_families": ["1", "4"],
+      "source_count": 3,
+      "required_components": [
+        "defensible-claim",
+        "accurate-specific-relevant-evidence-source-one",
+        "reasoning-with-course-content-one",
+        "accurate-specific-relevant-evidence-different-source",
+        "reasoning-with-different-course-content"
+      ],
+      "source": "psychology-clarifications"
+    }
+  },
+  "scope_flags": {
+    "detailed-genetics": {
+      "topics": ["1.1"],
+      "reason": "Genotype, phenotype, DNA, chromosomes, and dominant or recessive gene expression are outside current exam scope.",
+      "source": "psychology-ced",
+      "locator": "CED p. 34 (PDF p. 40)"
+    },
+    "sodium-potassium-pump": {
+      "topics": ["1.3"],
+      "reason": "The sodium-potassium pump is outside current exam scope.",
+      "source": "psychology-ced",
+      "locator": "CED p. 36 (PDF p. 42)"
+    },
+    "unlisted-neurotransmitter": {
+      "topics": ["1.3"],
+      "in_scope_values": ["dopamine", "serotonin", "norepinephrine", "glutamate", "GABA", "endorphins", "substance P", "acetylcholine"],
+      "reason": "Current exam scope is limited to the neurotransmitters listed in EK 1.3.B.2.",
+      "source": "psychology-ced",
+      "locator": "CED p. 37 (PDF p. 43)"
+    },
+    "unlisted-hormone": {
+      "topics": ["1.3"],
+      "in_scope_values": ["adrenaline", "leptin", "ghrelin", "melatonin", "oxytocin"],
+      "reason": "Current exam scope is limited to the hormones listed in EK 1.3.B.3.",
+      "source": "psychology-ced",
+      "locator": "CED p. 37 (PDF p. 43)"
+    },
+    "endocrine-gland-detail": {
+      "topics": ["1.3", "1.4"],
+      "reason": "Specific endocrine-gland detail is outside current exam scope except for the pituitary gland referenced in EK 1.4.A.4.",
+      "source": "psychology-ced",
+      "locator": "CED p. 37 (PDF p. 43)"
+    },
+    "psychoanalytic-dream-theory": {
+      "topics": ["1.5"],
+      "reason": "The psychoanalytic theory of dreams is outside current exam scope.",
+      "source": "psychology-ced",
+      "locator": "CED p. 42 (PDF p. 48)"
+    },
+    "unlisted-sleep-disorder": {
+      "topics": ["1.5"],
+      "in_scope_values": ["insomnia", "narcolepsy", "REM sleep behavior disorder", "sleep apnea", "somnambulism"],
+      "reason": "Current exam scope is limited to the sleep disorders listed in EK 1.5.A.6.",
+      "source": "psychology-ced",
+      "locator": "CED p. 42 (PDF p. 48)"
+    },
+    "unlisted-monocular-depth-cue": {
+      "topics": ["2.1"],
+      "in_scope_values": ["relative clarity", "relative size", "texture gradient", "linear perspective", "interposition"],
+      "reason": "Current exam scope is limited to the monocular depth cues listed in EK 2.1.B.2.",
+      "source": "psychology-ced",
+      "locator": "CED p. 55 (PDF p. 61)"
+    },
+    "ability-disability-labeling": {
+      "topics": ["2.8"],
+      "reason": "Labeling or describing cognitive abilities and disabilities is outside current exam scope.",
+      "source": "psychology-ced",
+      "locator": "CED p. 64 (PDF p. 70)"
+    },
+    "prenatal-stage-names": {
+      "topics": ["3.2"],
+      "reason": "The zygote, embryo, and fetus stages are outside current exam scope.",
+      "source": "psychology-ced",
+      "locator": "CED p. 75 (PDF p. 81)"
+    },
+    "language-pragmatics": {
+      "topics": ["3.5"],
+      "reason": "Pragmatics of language is outside current exam scope.",
+      "source": "psychology-ced",
+      "locator": "CED p. 80 (PDF p. 86)"
+    },
+    "psychosexual-development-stages": {
+      "topics": ["3.6", "4.4"],
+      "reason": "The psychosexual stage theory of development is outside current exam scope.",
+      "source": "psychology-ced",
+      "locator": "CED pp. 83, 101 (PDF pp. 89, 107)"
+    },
+    "advanced-conditioning-timing": {
+      "topics": ["3.7"],
+      "reason": "Delayed, trace, simultaneous, and backward conditioning are outside current exam scope.",
+      "source": "psychology-ced",
+      "locator": "CED p. 85 (PDF p. 91)"
+    },
+    "classical-conditioning-expectancy-theory": {
+      "topics": ["3.7"],
+      "reason": "Expectancy theory in the classical-conditioning context is outside current exam scope.",
+      "source": "psychology-ced",
+      "locator": "CED p. 85 (PDF p. 91)"
+    },
+    "maslow-hierarchy-of-needs": {
+      "topics": ["4.4", "4.6"],
+      "reason": "Maslow's hierarchy of needs is outside current exam scope.",
+      "source": "psychology-ced",
+      "locator": "CED p. 101 (PDF p. 107)"
+    },
+    "named-emotion-theories": {
+      "topics": ["4.7"],
+      "in_scope_values": ["broaden-and-build theory of emotion", "facial-feedback hypothesis"],
+      "reason": "Specific names of traditional theories of emotion are outside current exam scope; the listed broaden-and-build theory of emotion and facial-feedback hypothesis remain in scope.",
+      "source": "psychology-ced",
+      "locator": "CED p. 105 (PDF p. 111)"
+    },
+    "unlisted-psychological-disorder": {
+      "topics": ["5.4"],
+      "in_scope_values": [
+        "attention-deficit/hyperactivity disorder",
+        "autism spectrum disorder",
+        "schizophrenia",
+        "major depressive disorder",
+        "persistent depressive disorder",
+        "Bipolar I disorder",
+        "Bipolar II disorder",
+        "specific phobia",
+        "agoraphobia",
+        "panic disorder",
+        "ataque de nervios",
+        "social anxiety disorder",
+        "taijin kyofusho",
+        "generalized anxiety disorder",
+        "obsessive-compulsive disorder",
+        "hoarding disorder",
+        "dissociative amnesia (with and without fugue)",
+        "dissociative identity disorder",
+        "posttraumatic stress disorder",
+        "anorexia nervosa",
+        "bulimia nervosa",
+        "paranoid personality disorder",
+        "schizoid personality disorder",
+        "schizotypal personality disorder",
+        "antisocial personality disorder",
+        "histrionic personality disorder",
+        "narcissistic personality disorder",
+        "borderline personality disorder",
+        "avoidant personality disorder",
+        "dependent personality disorder",
+        "obsessive-compulsive personality disorder"
+      ],
+      "reason": "Current exam scope focuses on the disorders listed in Topic 5.4.",
+      "source": "psychology-ced",
+      "locator": "CED pp. 119-124 (PDF pp. 125-130)"
+    }
+  },
+  "corrections": [
+    {"id": "perspectives-list", "rule": "Practice 1.A includes biological, behavioral, cognitive, evolutionary, humanistic, psychodynamic, and sociocultural perspectives.", "source": "psychology-clarifications"},
+    {"id": "effect-size-significance", "rule": "Use the clarified Practice 3.C distinctions for effect size and statistical significance.", "source": "psychology-clarifications"},
+    {"id": "all-or-none", "rule": "Use the term all-or-none principle.", "source": "psychology-clarifications"},
+    {"id": "reticular-alertness", "rule": "Alertness is a function of the reticular activating system.", "source": "psychology-clarifications"},
+    {"id": "hypnagogic-spelling", "rule": "Use the spelling hypnagogic.", "source": "psychology-clarifications"},
+    {"id": "spontaneous-recovery", "rule": "An extinguished conditioned response may reappear when the conditioned stimulus is presented after extinction.", "source": "psychology-clarifications"},
+    {"id": "reinforcement-schedules", "rule": "Use fixed-interval, variable-interval, fixed-ratio, and variable-ratio.", "source": "psychology-clarifications"},
+    {"id": "aaq-ethics", "rule": "AAQ ethics requires both identifying a described guideline and explaining how the researchers applied it.", "source": "psychology-clarifications"},
+    {"id": "ebq-evidence", "rule": "EBQ evidence must be accurate, specific, and relevant, and reasoning must apply course content to the evidence-to-claim link.", "source": "psychology-clarifications"}
+  ],
+  "legacy_markers": [
+    "nine-unit framework",
+    "Unit 1 Scientific Foundations of Psychology",
+    "Unit 3 Sensation and Perception",
+    "Unit 4 Learning",
+    "Unit 8 Clinical Psychology",
+    "100 multiple-choice questions in 70 minutes",
+    "50-minute free-response section",
+    "Concept Application and Research Design as the two FRQ names",
+    "three skill categories without Argumentation"
+  ]
+}

@@ -1,0 +1,61 @@
+# Advisor Protocol
+
+Read only in Advisor mode. Diagnose the most actionable weakness and prescribe
+the smallest useful intervention; do not inventory the course.
+
+## Evidence and diagnosis
+
+Record only what the learner supplied: exam year, deadline, study time, attempted
+and correct counts, completion time, written responses, source annotations, error
+log, and confidence. Keep missing values unknown. Do not assume access to AP
+Classroom, a scoring guide, source articles, or teacher materials. Ask only when
+the answer would materially change the intervention; otherwise disclose the proxy.
+
+Classify evidenced problems as one or more of:
+
+- concept knowledge: a required definition, theory, perspective, or relation is
+  missing or inaccurate;
+- concept application: a correct concept is not linked to the specific scenario;
+- research design: method, variables, operationalization, sampling, assignment,
+  ethics, causation, or generalizability is mishandled;
+- data/statistics: a display or descriptive/inferential statistic is calculated or
+  interpreted incorrectly;
+- argument/evidence: the claim, source evidence, reasoning, or course-content link
+  is missing, inaccurate, or unsupported;
+- reading/completeness: a condition, source detail, task verb, or required part is
+  missed;
+- pacing: a viable method is too slow after other causes are ruled out.
+
+Separate observed symptoms from hypothesized causes. Infer causes only from work,
+annotations, or an error log. Accuracy, time, and self-report are provisional
+ranking proxies. Never treat Topic order as a dependency graph.
+
+## Minimum intervention and exit
+
+Rank by evidence strength, impact, transfer leverage, deadline, and available time.
+Preserve demonstrated strengths with light maintenance. Select one to three tasks
+unless the learner asks for broader coverage.
+
+Each task includes:
+
+- **Why now:** evidence, cause hypothesis, uncertainty, and priority reason;
+- **Practice:** a concrete method and bounded amount;
+- **Exit standard:** measurable accuracy, completeness, evidence use,
+  independence, or time threshold.
+
+Map and validate the relevant content Topic and Science Practice; metadata is not
+the priority reason. Validate only a Topic actually shown by the learner's evidence;
+do not infer one from a broad research or statistics weakness. When only a
+cross-course Practice is established, use:
+
+```text
+Primary Content Topic: not established
+Primary Science Practice: 2.B
+```
+
+Choose one primary Practice when several are plausible, and list supporting
+Practices only when the intervention actually uses them. Retest with an unseen item
+that changes context, design, data, or evidence. State the passing result. Until it
+occurs, call the intervention provisional and do not claim mastery.
+
+Give only the requested horizon; do not create a calendar unless requested.

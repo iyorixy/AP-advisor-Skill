@@ -1,15 +1,18 @@
 **English** | [简体中文](./README.zh-CN.md)
 
-# AP Advisor
+# AP Advisor Skills
 
-A dependency-free Codex Skill for AP Precalculus, AP Calculus AB, and AP
-Calculus BC. It can generate original study content, review learner work, and
-turn learner evidence into a small, measurable study intervention.
+This repository contains two dependency-free Codex Skills:
 
-The Skill keeps Topic mapping, course scope, exam-task metadata, and
-mathematical correctness separate. Its validator checks internal Topic labels
-and selected AP boundaries; it does not certify the mathematics or guarantee an
-exam result.
+- `ap-advisor` (repository root) supports AP Precalculus, AP Calculus AB, and
+  AP Calculus BC.
+- `ap-psychology-advisor` supports AP Psychology under the current five-unit
+  framework.
+
+Both Skills can generate original study content, review learner work, and turn
+learner evidence into a small, measurable study intervention. Their validators
+check internal Topic mappings and selected AP boundaries; they do not certify
+subject-matter correctness or guarantee an exam result.
 
 ## Requirements
 
@@ -20,10 +23,11 @@ exam result.
 
 ### Skill Installer (recommended)
 
-Ask Codex to install this GitHub repository:
+Ask Codex to install either or both Skills:
 
 ```text
 $skill-installer Install the skill at path . from iyorixy/AP-advisor-Skill as ap-advisor.
+$skill-installer Install the skill at path ap-psychology-advisor from iyorixy/AP-advisor-Skill as ap-psychology-advisor.
 ```
 
 Codex detects newly installed skills automatically. If it does not appear,
@@ -36,6 +40,9 @@ PowerShell:
 ```powershell
 New-Item -ItemType Directory -Force "$HOME\.agents\skills" | Out-Null
 git clone https://github.com/iyorixy/AP-advisor-Skill.git "$HOME\.agents\skills\ap-advisor"
+Copy-Item -Recurse `
+  "$HOME\.agents\skills\ap-advisor\ap-psychology-advisor" `
+  "$HOME\.agents\skills\ap-psychology-advisor"
 ```
 
 macOS or Linux:
@@ -43,32 +50,41 @@ macOS or Linux:
 ```bash
 mkdir -p "$HOME/.agents/skills"
 git clone https://github.com/iyorixy/AP-advisor-Skill.git "$HOME/.agents/skills/ap-advisor"
+cp -R "$HOME/.agents/skills/ap-advisor/ap-psychology-advisor" \
+  "$HOME/.agents/skills/ap-psychology-advisor"
 ```
 
-For repository-only use, place the folder at
-`<repository>/.agents/skills/ap-advisor` instead.
+These commands install both Skills. Skip the copy command if you only want the
+math Skill. For a repository-only installation, place each desired Skill
+directly under `<repository>/.agents/skills/`.
 
-To update a manual user installation:
+To update the cloned math Skill:
 
 ```bash
 git -C "$HOME/.agents/skills/ap-advisor" pull --ff-only
 ```
 
+After a manual update, copy `ap-psychology-advisor` to its sibling installation
+again. Skill Installer users can instead reinstall the updated Skill.
+
 ## Verify and use
 
-Open `/skills` in Codex and confirm that `ap-advisor` appears, or invoke it
-directly:
+Open `/skills` in Codex and confirm that the installed Skill names appear, or
+invoke them directly:
 
 ```text
 $ap-advisor Review this AP Calculus AB solution and identify the first substantive error.
+$ap-psychology-advisor Review this AP Psychology response and identify the first substantive error.
 ```
 
-Optional validator smoke check, run from the installed skill directory (use
-`python3` instead of `python` where needed):
+Optional validator smoke checks, run from the repository checkout (use `python3`
+instead of `python` where needed):
 
 ```bash
 python scripts/validate_topic_code.py --course calc-ab --evidence-json \
   "Unit 3, Topic 3.1 — The Chain Rule"
+python ap-psychology-advisor/scripts/validate_topic_code.py \
+  --self-check --evidence-json
 ```
 
 A successful check exits with code `0` and reports
