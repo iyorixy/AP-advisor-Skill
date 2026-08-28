@@ -17,9 +17,24 @@
 
 ## 安装
 
+### 先进入 Codex
+
+> **下面以 `$skill-installer ...` 开头的内容是发给 Codex 的消息，不是
+> PowerShell、CMD 或 Bash 命令。**
+
+- **桌面应用：**打开 ChatGPT 桌面应用，选择 **Codex**，点击 **New chat**，再将
+  安装指令粘贴到聊天输入框。
+- **Codex CLI：**先在 PowerShell 或其他终端中运行 `codex`。等 Codex 打开并显示
+  `›` 输入提示符后，再粘贴安装指令。如果仍看到 `(base) PS C:\...>` 之类的提示符，
+  说明你还在 PowerShell。
+
+如果尚未安装 Codex，请参照官方的
+[桌面应用快速入门](https://learn.chatgpt.com/docs/app)或
+[Codex CLI 快速入门](https://learn.chatgpt.com/docs/codex/cli)。
+
 ### 使用 Skill Installer（推荐）
 
-在 Codex 中按需输入以下一条或两条指令：
+进入 Codex 后，按需发送以下一条或两条安装消息：
 
 ```text
 $skill-installer Install the skill at path . from iyorixy/AP-advisor-Skill as ap-calculus-advisor.
