@@ -7,9 +7,8 @@
 - `ap-calculus-advisor`（仓库根目录）支持 AP Precalculus、AP Calculus AB 和 AP Calculus BC。
 - `ap-psychology-advisor` 支持当前五单元框架下的 AP Psychology。
 
-两个 Skill 都可以生成原创学习内容、审阅学生作答，并根据学习证据给出少量、可衡量的
-学习干预建议。内置 validator 只检查内部 Topic 映射和部分 AP 边界，不等于学科正确性
-认证，也不保证考试结果。
+两个 Skill 都是基于AP考纲下的辅助Skill，可以生成原创学习内容、审阅学生作答，并根据学习证据给出少量、可衡量的
+学习干预建议。内置 validator 只检查内部 Topic 映射和部分 AP 边界
 
 ## 运行要求
 
