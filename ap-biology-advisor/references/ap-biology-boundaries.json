@@ -1,0 +1,323 @@
+{
+  "schema_version": 1,
+  "source_checked_at": "2026-08-30",
+  "school_year": "2026-27",
+  "applicable_exam_administration": "May 2027",
+  "default_framework": "Fall 2025 CED with June 2025 and June 2026 clarifications",
+  "sources": [
+    {
+      "id": "biology-ced",
+      "url": "https://apcentral.collegeboard.org/media/pdf/ap-biology-course-and-exam-description.pdf",
+      "version": "Effective Fall 2025; resource references updated June 2026",
+      "locators": [
+        "Science Practices: CED pp. 11-13 (PDF pp. 17-19)",
+        "Course Framework and exclusion statements: CED pp. 27-160 (PDF pp. 33-166)",
+        "Exam Information: CED pp. 197-202 (PDF pp. 203-208)",
+        "Equations and Formulas: CED pp. 229-234 (PDF pp. 235-240)"
+      ]
+    },
+    {
+      "id": "biology-clarifications",
+      "url": "https://apcentral.collegeboard.org/media/pdf/ap-biology-ced-clarifications-and-corrections.pdf",
+      "version": "Implemented June 2025 and June 2026"
+    },
+    {
+      "id": "biology-course-page",
+      "url": "https://apcentral.collegeboard.org/courses/ap-biology",
+      "version": "2026-27 course page"
+    },
+    {
+      "id": "biology-exam-page",
+      "url": "https://apcentral.collegeboard.org/courses/ap-biology/exam",
+      "version": "May 2027 exam page"
+    },
+    {
+      "id": "course-changes",
+      "url": "https://apcentral.collegeboard.org/courses/how-ap-develops-courses-and-exams/course-changes-overview",
+      "version": "2026-27 change table"
+    },
+    {
+      "id": "past-exams",
+      "url": "https://apcentral.collegeboard.org/courses/ap-biology/exam/past-exam-questions",
+      "version": "current released-question notice"
+    },
+    {
+      "id": "biology-2026-frq",
+      "url": "https://apcentral.collegeboard.org/media/pdf/ap26-frq-biology.pdf",
+      "version": "2026 released free-response questions",
+      "locators": [
+        "Directions: PDF pp. 2-3",
+        "Questions 1-6: PDF pp. 3-15"
+      ]
+    }
+  ],
+  "science_practices": [
+    {"code": "1.A", "family": "1", "name": "Describe biological concepts and processes"},
+    {"code": "1.B", "family": "1", "name": "Explain biological concepts and processes"},
+    {"code": "1.C", "family": "1", "name": "Explain biological concepts and processes in applied contexts"},
+    {"code": "2.A", "family": "2", "name": "Describe characteristics of visual representations"},
+    {"code": "2.B", "family": "2", "name": "Explain relationships between characteristics of biological models"},
+    {"code": "2.C", "family": "2", "name": "Relate biological models to larger principles and systems"},
+    {"code": "2.D", "family": "2", "name": "Represent relationships within biological models"},
+    {"code": "3.A", "family": "3", "name": "Identify or pose a testable question"},
+    {"code": "3.B", "family": "3", "name": "State a null hypothesis or predict experimental results"},
+    {"code": "3.C", "family": "3", "name": "Identify aligned procedures, variables, and controls"},
+    {"code": "3.D", "family": "3", "name": "Propose a new investigation"},
+    {"code": "4.A", "family": "4", "name": "Construct an appropriate graph"},
+    {"code": "4.B", "family": "4", "name": "Describe data, trends, patterns, and relationships"},
+    {"code": "5.A", "family": "5", "name": "Perform curriculum calculations"},
+    {"code": "5.B", "family": "5", "name": "Use confidence intervals and error bars"},
+    {"code": "5.C", "family": "5", "name": "Perform chi-square hypothesis testing"},
+    {"code": "5.D", "family": "5", "name": "Use data to evaluate a hypothesis or prediction"},
+    {"code": "6.A", "family": "6", "name": "Make a scientific claim"},
+    {"code": "6.B", "family": "6", "name": "Support a claim with biological evidence"},
+    {"code": "6.C", "family": "6", "name": "Justify a claim by connecting evidence to biological theories"},
+    {"code": "6.D", "family": "6", "name": "Relate experimental results to larger biological concepts"},
+    {"code": "6.E", "family": "6", "name": "Predict causes or effects of a system change or disruption"}
+  ],
+  "exam_tasks": {
+    "multiple-choice": {
+      "allowed_practice_families": ["1", "2", "3", "4", "5", "6"],
+      "required_practice_groups": [],
+      "supports_full_task": false,
+      "source": "biology-ced"
+    },
+    "free-response-1": {
+      "title": "Interpreting and Evaluating Experimental Results",
+      "points": 9,
+      "allowed_practice_families": ["1", "3", "4", "5", "6"],
+      "required_practice_groups": [["1"], ["3", "4", "5"], ["6"]],
+      "supports_full_task": true,
+      "required_components": [
+        "concept-description",
+        "methods-or-data-description",
+        "methods-data-analysis-or-calculation",
+        "justified-prediction"
+      ],
+      "source": "biology-ced"
+    },
+    "free-response-2": {
+      "title": "Interpreting and Evaluating Experimental Results with Graphing",
+      "points": 9,
+      "allowed_practice_families": ["1", "3", "4", "5", "6"],
+      "required_practice_groups": [["1"], ["4"], ["3", "5"], ["6"]],
+      "supports_full_task": true,
+      "required_components": [
+        "concept-description",
+        "graph-construction",
+        "data-calculation-null-hypothesis-or-result-prediction",
+        "justified-prediction"
+      ],
+      "source": "biology-ced"
+    },
+    "free-response-3": {
+      "title": "Scientific Investigation",
+      "points": 4,
+      "allowed_practice_families": ["1", "3", "6"],
+      "required_practice_groups": [["1"], ["3"], ["6"]],
+      "supports_full_task": true,
+      "required_components": [
+        "concept-description",
+        "procedure-identification",
+        "null-hypothesis-or-result-prediction",
+        "prediction-justification"
+      ],
+      "source": "biology-ced"
+    },
+    "free-response-4": {
+      "title": "Conceptual Analysis",
+      "points": 4,
+      "allowed_practice_families": ["1", "6"],
+      "required_practice_groups": [["1"], ["6"]],
+      "supports_full_task": true,
+      "required_components": [
+        "concept-description",
+        "concept-explanation",
+        "cause-or-effect-prediction",
+        "prediction-justification"
+      ],
+      "source": "biology-ced"
+    },
+    "free-response-5": {
+      "title": "Analyze Model or Visual Representation of a Biological Concept or Process",
+      "points": 4,
+      "allowed_practice_families": ["1", "2"],
+      "required_practice_groups": [["1"], ["2"]],
+      "supports_full_task": true,
+      "required_components": [
+        "visual-characteristic-description",
+        "visual-relationship-explanation",
+        "relationship-representation",
+        "connection-to-larger-biological-principle"
+      ],
+      "source": "biology-clarifications"
+    },
+    "free-response-6": {
+      "title": "Analyze Data",
+      "points": 4,
+      "allowed_practice_families": ["4", "5", "6"],
+      "required_practice_groups": [["4"], ["5"], ["6"]],
+      "supports_full_task": true,
+      "required_components": [
+        "data-description-one",
+        "data-description-two",
+        "hypothesis-or-prediction-evaluation",
+        "connection-to-larger-biological-principle"
+      ],
+      "source": "biology-ced"
+    }
+  },
+  "scope_flags": {
+    "specific-carbohydrate-polymer-structure": {
+      "topics": ["1.4"],
+      "reason": "The molecular structure of specific carbohydrate polymers is outside current exam scope.",
+      "source": "biology-ced",
+      "locator": "CED p. 35 (PDF p. 41)"
+    },
+    "specific-lipid-molecular-structure": {
+      "topics": ["1.5"],
+      "reason": "The molecular structure of specific lipids is outside current exam scope.",
+      "source": "biology-ced",
+      "locator": "CED p. 37 (PDF p. 43)"
+    },
+    "specific-nucleotide-molecular-structure": {
+      "topics": ["1.6"],
+      "reason": "The molecular structure of specific nucleotides is outside current exam scope.",
+      "source": "biology-ced",
+      "locator": "CED p. 38 (PDF p. 44)"
+    },
+    "amino-acid-molecular-structure": {
+      "topics": ["1.7"],
+      "reason": "The molecular structure of amino acids is outside current exam scope.",
+      "source": "biology-ced",
+      "locator": "CED p. 40 (PDF p. 46)"
+    },
+    "smooth-er-specialized-function-detail": {
+      "topics": ["2.1"],
+      "reason": "Specific functions of smooth ER in specialized cells are outside current exam scope.",
+      "source": "biology-ced",
+      "locator": "CED p. 50 (PDF p. 56)"
+    },
+    "golgi-specialized-synthesis-packaging-detail": {
+      "topics": ["2.1"],
+      "reason": "Golgi synthesis of specific phospholipids and packaging of specific enzymes for lysosomes, peroxisomes, and secretory vesicles are outside current exam scope.",
+      "source": "biology-ced",
+      "locator": "CED p. 50 (PDF p. 56)"
+    },
+    "gibbs-free-energy-equation": {
+      "topics": ["3.3"],
+      "reason": "The Gibbs free-energy equation is outside current exam scope, although the concept of energy is in scope.",
+      "source": "biology-ced",
+      "locator": "CED p. 71 (PDF p. 77)"
+    },
+    "calvin-cycle-memorization": {
+      "topics": ["3.4"],
+      "reason": "Memorizing Calvin-cycle steps, molecular structures, and enzyme names other than ATP synthase is outside current exam scope.",
+      "source": "biology-ced",
+      "locator": "CED pp. 73-74 (PDF pp. 79-80)"
+    },
+    "electron-carrier-full-names": {
+      "topics": ["3.4", "3.5"],
+      "reason": "Full names of specific electron carriers in electron transport chains are outside current exam scope.",
+      "source": "biology-ced",
+      "locator": "CED pp. 74, 77 (PDF pp. 80, 83)"
+    },
+    "energy-pathway-step-enzyme-intermediate-detail": {
+      "topics": ["3.4", "3.5"],
+      "reason": "Specific pathway steps, enzyme names, and intermediates beyond the named exceptions are outside current course and exam scope.",
+      "source": "biology-ced",
+      "locator": "CED pp. 74, 77 (PDF pp. 80, 83)"
+    },
+    "glycolysis-krebs-memorization": {
+      "topics": ["3.5"],
+      "reason": "Memorizing glycolysis and Krebs-cycle steps, molecular structures, and enzyme names is outside current course and exam scope.",
+      "source": "biology-ced",
+      "locator": "CED pp. 77-78 (PDF pp. 83-84)"
+    },
+    "specific-cyclin-cdk-growth-factor": {
+      "topics": ["4.6"],
+      "reason": "Specific cyclin-CdK pairs and growth factors are outside current exam scope.",
+      "source": "biology-ced",
+      "locator": "CED p. 91 (PDF p. 97)"
+    },
+    "sexual-reproduction-cycle-detail": {
+      "topics": ["5.2"],
+      "reason": "Details of sexual reproduction cycles in particular plants and animals are outside current exam scope.",
+      "source": "biology-ced",
+      "locator": "CED p. 100 (PDF p. 106)"
+    },
+    "unlisted-dna-replication-enzyme-detail": {
+      "topics": ["6.2"],
+      "in_scope_values": ["DNA polymerase", "ligase", "RNA polymerase", "helicase", "topoisomerase"],
+      "reason": "Names of replication steps and enzymes other than DNA polymerase, ligase, RNA polymerase, helicase, and topoisomerase are outside current exam scope.",
+      "source": "biology-ced",
+      "locator": "CED p. 113 (PDF p. 119)"
+    },
+    "translation-enzyme-factor-detail": {
+      "topics": ["6.4"],
+      "reason": "Details and names of enzymes and factors involved in translation steps are outside current exam scope.",
+      "source": "biology-ced",
+      "locator": "CED p. 117 (PDF p. 123)"
+    },
+    "genetic-code-memorization": {
+      "topics": ["6.4"],
+      "in_scope_values": ["start codon AUG"],
+      "reason": "Memorizing the genetic code other than the start codon AUG is outside current exam scope.",
+      "source": "biology-ced",
+      "locator": "CED p. 117 (PDF p. 123)"
+    },
+    "specific-mutation-effect-detail": {
+      "topics": ["6.7"],
+      "reason": "Knowledge of specific mutations and their effects is outside current exam scope.",
+      "source": "biology-ced",
+      "locator": "CED p. 121 (PDF p. 127)"
+    },
+    "chromosome-number-disorder-detail": {
+      "topics": ["6.7"],
+      "reason": "Knowledge of specific disorders related to changes in chromosome number is outside current exam scope.",
+      "source": "biology-ced",
+      "locator": "CED p. 122 (PDF p. 128)"
+    },
+    "genetic-engineering-technique-detail": {
+      "topics": ["6.8"],
+      "reason": "Procedural details of the listed genetic-engineering techniques are outside current exam scope.",
+      "source": "biology-ced",
+      "locator": "CED p. 123 (PDF p. 129)"
+    },
+    "behavioral-physiological-mechanism-detail": {
+      "topics": ["8.1"],
+      "reason": "Specific behavioral or physiological response mechanisms are outside current exam scope.",
+      "source": "biology-ced",
+      "locator": "CED p. 152 (PDF p. 158)"
+    },
+    "communication-mechanism-detail": {
+      "topics": ["8.1"],
+      "reason": "Specific mechanisms of organismal communication are outside current exam scope.",
+      "source": "biology-ced",
+      "locator": "CED p. 153 (PDF p. 159)"
+    },
+    "communication-behavior-system-detail": {
+      "topics": ["8.1"],
+      "reason": "Details of communication and community behavioral systems are outside current exam scope.",
+      "source": "biology-ced",
+      "locator": "CED p. 153 (PDF p. 159)"
+    }
+  },
+  "corrections": [
+    {
+      "source": "biology-clarifications",
+      "rule": "Use the corrected FRQ 5 title: Analyze Model or Visual Representation of a Biological Concept or Process."
+    },
+    {
+      "source": "biology-clarifications",
+      "rule": "Do not infer public availability from older Available Resources callouts; many resources moved to AP Classroom or the Online Teacher Community in June 2026."
+    }
+  ],
+  "legacy_markers": [
+    "May 2025 or earlier AP Biology exam administration",
+    "Topic 1.4 — Properties of Biological Macromolecules",
+    "Topic 2.1 — Cell Structure: Subcellular Components",
+    "Topic 3.2 — Enzyme Catalysis",
+    "Topic 5.6 — Chromosomal Inheritance"
+  ]
+}

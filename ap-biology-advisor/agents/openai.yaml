@@ -1,0 +1,5 @@
+interface:
+  display_name: "AP Biology Advisor"
+  short_description: "AP Biology study content, review, and intervention"
+  brand_color: "#15803D"
+  default_prompt: "Use $ap-biology-advisor to review this AP Biology response and identify the first substantive error."
