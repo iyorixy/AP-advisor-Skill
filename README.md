@@ -2,48 +2,78 @@
 
 # AP Advisor Skills
 
-This repository contains three Codex Skills that require no third-party Python
-packages:
+This repository contains three Codex Skills that run on Python 3.10+ without
+third-party packages:
 
-- `ap-calculus-advisor` (repository root) supports AP Precalculus, AP Calculus
-  AB, and AP Calculus BC.
-- `ap-psychology-advisor` supports AP Psychology under the current five-unit
-  framework.
-- `ap-biology-advisor` supports AP Biology under the current Fall 2025
-  eight-unit framework.
+| Skill | Path | Repository scope |
+| --- | --- | --- |
+| `ap-calculus-advisor` | repository root | AP Precalculus, AP Calculus AB, and AP Calculus BC; selected adaptive Coach support for Calculus AB |
+| `ap-psychology-advisor` | `ap-psychology-advisor/` | AP Psychology under the five-unit framework represented in this repository |
+| `ap-biology-advisor` | `ap-biology-advisor/` | AP Biology under the Fall 2025 framework represented in this repository |
 
-All three Skills are study aids built around the AP course frameworks. They are
-designed to help Codex better support students in their AP studies—for example,
-by generating original study content, reviewing student responses, and
-recommending measurable study interventions based on evidence of learning. The
-built-in validators check only internal Topic mappings and selected AP boundaries.
+The root Skill retains Generate, Review, and Advisor support across its three
+math courses. Adaptive Coach v1 is narrower: its maintained misconception
+graph, diagnostic bank, learner state, and next-item selector span AP Calculus
+AB Units 1–8 but are not an exhaustive Topic bank. Do not infer equivalent
+adaptive coverage for Precalculus or BC.
 
-## Requirements
+## AP Calculus AB adaptive loop v1
 
-- Codex
-- Python 3.10 or newer; no third-party Python packages
+In Coach mode, the Skill uses the learner's actual work to identify the first
+substantive error, separate observations from a bounded misconception
+hypothesis, give one minimal hint, and wait for the learner's response. A
+corrected attempt advances to one unseen same-form confirmation; an independent
+success advances to one unseen cross-representation or cross-context transfer.
+Only an independent unseen transfer at hint level 0 can pass the specific
+intervention. It never establishes Unit-wide mastery.
 
-## Install
+Example:
 
-### Open Codex first
+```text
+$ap-calculus-advisor Coach me on this AP Calculus AB Unit 4 solution. Give only
+one minimal hint, wait for my work, and keep the session private.
+```
 
-> **The `$skill-installer ...` lines below are messages for Codex, not
-> PowerShell, Command Prompt, or Bash commands.**
+The maintained bank contains original practice, not AP Classroom, Progress
+Check, Practice Exam, or other secure College Board material. The Skill hides
+bank answers from learner-facing responses by default. Difficulty labels are
+`provisional` until real, de-identified learner data support calibration.
 
-- **Desktop app:** Open the ChatGPT desktop app, choose **Codex**, start
-  **New chat**, and paste the installer message into the chat box.
-- **Codex CLI:** In PowerShell or another terminal, run `codex`. Paste the
-  installer message only after Codex opens and shows the `›` input prompt. If
-  you still see a prompt such as `(base) PS C:\...>`, you are still in
-  PowerShell.
+## Privacy and optional local state
 
-If Codex is not installed yet, follow the official
-[desktop app quickstart](https://learn.chatgpt.com/docs/app) or
-[Codex CLI quickstart](https://learn.chatgpt.com/docs/codex/cli).
+Coach is session-only by default and writes nothing. Local persistence requires
+both explicit authorization and a caller-supplied data directory outside this
+repository. The state stores a pseudonymous profile ID, attempts, evidence,
+hint/independence fields, and a review queue; it does not request names or email
+addresses.
 
-### Skill Installer (recommended)
+Use an explicit external directory (replace the examples below with paths
+chosen by the caller):
 
-Once inside Codex, send any of these installer messages:
+```powershell
+python scripts/update_learner_state.py --data-dir "D:\learner-data\calc-ab-demo" `
+  --as-of "2026-08-31T12:00:00Z" --evidence-json init --profile-id demo_profile
+python scripts/update_learner_state.py --data-dir "D:\learner-data\calc-ab-demo" `
+  --as-of "2026-08-31T12:10:00Z" --evidence-json record --attempt-file attempt.json
+python scripts/update_learner_state.py --data-dir "D:\learner-data\calc-ab-demo" `
+  --as-of "2026-08-31T12:10:00Z" --evidence-json queue
+```
+
+`clear-test-profile` works only for a directory initialized with `--test-data`
+and removes only the recognized files for the exact profile. It is not a
+general data-deletion command. Keep real learner data outside the repository
+and do not commit it.
+
+```powershell
+python scripts/update_learner_state.py --data-dir "D:\learner-data\calc-ab-test" `
+  --evidence-json init --profile-id test_profile --test-data
+python scripts/update_learner_state.py --data-dir "D:\learner-data\calc-ab-test" `
+  --evidence-json clear-test-profile --profile-id test_profile
+```
+
+## Install and invoke
+
+Inside Codex, use Skill Installer:
 
 ```text
 $skill-installer Install the skill at path . from iyorixy/AP-advisor-Skill as ap-calculus-advisor.
@@ -51,101 +81,46 @@ $skill-installer Install the skill at path ap-psychology-advisor from iyorixy/AP
 $skill-installer Install the skill at path ap-biology-advisor from iyorixy/AP-advisor-Skill as ap-biology-advisor.
 ```
 
-Codex usually discovers newly installed Skills automatically. If they do not
-appear, restart Codex.
-
-If you previously installed this Skill as `ap-advisor`, replace that
-installation with `ap-calculus-advisor` so Codex does not discover both names.
-
-### Manual installation to the user directory
-
-PowerShell:
-
-```powershell
-New-Item -ItemType Directory -Force "$HOME\.agents\skills" | Out-Null
-git clone https://github.com/iyorixy/AP-advisor-Skill.git "$HOME\.agents\skills\ap-calculus-advisor"
-Copy-Item -Recurse `
-  "$HOME\.agents\skills\ap-calculus-advisor\ap-psychology-advisor" `
-  "$HOME\.agents\skills\ap-psychology-advisor"
-Copy-Item -Recurse `
-  "$HOME\.agents\skills\ap-calculus-advisor\ap-biology-advisor" `
-  "$HOME\.agents\skills\ap-biology-advisor"
-```
-
-macOS or Linux:
-
-```bash
-mkdir -p "$HOME/.agents/skills"
-git clone https://github.com/iyorixy/AP-advisor-Skill.git "$HOME/.agents/skills/ap-calculus-advisor"
-cp -R "$HOME/.agents/skills/ap-calculus-advisor/ap-psychology-advisor" \
-  "$HOME/.agents/skills/ap-psychology-advisor"
-cp -R "$HOME/.agents/skills/ap-calculus-advisor/ap-biology-advisor" \
-  "$HOME/.agents/skills/ap-biology-advisor"
-```
-
-These commands install all three Skills. Skip either copy command for a Skill
-you do not want. For a repository-only installation, place each
-desired Skill directly under `<repository>/.agents/skills/`.
-
-To update the cloned calculus Skill:
-
-```bash
-git -C "$HOME/.agents/skills/ap-calculus-advisor" pull --ff-only
-```
-
-After a manual update, copy `ap-psychology-advisor` and
-`ap-biology-advisor` again into their sibling installation directories. Skill
-Installer users can instead reinstall the updated Skill.
-
-## Verify and use
-
-Open `/skills` in Codex and confirm that the installed Skill names appear, or
-invoke them directly:
+After installation, restart Codex if the Skills are not discovered. Examples:
 
 ```text
-$ap-calculus-advisor Review this AP Calculus AB solution and identify the first substantive error.
+$ap-calculus-advisor Review this AP Calculus BC solution and identify the first substantive error.
+$ap-calculus-advisor Generate an AP Precalculus practice problem without its answer.
+$ap-calculus-advisor Coach me through this AP Calculus AB Unit 6 attempt one step at a time.
 $ap-psychology-advisor Review this AP Psychology response and identify the first substantive error.
 $ap-biology-advisor Review this AP Biology response and identify the first substantive error.
 ```
 
-Optional validator smoke checks, run from the repository checkout (use `python3`
-instead of `python` where needed):
+## Verify a checkout
+
+Run from the repository root (`python3` may replace `python`):
 
 ```bash
-python scripts/validate_topic_code.py --course calc-ab --evidence-json \
-  "Unit 3, Topic 3.1 — The Chain Rule"
-python ap-psychology-advisor/scripts/validate_topic_code.py \
-  --self-check --evidence-json
-python ap-biology-advisor/scripts/validate_topic_code.py \
-  --self-check --evidence-json
+python scripts/validate_topic_code.py --self-check --evidence-json
+python ap-psychology-advisor/scripts/validate_topic_code.py --self-check --evidence-json
+python ap-biology-advisor/scripts/validate_topic_code.py --self-check --evidence-json
+python scripts/run_evals.py --self-check --evidence-json
+python -m unittest discover -s tests -v
+python scripts/check_release.py --evidence-json
 ```
 
-A successful check exits with code `0` and reports
+The three validator self-checks cover each Skill's mapping and boundary package.
+The root Calculus adaptive v1 release gate additionally validates required
+artifacts, the assessment contract, misconception/item cross-references, math
+audit hashes, learner-state safety, selector determinism, behavioral review
+thresholds, Python compilation and standard-library imports, unit tests, and
+the installed skill-creator validator. Treat the checkout as verified only when
+every command exits `0` and the last command emits lower-case
 `"overall_status":"pass"`.
 
-## Maintainer: one-shot `/goal` overnight prompt
-
-For a long unattended release pass, first select a Codex model that supports
-`xhigh` (Extra High) reasoning and set that reasoning level in the UI or
-configuration. The prompt below does not change model settings. It follows
-OpenAI's guidance to give `/goal` one durable objective, explicit boundaries,
-validation commands, and a verifiable stopping condition. See the official
-[Follow a goal guide](https://learn.chatgpt.com/use-cases/follow-goals).
-
-Open this repository in Codex, then send the following as one message:
-
-On Windows, if `quick_validate.py` inherits a legacy console encoding, run it
-with `PYTHONUTF8=1`; this changes only Python's text decoding for that check.
-
-```text
-/goal Finish a release-ready AP Biology Advisor Skill in ap-biology-advisor and keep working until every stopping condition below is verified. First read the repository's existing AP Calculus and AP Psychology Skills, the installed skill-creator instructions, and all files already present under ap-biology-advisor. Preserve unrelated user changes. Verify the current AP Biology framework only against official College Board sources: the current CED, its clarifications/corrections, the AP Biology course page, exam page, course-changes page, and released-question page. Then implement or correct the minimum complete package: SKILL.md, agents/openai.yaml, a concise current Topic-and-Practice catalog, decision-changing boundaries with dated source metadata, current MCQ/FRQ task contracts, an Advisor protocol, and a Python 3.10+ standard-library-only exact Topic/boundary validator with a meaningful --self-check. Keep Topic mapping separate from Science Practice mapping; distinguish instructional, assessed-topic, and exam-oriented claims; detect pre-Fall-2025 legacy material; prohibit unsupported official-style/scoring claims and invented studies or data. Update README.md and README.zh-CN.md so the skill count, installation paths, manual copy/update steps, invocation examples, smoke checks, and this /goal section agree in both languages. Run the biology validator self-check, targeted positive and negative CLI cases, Python compilation, and the installed skill-creator quick_validate.py against ap-biology-advisor. Inspect every changed file and git diff for contradictions, stale counts, invalid JSON/YAML, TODOs, placeholders, generated cache files, and unrelated edits. Do not commit, push, publish, install globally, delete user work, or change the existing Skills' behavior. If an official source is temporarily inaccessible, use other current official College Board sources and disclose the unverified point; never invent it. Stop only when all required files exist, every validation exits as expected, all success receipts report lower-case overall_status pass where applicable, both READMEs match, and the final report lists changed files, official sources checked, commands run, and any remaining limitation. If the same external blocker prevents progress across three consecutive goal turns, report the exact blocker instead of looping.
-```
-
-If `/goal` is not listed, enable the feature with
-`codex features enable goals`, then restart or reopen Codex as needed.
+The first release deliberately uses transparent rules rather than BKT, IRT,
+vector retrieval, or empirical mastery probabilities. Aggregate calibration
+exports remain descriptive and report `insufficient_data` below their sample
+minimum; future calibration requires real, consented, de-identified response
+data and a separate review.
 
 ## License and AP notice
 
 MIT. “AP” is a College Board trademark. This project is not an official College
-Board publication and is not endorsed by College Board. For time-sensitive exam
-information, refer to current official College Board sources.
+Board publication and is not endorsed by College Board. For time-sensitive
+exam information, use current official College Board sources.

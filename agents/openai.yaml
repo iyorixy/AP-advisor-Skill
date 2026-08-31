@@ -1,7 +1,7 @@
 interface:
-  display_name: "AP Precalculus & Calculus Advisor"
-  short_description: "AP Precalculus, Calculus AB, and BC study advisor"
+  display_name: "AP Calculus Adaptive Advisor"
+  short_description: "AB adaptive Coach plus AP math study support"
   icon_small: "./assets/ap-advisor-icon.png"
   icon_large: "./assets/ap-advisor-icon.png"
   brand_color: "#4F46E5"
-  default_prompt: "Use $ap-calculus-advisor to review this AP Calculus AB solution and identify the first substantive error."
+  default_prompt: "Use $ap-calculus-advisor in Coach mode for this AP Calculus AB Units 1–8 attempt: identify the first substantive error, give one minimal hint, and keep state session-only unless I explicitly opt into local persistence."

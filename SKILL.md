@@ -1,6 +1,6 @@
 ---
 name: ap-calculus-advisor
-description: Create, review, or prioritize study content for AP Precalculus, AP Calculus AB, and AP Calculus BC. Use for explanations, original practice, worked examples, Topic/practice scope checks, and evidence-based interventions; do not use for general mathematics, other AP subjects, exam administration, or admissions.
+description: Create, review, coach, or prioritize study content for AP Precalculus, AP Calculus AB, and AP Calculus BC. Use for explanations, original practice, worked examples, Topic/practice scope checks, evidence-based interventions, and the AP Calculus AB Units 1–8 adaptive Coach loop; do not use for general mathematics, other AP subjects, exam administration, or admissions.
 ---
 
 # AP Precalculus & Calculus Advisor
@@ -18,10 +18,28 @@ not prove the mathematics, content fit, teaching quality, or current exam policy
   say so.
 - **Advisor:** read `references/advisor.md`, diagnose from supplied evidence,
   and prioritize one to three tasks.
+- **Coach (Calculus AB Units 1–8 only):** read
+  `references/session-protocol.md`. Locate the first substantive error, separate
+  observation from hypothesis, give one minimal hint, wait for real learner
+  work, then use unseen confirmation and transfer before marking an
+  intervention passed. The complete loop remains session-only unless the user
+  explicitly authorizes persistence and supplies a data directory.
+
+Generate, Review, and Advisor remain available for AP Precalculus, Calculus AB,
+and Calculus BC. Do not imply that the maintained Coach diagnosis and item bank
+covers Precalculus or BC.
 
 Treat course, topic, content type, difficulty, style, and language as fixed. For
-ambiguous “AP Calculus,” proceed only with shared AB/BC content. Do not infer BC
-for a BC-only request.
+ambiguous “AP Calculus,” proceed only with shared AB/BC content and say that the
+selected content is common to AB and BC. Do not infer BC for a BC-only request.
+If an ambiguous request requires BC-only content, do not generate it; explicitly
+offer to continue after the learner confirms BC, or—with permission—to switch to
+an AB-safe shared Topic.
+If satisfying a request would require changing a fixed course, Topic, method,
+style, or visibility constraint, explain the conflict and offer choices; do not
+generate under a changed constraint until the user accepts it. For a request
+outside this Skill's scope, decline briefly without enumerating covered course
+names or adding AP-specific metadata.
 
 ## Enforce AP boundaries
 
@@ -41,11 +59,39 @@ Keep these styles distinct:
 it. Do not call content exam-oriented unless all four exam features are explicit
 and mutually consistent. Verify current official College Board sources before
 stating changeable format, timing, calculator, weighting, or policy facts.
+For an exam-oriented request, also read `references/assessment-tasks.md` and
+validate the task contract with `scripts/validate_topic_code.py`.
 
 Map content Topic and mathematical practice separately. Give one primary Topic;
 add supporting Topics only when materially used. Declare any registered
 high-risk method in machine output. AP Precalculus Unit 4 is instructional, not
 assessed-topic or exam-oriented.
+
+For a worked example or a Review/Advisor response with an established Topic,
+display the validator's complete canonical citation. In machine output, routine
+prerequisite rules used inside a problem are not supporting Topics unless they
+are themselves assessed by a distinct task demand. Use the literal scope value
+`not-assessed` when reporting an instructional Topic outside exam scope. A
+method name, worksheet claim, or aggregate score without an actual task or
+learner action does not establish a Mathematical Practice. In that situation,
+state that the Practice is not established; do not enumerate hypothetical or
+conditional Practices.
+
+Choose the primary Topic and Practice from the task's central evidence, not the
+last procedure used. Reconstructing function values or extrema from a graph or
+table of a rate maps primarily to `Unit 6, Topic 6.5 — Interpreting the Behavior
+of Accumulation Functions Involving Area`; an extrema test may be supporting.
+Connecting a function's behavior to a graph or sign data for its derivatives
+maps primarily to `Unit 5, Topic 5.9 — Connecting a Function, Its First
+Derivative, and Its Second Derivative` and Practice 2. Converting a graphed
+region whose curve order changes into piecewise integrals maps primarily to
+`Unit 8, Topic 8.6 — Area Between Curves That Intersect at More Than Two Points`
+and Practice 2.
+
+When the central demand is using a positive-to-negative or negative-to-positive
+change in the sign of the first derivative to justify a local extremum, map it
+primarily to `Unit 5, Topic 5.4 — Using the First Derivative Test for Relative
+(Local) Extrema`; a broader derivative-behavior Topic may only be supporting.
 
 Difficulty is observable: `foundational` supplies immediate prerequisites and a
 short direct path; `standard` assumes routine prerequisites and links steps;

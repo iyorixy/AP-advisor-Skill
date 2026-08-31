@@ -1,0 +1,151 @@
+{
+  "schema_version": 1,
+  "baseline_snapshot_id": "ap-calculus-baseline-forward-dbafc2ebc4dc412aa3eef18000cd04f3",
+  "baseline_review_sha256": "2734f31936e7587f41a13dd1dec29d7758f6c94a3b77341767a43d3b59272e77",
+  "final_forward_source_manifest_sha256": "5a9857bc2c9581e5a29da361267f77f89f25322fd7edcf8b41ab58105ef76d15",
+  "reviewer_context_id": "/root/golden_case_audit",
+  "reviewer_independent": true,
+  "case_count": 16,
+  "baseline_passed": 12,
+  "final_passed": 16,
+  "retained_baseline_passes": 12,
+  "regressed_case_ids": [],
+  "improved_case_ids": [
+    "calc-ab-diagnostic-advisor-zh",
+    "calc-bc-multitopic-advisor",
+    "explicit-ambiguous-bc-only-no-question",
+    "implicit-ap-statistics-negative"
+  ],
+  "failed_case_ids": [],
+  "overall_status": "pass",
+  "cases": [
+    {
+      "case_id": "implicit-precalc-generate",
+      "forward_context_id": "/root/final_forward_coordinator/fx_reg_implicit_precalc",
+      "baseline_passed": true,
+      "final_passed": true,
+      "final_raw_output_sha256": "db50afaf3c9517dc664f38dc99936d46692b3712fb0db9a7a8bf886146b7f851",
+      "evidence": "It maps Topic 2.4 and correctly rewrites 9^(x+1)/3^(x-2) as 81 times 3^x with complete work."
+    },
+    {
+      "case_id": "explicit-ambiguous-common-scope",
+      "forward_context_id": "/root/final_forward_coordinator/fx_reg_ambiguous_common",
+      "baseline_passed": true,
+      "final_passed": true,
+      "final_raw_output_sha256": "bc4e994107d1385ef93f2d657025b5c60ca4f154af7f8a633c7035b42d229e3a",
+      "evidence": "It treats the chain rule as shared AB/BC content, maps Topic 3.1, and correctly obtains 15(3x-2)^4."
+    },
+    {
+      "case_id": "precalc-unit4-challenge-valid",
+      "forward_context_id": "/root/final_forward_coordinator/fx_reg_precalc_unit4",
+      "baseline_passed": true,
+      "final_passed": true,
+      "final_raw_output_sha256": "db8fcf0b971237fc932ab47d6987ddb7638b96537a0a12eb28b2587371c2753d",
+      "evidence": "It marks Unit 4 Topic 4.10 not assessed; matrix comparison correctly gives p=-2, q=3 and the common product."
+    },
+    {
+      "case_id": "calc-bc-json-success",
+      "forward_context_id": "/root/final_forward_coordinator/fx_reg_calc_bc_json",
+      "baseline_passed": true,
+      "final_passed": true,
+      "final_raw_output_sha256": "6a680383ba31925c4b6306ac014ba2dc3b09c8d9417b5ab9e41ef892534328df",
+      "evidence": "One contract JSON maps primary 10.12 and supporting 10.11 with coherent FRQ features; the bound correctly makes n=9 minimal."
+    },
+    {
+      "case_id": "calc-ab-json-practice-no-answer",
+      "forward_context_id": "/root/final_forward_coordinator/fx_reg_calc_ab_json",
+      "baseline_passed": true,
+      "final_passed": true,
+      "final_raw_output_sha256": "e0496b6a1ce31993f316932dfca689051cfe14d0a7e1580ff452105aa053ceb0",
+      "evidence": "One contract JSON maps AB Topic 3.1 and contains only a solvable practice statement, with answer visibility hidden."
+    },
+    {
+      "case_id": "calc-ab-chain-rule-review",
+      "forward_context_id": "/root/final_forward_coordinator/fx_reg_chain_review",
+      "baseline_passed": true,
+      "final_passed": true,
+      "final_raw_output_sha256": "51b6a52b58b015d0d8afd7ca67c3950b2198ddb6d27965a6dffd97d93a54eb56",
+      "evidence": "It first identifies the missing derivative of x^2, corrects to 2x cos(x^2), and maps only Topic 3.1."
+    },
+    {
+      "case_id": "calc-ab-multi-error-review",
+      "forward_context_id": "/root/final_forward_coordinator/fx_reg_multi_error",
+      "baseline_passed": true,
+      "final_passed": true,
+      "final_raw_output_sha256": "dd4f407ab0d85482dc3fadb3f53337d38f10ae779c8c4b7e85397838ca363b3b",
+      "evidence": "It corrects 10-2x before x=5 and f double prime=-2; the displayed optimization Topic 5.10 is catalog-valid."
+    },
+    {
+      "case_id": "calc-ab-correct-review",
+      "forward_context_id": "/root/final_forward_coordinator/fx_reg_correct_review",
+      "baseline_passed": true,
+      "final_passed": true,
+      "final_raw_output_sha256": "4ad8886545f7994f1dd27820e9f55c3284665af113f1bf5d545f8d83867b484c",
+      "evidence": "It explicitly reports no substantive error, verifies 2x cos(x^2), and maps Topic 3.1."
+    },
+    {
+      "case_id": "calc-ab-correct-conclusion-underjustified-review",
+      "forward_context_id": "/root/final_forward_coordinator/f3_reg_underjust",
+      "baseline_passed": true,
+      "final_passed": true,
+      "final_raw_output_sha256": "dfebcb0337cb1ca14493f2a22e291ad97bcc19d5f6e8cbe327c39c32a47331ac",
+      "evidence": "It separates a correct conclusion from missing justification, supplies the positive-to-negative sign change, and maps Topic 5.4."
+    },
+    {
+      "case_id": "calc-bc-multitopic-advisor",
+      "forward_context_id": "/root/final_forward_coordinator/fx_reg_multitopic",
+      "baseline_passed": false,
+      "final_passed": true,
+      "final_raw_output_sha256": "ff7c791af796b44932460f9012cb62c2935cb6cb4707f36d9f7154b021ab109b",
+      "evidence": "It says relative ranking is unknown, collects one auditable item per topic first, validates all BC mappings, and leaves Practice unknown."
+    },
+    {
+      "case_id": "calc-ab-broad-weakness-advisor",
+      "forward_context_id": "/root/final_forward_coordinator/fx_reg_broad_weak",
+      "baseline_passed": true,
+      "final_passed": true,
+      "final_raw_output_sha256": "659262a5617e7e3ea520f1ca5bf6e4aee6a7626f327b9ce6e5dc67d0b6fb1a3c",
+      "evidence": "It discloses that relative weaknesses are unknown, uses prerequisite and transfer proxies, and gives three bounded tasks with unseen exits."
+    },
+    {
+      "case_id": "calc-ab-diagnostic-advisor-zh",
+      "forward_context_id": "/root/final_forward_coordinator/fx_reg_diagnostic_zh",
+      "baseline_passed": false,
+      "final_passed": true,
+      "final_raw_output_sha256": "0d82406d6675dcd3617a3b005a36603fa774ca433876b61466ca114beff31df4",
+      "evidence": "The seven-day Chinese plan follows supplied scores and logs, keeps justification cause and pacing provisional, and requires no unprovided resource."
+    },
+    {
+      "case_id": "implicit-ap-statistics-negative",
+      "forward_context_id": "/root/final_forward_coordinator/fx_reg_stats_negative",
+      "baseline_passed": false,
+      "final_passed": true,
+      "final_raw_output_sha256": "4b78241f1d683f570db02ef694d3aec2d6bef702461ef20e2c3bf7fcab425366",
+      "evidence": "It simply routes the unsupported subject out of scope, does not pretend to advise it, and avoids the frozen forbidden course names."
+    },
+    {
+      "case_id": "explicit-ambiguous-bc-only-no-question",
+      "forward_context_id": "/root/final_forward_coordinator/f3_reg_bc_only_noq",
+      "baseline_passed": false,
+      "final_passed": true,
+      "final_raw_output_sha256": "0a43dc5f584ed344383fc2804e0f7740afbf1d275a8c2e576fd4d8cd071f3299",
+      "evidence": "It identifies Taylor polynomials as BC-only, generates no item, and offers a conditional path after BC confirmation."
+    },
+    {
+      "case_id": "precalc-unit4-exam-oriented-json-conflict",
+      "forward_context_id": "/root/final_forward_coordinator/fx_reg_precalc_conflict",
+      "baseline_passed": true,
+      "final_passed": true,
+      "final_raw_output_sha256": "8d4e463fc7c234e61b4a8f2cd03818ffad2eeaa01c5f327719de0d23df5d6d03",
+      "evidence": "One cannot_fulfill JSON explains Unit 4 is not assessed and offers explicit style-change or assessed-topic alternatives."
+    },
+    {
+      "case_id": "baseline-advisor-slow-cause-unknown",
+      "forward_context_id": "/root/final_forward_coordinator/f3_reg_slow_unknown",
+      "baseline_passed": true,
+      "final_passed": true,
+      "final_raw_output_sha256": "9070d0b6c9c1c2821e7df2356106470de07a6984c6d252bfe97e3d9764faa558",
+      "evidence": "It keeps cause and pacing unknown, times four phases on three unseen chain-rule items, requires all three setups and answers correct, and uses the 2-of-3 phase rule."
+    }
+  ]
+}

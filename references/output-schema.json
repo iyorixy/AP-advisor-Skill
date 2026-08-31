@@ -11,6 +11,7 @@
     "type",
     "difficulty",
     "style",
+    "answer_visibility",
     "mathematical_practices",
     "methods",
     "supporting_topics",
@@ -45,8 +46,13 @@
     },
     "style": {
       "type": "string",
-      "enum": ["instructional", "assessed-topic", "exam-oriented", "ap-oriented"],
-      "description": "assessed-topic means only assessed Topic scope. exam-oriented additionally requires explicit exam_features. ap-oriented is a deprecated alias for assessed-topic."
+      "enum": ["instructional", "assessed-topic", "exam-oriented"],
+      "description": "assessed-topic means only assessed Topic scope. exam-oriented additionally requires explicit exam_features. Deprecated ap-oriented input is normalized before output."
+    },
+    "answer_visibility": {
+      "type": "string",
+      "enum": ["hidden", "revealed"],
+      "description": "hidden forbids answer and solution fields; reveal only when the user explicitly requests them or requests a worked example."
     },
     "mathematical_practices": {
       "type": "array",
@@ -94,7 +100,7 @@
         },
         "calculator": {
           "type": "string",
-          "enum": ["required", "not-permitted"]
+          "enum": ["calculator-required-section", "calculator-not-permitted"]
         },
         "representations": {
           "type": "array",
@@ -199,7 +205,7 @@
       "if": {
         "properties": {
           "style": {
-            "enum": ["assessed-topic", "exam-oriented", "ap-oriented"]
+            "enum": ["assessed-topic", "exam-oriented"]
           }
         }
       },
@@ -216,7 +222,23 @@
     },
     {
       "if": {"properties": {"style": {"const": "exam-oriented"}}},
-      "then": {"required": ["exam_features"]}
+      "then": {"required": ["exam_features"]},
+      "else": {"not": {"required": ["exam_features"]}}
+    },
+    {
+      "if": {"properties": {"answer_visibility": {"const": "hidden"}}},
+      "then": {
+        "properties": {
+          "content": {
+            "not": {
+              "anyOf": [
+                {"required": ["final_answer"]},
+                {"required": ["solution"]}
+              ]
+            }
+          }
+        }
+      }
     }
   ]
 }

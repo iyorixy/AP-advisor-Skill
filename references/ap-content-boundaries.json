@@ -1,19 +1,44 @@
 {
   "schema_version": 1,
-  "source_checked_at": "2026-08-27",
+  "source_checked_at": "2026-08-31",
   "school_year": "2026-27",
   "applicable_exam_administration": "May 2027",
   "sources": [
     {
       "id": "calculus-ced",
       "url": "https://apcentral.collegeboard.org/media/pdf/ap-calculus-ab-and-bc-course-and-exam-description.pdf",
-      "version": "Fall 2020 CED with 2026-27 clarifications",
-      "locators": ["pp. 15-16", "p. 127", "pp. 159-162", "pp. 204-206"]
+      "version": "Fall 2020 framework; current consolidated PDF ©2026 with Fall 2026 clarifications",
+      "locators": ["p. 8", "pp. 11-16", "pp. 198-203"]
     },
     {
-      "id": "calculus-course-update",
-      "url": "https://apcentral.collegeboard.org/courses/ap-calculus-bc",
+      "id": "calculus-course-page",
+      "url": "https://apcentral.collegeboard.org/courses/ap-calculus-ab",
       "version": "2026-27 course page"
+    },
+    {
+      "id": "calculus-exam-page",
+      "url": "https://apcentral.collegeboard.org/courses/ap-calculus-ab/exam",
+      "version": "May 2027 exam page"
+    },
+    {
+      "id": "calculus-clarifications",
+      "url": "https://apcentral.collegeboard.org/media/pdf/ap-calculus-ab-bc-course-and-exam-description-clarifications-effective-fall-2026.pdf",
+      "version": "Effective Fall 2026"
+    },
+    {
+      "id": "course-changes",
+      "url": "https://apcentral.collegeboard.org/courses/how-ap-develops-courses-and-exams/course-changes-overview",
+      "version": "2026-27 change table"
+    },
+    {
+      "id": "past-exams",
+      "url": "https://apcentral.collegeboard.org/courses/ap-calculus-ab/exam/past-exam-questions",
+      "version": "current released-question page"
+    },
+    {
+      "id": "calculator-policy",
+      "url": "https://apstudents.collegeboard.org/exam-policies-guidelines/calculator-policies",
+      "version": "current calculator policy"
     },
     {
       "id": "precalculus-practices",
@@ -22,6 +47,11 @@
       "locators": ["Mathematical Practices", "p. 13"]
     }
   ],
+  "ab_adaptive_scope": {
+    "units": [1, 2, 3, 4, 5, 6, 7, 8],
+    "embedded_bc_only_topics": ["6.11", "6.12", "6.13", "7.5", "7.9", "8.13"],
+    "source": "calculus-ced"
+  },
   "mathematical_practices": {
     "precalculus": [
       "precalc-1-procedural-symbolic-fluency",
@@ -34,6 +64,39 @@
       "calc-3-justification",
       "calc-4-communication-notation"
     ]
+  },
+  "practice_names": {
+    "calc-1-implementing-processes": "Implementing Mathematical Processes",
+    "calc-2-connecting-representations": "Connecting Representations",
+    "calc-3-justification": "Justification",
+    "calc-4-communication-notation": "Communication and Notation"
+  },
+  "exam_tasks": {
+    "multiple-choice": {
+      "supports_full_task": false,
+      "allowed_calculator_conditions": ["calculator-not-permitted", "calculator-required-section"],
+      "allowed_representations": ["analytical", "graphical", "numerical", "tabular", "verbal"],
+      "allowed_practices": [
+        "calc-1-implementing-processes",
+        "calc-2-connecting-representations",
+        "calc-3-justification"
+      ],
+      "justification_requirement": "not-required",
+      "source": "calculus-exam-page"
+    },
+    "free-response": {
+      "supports_full_task": true,
+      "allowed_calculator_conditions": ["calculator-not-permitted", "calculator-required-section"],
+      "allowed_representations": ["analytical", "graphical", "numerical", "tabular", "verbal"],
+      "allowed_practices": [
+        "calc-1-implementing-processes",
+        "calc-2-connecting-representations",
+        "calc-3-justification",
+        "calc-4-communication-notation"
+      ],
+      "justification_requirement": "verb-dependent",
+      "source": "calculus-exam-page"
+    }
   },
   "high_risk_methods": {
     "integration-by-parts": {
@@ -66,5 +129,50 @@
       "reason": "AP Precalculus Unit 4 is course content but is not assessed on the AP Exam.",
       "source": "precalculus-practices"
     }
+  ],
+  "corrections": [
+    {
+      "id": "extreme-value-theorem-closed-interval",
+      "rule": "For EK FUN-1.C.1, continuity on [a,b] guarantees at least one minimum value and at least one maximum value on [a,b].",
+      "source": "calculus-clarifications"
+    },
+    {
+      "id": "differential-equation-solution-count",
+      "rule": "For EK FUN-7.B.2, there may be infinitely many solutions to a differential equation.",
+      "source": "calculus-clarifications"
+    },
+    {
+      "id": "may-2027-mcq-update",
+      "rule": "Starting May 2027, MCQ Part A has 29 questions in 62 minutes and Part B has 13 questions in 38 minutes.",
+      "source": "calculus-clarifications"
+    }
+  ],
+  "official_source_conflicts": [
+    {
+      "id": "unit-title-aliases",
+      "sources": ["calculus-course-page", "calculus-ced", "calculus-exam-page"],
+      "handling": "Use course-page and framework-table Unit titles as canonical; retain exam-information variants only as aliases."
+    },
+    {
+      "id": "calculator-required-part-wording",
+      "sources": ["calculus-exam-page", "calculator-policy"],
+      "handling": "Treat calculator-required as a section condition, not a claim that every item inherently needs calculator use."
+    },
+    {
+      "id": "released-year-count",
+      "sources": ["past-exams"],
+      "handling": "The page says three recent years while displaying four headings; date-stamp the check and do not hard-code a count."
+    },
+    {
+      "id": "annual-consistency-boilerplate",
+      "sources": ["calculus-exam-page", "calculus-clarifications", "course-changes"],
+      "handling": "Do not use generic annual-consistency wording to revive the pre-2027 MCQ contract; use the May 2027 table and effective Fall 2026 clarification for the named administration."
+    }
+  ],
+  "legacy_markers": [
+    "45 multiple-choice questions in 105 minutes",
+    "30 multiple-choice questions in 60 minutes for Part A",
+    "15 multiple-choice questions in 45 minutes for Part B",
+    "paper-only AP Calculus exam"
   ]
 }

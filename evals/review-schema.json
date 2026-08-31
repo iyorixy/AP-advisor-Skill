@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "review-schema.json",
+  "title": "Independent behavioral review record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "case_id",
+    "round_id",
+    "forward_context_id",
+    "forward_context_independent",
+    "rubric_hidden_from_forward_tester",
+    "reviewer_context_id",
+    "reviewer_independent",
+    "raw_output_sha256",
+    "reviewed_at",
+    "invariants"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "case_id": {"type": "string", "pattern": "^(REV|ADV|COA|GEN|BND)-[0-9]{3}$"},
+    "round_id": {"type": "string", "enum": ["primary", "repeat"]},
+    "forward_context_id": {"type": "string", "minLength": 3},
+    "forward_context_independent": {"const": true},
+    "rubric_hidden_from_forward_tester": {"const": true},
+    "reviewer_context_id": {"type": "string", "minLength": 3},
+    "reviewer_independent": {"const": true},
+    "raw_output_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "reviewed_at": {"type": "string", "format": "date-time"},
+    "invariants": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["invariant_id", "passed", "evidence"],
+        "properties": {
+          "invariant_id": {"type": "string", "pattern": "^[A-Z0-9-]+$"},
+          "passed": {"type": "boolean"},
+          "evidence": {"type": "string", "minLength": 12}
+        }
+      }
+    }
+  }
+}

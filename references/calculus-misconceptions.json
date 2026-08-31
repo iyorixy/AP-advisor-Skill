@@ -1,0 +1,499 @@
+{
+  "schema_version": 1,
+  "scope": "ap-calculus-ab-units-1-8",
+  "status": "internal-teaching-diagnostics-not-official",
+  "misconceptions": [
+    {
+      "misconception_id": "u1-limit-value-substitution",
+      "internal_diagnostic": true,
+      "unit": 1,
+      "topic": "1.10",
+      "practice": "calc-2-connecting-representations",
+      "observable_features": [
+        "Reports the separately defined function value when asked for a two-sided limit at a removable discontinuity.",
+        "Treats a filled point as overriding matching left- and right-hand behavior."
+      ],
+      "evidence_required": [
+        "Compare the learner's stated limit with the approach values and the function value in one representation.",
+        "Ask the learner to distinguish what x approaches from what happens exactly at the point."
+      ],
+      "alternative_causes": [
+        "The learner may have misread the requested x-value rather than confused limit and function value.",
+        "The learner may have made an arithmetic error after correctly identifying the approaching value."
+      ],
+      "prerequisites": [],
+      "prerequisite_rationale": {},
+      "minimum_remediation": "Contrast nearby behavior with the value at the point, then require the learner to name each quantity before calculating.",
+      "diagnostic_item_id": "ab-u1-m1-d",
+      "confirmation_item_id": "ab-u1-m1-c",
+      "transfer_item_id": "ab-u1-m1-t",
+      "exit_standard": "Correctly complete the unseen transfer item independently with hint level 0 and explicitly distinguish the limit from the function value.",
+      "uncertain_action": "Request one explanation that separately states the nearby behavior and the value at the point."
+    },
+    {
+      "misconception_id": "u1-continuity-missing-condition",
+      "internal_diagnostic": true,
+      "unit": 1,
+      "topic": "1.11",
+      "practice": "calc-3-justification",
+      "observable_features": [
+        "Checks only that the function value exists, or only that the limit exists, when deciding continuity at a point.",
+        "Chooses a parameter without equating the two-sided limit and the defined function value."
+      ],
+      "evidence_required": [
+        "Require the learner to state all three point-continuity conditions and apply each at the named point.",
+        "Use a piecewise example in which the limit and the function value can be varied independently."
+      ],
+      "alternative_causes": [
+        "The learner may know the conditions but omit them because the prompt was read as computation only.",
+        "The learner may correctly set up continuity but make an equation-solving error."
+      ],
+      "prerequisites": [
+        "u1-limit-value-substitution"
+      ],
+      "prerequisite_rationale": {
+        "u1-limit-value-substitution": "Continuity at a point requires treating the limiting value and the defined value as distinct quantities before comparing them."
+      },
+      "minimum_remediation": "Have the learner label existence of the value, existence of the two-sided limit, and equality of those quantities before solving.",
+      "diagnostic_item_id": "ab-u1-m2-d",
+      "confirmation_item_id": "ab-u1-m2-c",
+      "transfer_item_id": "ab-u1-m2-t",
+      "exit_standard": "Correctly complete the unseen transfer item independently with hint level 0 and cite the required continuity or IVT conditions.",
+      "uncertain_action": "Ask for the three continuity conditions on a fresh piecewise function without asking for any parameter calculation."
+    },
+    {
+      "misconception_id": "u2-derivative-not-rate",
+      "internal_diagnostic": true,
+      "unit": 2,
+      "topic": "2.2",
+      "practice": "calc-2-connecting-representations",
+      "observable_features": [
+        "Reports a function value or a raw output change when the derivative at a point is requested.",
+        "Interprets derivative notation without a per-unit-input rate or tangent-slope meaning."
+      ],
+      "evidence_required": [
+        "Ask for a difference quotient from nearby values and a sentence interpreting its units or slope.",
+        "Compare the learner's derivative estimate with the scale of both the output change and the input change."
+      ],
+      "alternative_causes": [
+        "The learner may calculate the quotient correctly but copy the wrong table entry.",
+        "The learner may understand the rate but omit units in a context-free response."
+      ],
+      "prerequisites": [
+        "u1-limit-value-substitution"
+      ],
+      "prerequisite_rationale": {
+        "u1-limit-value-substitution": "The derivative definition depends on separating a limiting process from the function value at the evaluation point."
+      },
+      "minimum_remediation": "Rebuild the derivative as output change divided by input change, then connect that quotient to the local tangent slope.",
+      "diagnostic_item_id": "ab-u2-m1-d",
+      "confirmation_item_id": "ab-u2-m1-c",
+      "transfer_item_id": "ab-u2-m1-t",
+      "exit_standard": "Correctly complete the unseen transfer item independently with hint level 0 and interpret the derivative with sign and units.",
+      "uncertain_action": "Ask for one nearby secant-slope estimate and a one-sentence interpretation before assigning a conceptual cause."
+    },
+    {
+      "misconception_id": "u2-product-rule-distribution",
+      "internal_diagnostic": true,
+      "unit": 2,
+      "topic": "2.8",
+      "practice": "calc-1-implementing-processes",
+      "observable_features": [
+        "Differentiates a product as the product of the two derivatives.",
+        "Includes only one of the two product-rule terms or loses a factor from one term."
+      ],
+      "evidence_required": [
+        "Ask the learner to differentiate a product whose expanded derivative can be checked independently.",
+        "Require labeling of the unchanged factor in each of the two product-rule terms."
+      ],
+      "alternative_causes": [
+        "The learner may know the product rule but make a derivative error in one factor.",
+        "The learner may mistake multiplication notation for function composition."
+      ],
+      "prerequisites": [
+        "u2-derivative-not-rate"
+      ],
+      "prerequisite_rationale": {
+        "u2-derivative-not-rate": "Product-rule work presupposes that each factor's derivative is a local rate rather than another function value."
+      },
+      "minimum_remediation": "Use a two-column product-rule structure showing which factor changes in each term, then verify by expansion when possible.",
+      "diagnostic_item_id": "ab-u2-m2-d",
+      "confirmation_item_id": "ab-u2-m2-c",
+      "transfer_item_id": "ab-u2-m2-t",
+      "exit_standard": "Correctly complete the unseen transfer item independently with hint level 0 and preserve both product-rule contributions.",
+      "uncertain_action": "Ask for the derivative of one simple polynomial product both by expansion and by the product rule."
+    },
+    {
+      "misconception_id": "u3-chain-rule-inner-factor",
+      "internal_diagnostic": true,
+      "unit": 3,
+      "topic": "3.1",
+      "practice": "calc-1-implementing-processes",
+      "observable_features": [
+        "Differentiates the outer function but omits the derivative of the inner function.",
+        "Multiplies by the inner function itself instead of by its derivative."
+      ],
+      "evidence_required": [
+        "Ask the learner to name the inner and outer functions before differentiating a composition.",
+        "Check the proposed derivative at one numerical input against a finite local change or an independently expanded form."
+      ],
+      "alternative_causes": [
+        "The learner may know the chain rule but make an algebraic simplification error.",
+        "The expression may have been read as a product rather than a composition."
+      ],
+      "prerequisites": [
+        "u2-derivative-not-rate"
+      ],
+      "prerequisite_rationale": {
+        "u2-derivative-not-rate": "The chain rule combines local rates, so interpreting each derivative as a rate is a conceptual prerequisite."
+      },
+      "minimum_remediation": "Require an inner-outer decomposition and leave a visible factor for the inner derivative before any simplification.",
+      "diagnostic_item_id": "ab-u3-m1-d",
+      "confirmation_item_id": "ab-u3-m1-c",
+      "transfer_item_id": "ab-u3-m1-t",
+      "exit_standard": "Correctly complete the unseen transfer item independently with hint level 0 and include the correct inner-rate factor.",
+      "uncertain_action": "Ask the learner to identify only the inner function and its derivative for a new composition."
+    },
+    {
+      "misconception_id": "u3-implicit-y-prime-omission",
+      "internal_diagnostic": true,
+      "unit": 3,
+      "topic": "3.2",
+      "practice": "calc-4-communication-notation",
+      "observable_features": [
+        "Differentiates a term containing y with respect to x but omits the dy/dx factor.",
+        "Treats y as a constant throughout an implicit relation."
+      ],
+      "evidence_required": [
+        "Ask the learner to annotate which quantities depend on x before differentiating.",
+        "Use an implicit equation with a known point and compare the resulting slope with local geometric behavior."
+      ],
+      "alternative_causes": [
+        "The learner may include dy/dx correctly and then solve the linear equation for it incorrectly.",
+        "The learner may substitute the point before differentiating and erase variable dependence."
+      ],
+      "prerequisites": [
+        "u3-chain-rule-inner-factor"
+      ],
+      "prerequisite_rationale": {
+        "u3-chain-rule-inner-factor": "Differentiating a function of y with respect to x is a chain-rule application whose inner rate is dy/dx."
+      },
+      "minimum_remediation": "Mark every y-term as a composition with y(x), differentiate one term at a time, and collect all dy/dx terms.",
+      "diagnostic_item_id": "ab-u3-m2-d",
+      "confirmation_item_id": "ab-u3-m2-c",
+      "transfer_item_id": "ab-u3-m2-t",
+      "exit_standard": "Correctly complete the unseen transfer item independently with hint level 0 and retain every required dy/dx factor.",
+      "uncertain_action": "Ask the learner to differentiate only y squared and xy with respect to x, without solving a full equation."
+    },
+    {
+      "misconception_id": "u4-context-derivative-units",
+      "internal_diagnostic": true,
+      "unit": 4,
+      "topic": "4.1",
+      "practice": "calc-2-connecting-representations",
+      "observable_features": [
+        "Interprets a derivative as an amount rather than a rate and omits per-input units.",
+        "Ignores the derivative's sign when describing contextual change."
+      ],
+      "evidence_required": [
+        "Require a sentence containing the evaluation time, direction of change, magnitude, and quotient units.",
+        "Compare the learner's interpretation with the units assigned to both variables."
+      ],
+      "alternative_causes": [
+        "The learner may understand the rate but omit units from a terse numerical answer.",
+        "A negative sign may be lost through arithmetic rather than interpretation."
+      ],
+      "prerequisites": [
+        "u2-derivative-not-rate"
+      ],
+      "prerequisite_rationale": {
+        "u2-derivative-not-rate": "Contextual interpretation requires the derivative's prior meaning as a signed output change per unit input."
+      },
+      "minimum_remediation": "Use a four-part interpretation frame: at what input, which quantity, increasing or decreasing, and at what rate with units.",
+      "diagnostic_item_id": "ab-u4-m1-d",
+      "confirmation_item_id": "ab-u4-m1-c",
+      "transfer_item_id": "ab-u4-m1-t",
+      "exit_standard": "Correctly complete the unseen transfer item independently with hint level 0 and communicate sign, magnitude, and quotient units.",
+      "uncertain_action": "Ask for the numerator and denominator units of one derivative before requesting a full contextual sentence."
+    },
+    {
+      "misconception_id": "u4-related-rates-premature-substitution",
+      "internal_diagnostic": true,
+      "unit": 4,
+      "topic": "4.5",
+      "practice": "calc-1-implementing-processes",
+      "observable_features": [
+        "Substitutes snapshot values before differentiating and thereby treats changing quantities as constants.",
+        "Relates the variables correctly but omits one time-derivative factor after implicit differentiation."
+      ],
+      "evidence_required": [
+        "Ask for the relation in variables and its time derivative before any numerical substitution.",
+        "Check the final rate's sign and units against the stated motion or growth."
+      ],
+      "alternative_causes": [
+        "The learner may differentiate correctly but use a wrong geometric formula.",
+        "The learner may make an arithmetic error after a complete related-rates setup."
+      ],
+      "prerequisites": [
+        "u3-implicit-y-prime-omission",
+        "u4-context-derivative-units"
+      ],
+      "prerequisite_rationale": {
+        "u3-implicit-y-prime-omission": "Related-rates equations require implicit differentiation of quantities that depend on time.",
+        "u4-context-derivative-units": "The requested related rate must be interpreted with a direction and quotient units."
+      },
+      "minimum_remediation": "Separate the work into relation, differentiation with respect to time, snapshot substitution, solution, and contextual unit check.",
+      "diagnostic_item_id": "ab-u4-m2-d",
+      "confirmation_item_id": "ab-u4-m2-c",
+      "transfer_item_id": "ab-u4-m2-t",
+      "exit_standard": "Correctly complete the unseen transfer item independently with hint level 0 using variable-first differentiation and valid units.",
+      "uncertain_action": "Request only the undifferentiated relation and its time derivative for a fresh geometry context."
+    },
+    {
+      "misconception_id": "u5-critical-points-endpoints",
+      "internal_diagnostic": true,
+      "unit": 5,
+      "topic": "5.5",
+      "practice": "calc-3-justification",
+      "observable_features": [
+        "Tests only where the derivative is zero and omits endpoints or in-domain nondifferentiable points.",
+        "Labels every critical point as an absolute extremum without comparing candidate values."
+      ],
+      "evidence_required": [
+        "Require a complete candidate list and the function value at every candidate on a closed interval.",
+        "Ask the learner to distinguish critical points, local extrema, and absolute extrema."
+      ],
+      "alternative_causes": [
+        "The learner may know the candidate process but solve the derivative equation incompletely.",
+        "The learner may omit an endpoint because the interval was copied incorrectly."
+      ],
+      "prerequisites": [
+        "u2-derivative-not-rate"
+      ],
+      "prerequisite_rationale": {
+        "u2-derivative-not-rate": "Identifying critical points requires knowing where the derivative is zero or fails to exist in the function's domain."
+      },
+      "minimum_remediation": "Build a candidate table containing both endpoints and all in-domain critical points, then compare actual function values.",
+      "diagnostic_item_id": "ab-u5-m1-d",
+      "confirmation_item_id": "ab-u5-m1-c",
+      "transfer_item_id": "ab-u5-m1-t",
+      "exit_standard": "Correctly complete the unseen transfer item independently with hint level 0 and justify extrema from a complete candidate set.",
+      "uncertain_action": "Ask the learner to list candidates only, without yet choosing extrema, for one new closed-interval function."
+    },
+    {
+      "misconception_id": "u5-concavity-wrong-sign-source",
+      "internal_diagnostic": true,
+      "unit": 5,
+      "topic": "5.6",
+      "practice": "calc-2-connecting-representations",
+      "observable_features": [
+        "Uses the sign of the first derivative rather than whether the first derivative is increasing or decreasing to determine concavity.",
+        "Names an inflection point where the second derivative is zero but its sign does not change."
+      ],
+      "evidence_required": [
+        "Ask whether the slope values are increasing or decreasing on each interval and connect that behavior to concavity.",
+        "Require a sign-change check around every proposed inflection input."
+      ],
+      "alternative_causes": [
+        "The learner may understand concavity but differentiate the first derivative incorrectly.",
+        "The learner may confuse an interval statement with the coordinates of an inflection point."
+      ],
+      "prerequisites": [
+        "u2-product-rule-distribution"
+      ],
+      "prerequisite_rationale": {
+        "u2-product-rule-distribution": "Accurate second-derivative analysis depends on reliably differentiating first-derivative expressions that may include products."
+      },
+      "minimum_remediation": "Translate between increasing or decreasing slopes and the sign of the second derivative before locating sign changes.",
+      "diagnostic_item_id": "ab-u5-m2-d",
+      "confirmation_item_id": "ab-u5-m2-c",
+      "transfer_item_id": "ab-u5-m2-t",
+      "exit_standard": "Correctly complete the unseen transfer item independently with hint level 0 and justify concavity and inflection by sign change.",
+      "uncertain_action": "Ask whether a short table of first-derivative values is increasing or decreasing before using concavity vocabulary."
+    },
+    {
+      "misconception_id": "u6-signed-accumulation-area",
+      "internal_diagnostic": true,
+      "unit": 6,
+      "topic": "6.1",
+      "practice": "calc-2-connecting-representations",
+      "observable_features": [
+        "Adds all geometric areas as positive when a signed accumulation or net change is requested.",
+        "Reports signed accumulation when the prompt instead asks for total accumulated magnitude."
+      ],
+      "evidence_required": [
+        "Require separate labels for signed contribution and geometric area on intervals above and below the axis.",
+        "Ask for both net change and total magnitude from the same simple rate graph."
+      ],
+      "alternative_causes": [
+        "The learner may distinguish signed and total accumulation but calculate one region's area incorrectly.",
+        "The learner may misread which quantity the prompt requests."
+      ],
+      "prerequisites": [],
+      "prerequisite_rationale": {},
+      "minimum_remediation": "Partition at sign changes, record each interval's signed contribution, and only then decide whether absolute values are needed.",
+      "diagnostic_item_id": "ab-u6-m1-d",
+      "confirmation_item_id": "ab-u6-m1-c",
+      "transfer_item_id": "ab-u6-m1-t",
+      "exit_standard": "Correctly complete the unseen transfer item independently with hint level 0 and distinguish signed accumulation from total magnitude.",
+      "uncertain_action": "Ask for the sign of each region on one fresh rate graph before requesting any sum."
+    },
+    {
+      "misconception_id": "u6-ftc-variable-bound-chain",
+      "internal_diagnostic": true,
+      "unit": 6,
+      "topic": "6.4",
+      "practice": "calc-1-implementing-processes",
+      "observable_features": [
+        "Evaluates the integrand at a variable bound but omits the derivative of that bound.",
+        "Applies the upper-bound contribution with the wrong sign when both integration limits vary."
+      ],
+      "evidence_required": [
+        "Ask the learner to label upper and lower bound contributions before differentiating.",
+        "Check the proposed derivative at a numerical input using maintained table values for the integrand."
+      ],
+      "alternative_causes": [
+        "The learner may apply the FTC correctly but substitute a table value from the wrong input.",
+        "The learner may make a sign error while distributing a negative lower-bound term."
+      ],
+      "prerequisites": [
+        "u3-chain-rule-inner-factor",
+        "u6-signed-accumulation-area"
+      ],
+      "prerequisite_rationale": {
+        "u3-chain-rule-inner-factor": "A variable integration limit is an inner function whose derivative multiplies the integrand value.",
+        "u6-signed-accumulation-area": "The sign of each moving-bound contribution follows the orientation of signed accumulation."
+      },
+      "minimum_remediation": "Write one signed term for each moving bound and leave each bound derivative visible until after substitution.",
+      "diagnostic_item_id": "ab-u6-m2-d",
+      "confirmation_item_id": "ab-u6-m2-c",
+      "transfer_item_id": "ab-u6-m2-t",
+      "exit_standard": "Correctly complete the unseen transfer item independently with hint level 0 including every bound derivative and orientation sign.",
+      "uncertain_action": "Ask for only the upper-bound and lower-bound terms of a new accumulation derivative before simplification."
+    },
+    {
+      "misconception_id": "u7-slope-field-segment-meaning",
+      "internal_diagnostic": true,
+      "unit": 7,
+      "topic": "7.4",
+      "practice": "calc-2-connecting-representations",
+      "observable_features": [
+        "Reads a slope-field segment's vertical coordinate as the derivative value.",
+        "Infers a solution's behavior from one segment while ignoring how slopes change across the field."
+      ],
+      "evidence_required": [
+        "Ask for the slope represented by segments at several labeled coordinates.",
+        "Require a qualitative solution path that remains tangent to nearby field segments."
+      ],
+      "alternative_causes": [
+        "The learner may understand segment meaning but misread a coordinate label.",
+        "The learner may reverse positive and negative visual slopes."
+      ],
+      "prerequisites": [
+        "u4-context-derivative-units"
+      ],
+      "prerequisite_rationale": {
+        "u4-context-derivative-units": "A slope-field segment represents the signed local rate dy/dx at a location, extending contextual derivative interpretation."
+      },
+      "minimum_remediation": "At each marked point, separate the point's y-coordinate from the small segment's rise-over-run before tracing a solution.",
+      "diagnostic_item_id": "ab-u7-m1-d",
+      "confirmation_item_id": "ab-u7-m1-c",
+      "transfer_item_id": "ab-u7-m1-t",
+      "exit_standard": "Correctly complete the unseen transfer item independently with hint level 0 and justify behavior from local segment slopes.",
+      "uncertain_action": "Ask for the slopes of three explicitly described field segments without asking for a full solution curve."
+    },
+    {
+      "misconception_id": "u7-particular-solution-constant",
+      "internal_diagnostic": true,
+      "unit": 7,
+      "topic": "7.7",
+      "practice": "calc-1-implementing-processes",
+      "observable_features": [
+        "Finds a family of antiderivatives but does not use the initial condition to determine its constant.",
+        "Drops an absolute-value or branch condition during separation and accepts a solution outside its stated domain."
+      ],
+      "evidence_required": [
+        "Require both the general separated solution and a visible substitution of the initial condition.",
+        "Substitute the proposed particular solution into the differential equation and initial condition."
+      ],
+      "alternative_causes": [
+        "The learner may use the initial condition correctly but solve the resulting constant equation incorrectly.",
+        "The learner may produce an equivalent constant form that only appears different."
+      ],
+      "prerequisites": [
+        "u6-ftc-variable-bound-chain"
+      ],
+      "prerequisite_rationale": {
+        "u6-ftc-variable-bound-chain": "Constructing and checking a particular solution relies on linking derivatives and antiderivatives with correct variable dependence."
+      },
+      "minimum_remediation": "Keep an explicit arbitrary constant through integration, apply the initial condition, and verify both the equation and initial value.",
+      "diagnostic_item_id": "ab-u7-m2-d",
+      "confirmation_item_id": "ab-u7-m2-c",
+      "transfer_item_id": "ab-u7-m2-t",
+      "exit_standard": "Correctly complete the unseen transfer item independently with hint level 0 and verify the differential equation and initial condition.",
+      "uncertain_action": "Ask the learner to substitute one proposed family into only the initial condition and solve for its constant."
+    },
+    {
+      "misconception_id": "u8-net-change-versus-distance",
+      "internal_diagnostic": true,
+      "unit": 8,
+      "topic": "8.2",
+      "practice": "calc-2-connecting-representations",
+      "observable_features": [
+        "Uses the signed integral of velocity as total distance even when velocity changes sign.",
+        "Uses absolute velocity for displacement or net position change."
+      ],
+      "evidence_required": [
+        "Require the learner to locate velocity sign changes and compute both displacement and total distance.",
+        "Compare the integral result with position values at endpoints and turning times."
+      ],
+      "alternative_causes": [
+        "The learner may understand the distinction but miss a zero of velocity.",
+        "The learner may calculate one geometric area incorrectly after partitioning correctly."
+      ],
+      "prerequisites": [
+        "u6-signed-accumulation-area"
+      ],
+      "prerequisite_rationale": {
+        "u6-signed-accumulation-area": "Distance and displacement specialize the distinction between total magnitude and signed accumulation."
+      },
+      "minimum_remediation": "Partition at velocity zeros, record signed changes in position, and use absolute contributions only for total distance.",
+      "diagnostic_item_id": "ab-u8-m1-d",
+      "confirmation_item_id": "ab-u8-m1-c",
+      "transfer_item_id": "ab-u8-m1-t",
+      "exit_standard": "Correctly complete the unseen transfer item independently with hint level 0 and distinguish displacement from total distance.",
+      "uncertain_action": "Ask the learner to identify the velocity sign intervals before requesting either accumulated quantity."
+    },
+    {
+      "misconception_id": "u8-washer-radius-axis-offset",
+      "internal_diagnostic": true,
+      "unit": 8,
+      "topic": "8.12",
+      "practice": "calc-4-communication-notation",
+      "observable_features": [
+        "Uses function values as radii without measuring distance from the stated axis of rotation.",
+        "Reverses outer and inner radii or omits the squared-radius difference for a washer."
+      ],
+      "evidence_required": [
+        "Require labeled inner and outer radius expressions as distances from the axis before writing an integral.",
+        "Check that each radius is nonnegative and that the outer radius is at least the inner radius throughout the interval."
+      ],
+      "alternative_causes": [
+        "The learner may identify both radii correctly but expand or integrate the polynomial incorrectly.",
+        "The learner may choose the wrong integration variable after reading the region description."
+      ],
+      "prerequisites": [
+        "u6-signed-accumulation-area"
+      ],
+      "prerequisite_rationale": {
+        "u6-signed-accumulation-area": "Washer volume accumulates nonnegative cross-sectional area and requires maintaining the orientation of a definite integral."
+      },
+      "minimum_remediation": "Draw or describe one representative washer, measure both radii from the rotation axis, and verify outer exceeds inner.",
+      "diagnostic_item_id": "ab-u8-m2-d",
+      "confirmation_item_id": "ab-u8-m2-c",
+      "transfer_item_id": "ab-u8-m2-t",
+      "exit_standard": "Correctly complete the unseen transfer item independently with hint level 0 using valid outer and inner radius distances.",
+      "uncertain_action": "Ask only for the two radius expressions at a generic slice before requesting a volume integral."
+    }
+  ]
+}

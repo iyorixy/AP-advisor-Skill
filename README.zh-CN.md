@@ -2,41 +2,69 @@
 
 # AP Advisor Skills
 
-本仓库包含三个不依赖第三方 Python 包的 Codex Skill：
+本仓库包含三个 Codex Skill，均仅依赖 Python 3.10+ 标准库：
 
-- `ap-calculus-advisor`（仓库根目录）支持 AP Precalculus、AP Calculus AB 和 AP Calculus BC。
-- `ap-psychology-advisor` 支持当前五单元框架下的 AP Psychology。
-- `ap-biology-advisor` 支持当前 Fall 2025 八单元框架下的 AP Biology。
+| Skill | 路径 | 仓库内的支持范围 |
+| --- | --- | --- |
+| `ap-calculus-advisor` | 仓库根目录 | AP Precalculus、AP Calculus AB 和 AP Calculus BC；另含精选的 Calculus AB 自适应 Coach 支持 |
+| `ap-psychology-advisor` | `ap-psychology-advisor/` | 本仓库所记录五单元框架下的 AP Psychology |
+| `ap-biology-advisor` | `ap-biology-advisor/` | 本仓库所记录 Fall 2025 框架下的 AP Biology |
 
-三个 Skill 都是基于 AP 课程框架的学习辅助工具，帮助 Codex 生成原创学习内容、
-审阅学生作答，并根据学习证据给出可衡量的学习干预建议。内置 validator 只检查
-内部 Topic 映射和部分 AP 边界。
+根 Skill 继续支持上述三门数学课程的 Generate、Review 与 Advisor。自适应
+Coach v1 的范围更窄：维护的错因图谱、诊断题库、学习状态与下一题选择器横跨
+AP Calculus AB Units 1–8，但并非穷尽所有 Topic；不得据此声称 Precalculus
+或 BC 已有同等的自适应覆盖。
 
-## 运行要求
+## AP Calculus AB 自适应闭环 v1
 
-- Codex
-- Python 3.10 或更高版本；无需第三方 Python 包
+Coach 根据学生实际作答定位第一个实质性错误，把观察事实、有限证据支持的错因
+假设与不确定性分开，只给一个最小提示，然后等待学生真实回应。学生自行修正后，
+进入一道未见同构确认题；独立通过后，再进入一道未见的跨表征或跨情境迁移题。
+只有在 hint level 0 独立通过未见迁移题时，才能把该具体干预标记为 `passed`；
+这不代表整个 Unit 已掌握。
 
-## 安装
+示例：
 
-### 先进入 Codex
+```text
+$ap-calculus-advisor 请用 Coach 模式检查这份 AP Calculus AB Unit 4 解答；
+每次只给一个最小提示，等待我的作答，并保持 session-only。
+```
 
-> **下面以 `$skill-installer ...` 开头的内容是发给 Codex 的消息，不是
-> PowerShell、CMD 或 Bash 命令。**
+维护题库全部为原创练习，不是 AP Classroom、Progress Check、Practice Exam
+或其他 College Board 安全材料。Skill 默认不在面向学习者的响应中展示题库答案。
+在取得真实、去标识化的学习者数据之前，难度标签一律为 `provisional`。
 
-- **桌面应用：**打开 ChatGPT 桌面应用，选择 **Codex**，点击 **New chat**，再将
-  安装指令粘贴到聊天输入框。
-- **Codex CLI：**先在 PowerShell 或其他终端中运行 `codex`。等 Codex 打开并显示
-  `›` 输入提示符后，再粘贴安装指令。如果仍看到 `(base) PS C:\...>` 之类的提示符，
-  说明你还在 PowerShell。
+## 隐私与可选本地状态
 
-如果尚未安装 Codex，请参照官方的
-[桌面应用快速入门](https://learn.chatgpt.com/docs/app)或
-[Codex CLI 快速入门](https://learn.chatgpt.com/docs/codex/cli)。
+Coach 默认仅保留在当前会话中，不写磁盘。本地持久化必须同时满足：用户明确授权，
+并由调用者给出仓库外的具体 data directory。状态只保存假名 profile ID、作答、
+证据、提示/独立性字段和复测队列；不要求姓名或邮箱。
 
-### 使用 Skill Installer（推荐）
+请使用调用者明确选择的外部目录（以下路径只是示例）：
 
-进入 Codex 后，按需发送以下任意安装消息：
+```powershell
+python scripts/update_learner_state.py --data-dir "D:\learner-data\calc-ab-demo" `
+  --as-of "2026-08-31T12:00:00Z" --evidence-json init --profile-id demo_profile
+python scripts/update_learner_state.py --data-dir "D:\learner-data\calc-ab-demo" `
+  --as-of "2026-08-31T12:10:00Z" --evidence-json record --attempt-file attempt.json
+python scripts/update_learner_state.py --data-dir "D:\learner-data\calc-ab-demo" `
+  --as-of "2026-08-31T12:10:00Z" --evidence-json queue
+```
+
+`clear-test-profile` 只能用于以 `--test-data` 初始化的目录，并且只删除该精确
+profile 的已识别文件；它不是通用删除命令。真实学习者数据必须保存在仓库外，
+不得提交。
+
+```powershell
+python scripts/update_learner_state.py --data-dir "D:\learner-data\calc-ab-test" `
+  --evidence-json init --profile-id test_profile --test-data
+python scripts/update_learner_state.py --data-dir "D:\learner-data\calc-ab-test" `
+  --evidence-json clear-test-profile --profile-id test_profile
+```
+
+## 安装与调用
+
+进入 Codex 后，使用 Skill Installer：
 
 ```text
 $skill-installer Install the skill at path . from iyorixy/AP-advisor-Skill as ap-calculus-advisor.
@@ -44,96 +72,40 @@ $skill-installer Install the skill at path ap-psychology-advisor from iyorixy/AP
 $skill-installer Install the skill at path ap-biology-advisor from iyorixy/AP-advisor-Skill as ap-biology-advisor.
 ```
 
-Codex 通常会自动发现新安装的 Skill；如果没有显示，请重启 Codex。
-
-如果此前以 `ap-advisor` 安装过此 Skill，请将旧安装替换为
-`ap-calculus-advisor`，以免 Codex 同时发现两个名称。
-
-### 手动安装到用户目录
-
-PowerShell：
-
-```powershell
-New-Item -ItemType Directory -Force "$HOME\.agents\skills" | Out-Null
-git clone https://github.com/iyorixy/AP-advisor-Skill.git "$HOME\.agents\skills\ap-calculus-advisor"
-Copy-Item -Recurse `
-  "$HOME\.agents\skills\ap-calculus-advisor\ap-psychology-advisor" `
-  "$HOME\.agents\skills\ap-psychology-advisor"
-Copy-Item -Recurse `
-  "$HOME\.agents\skills\ap-calculus-advisor\ap-biology-advisor" `
-  "$HOME\.agents\skills\ap-biology-advisor"
-```
-
-macOS 或 Linux：
-
-```bash
-mkdir -p "$HOME/.agents/skills"
-git clone https://github.com/iyorixy/AP-advisor-Skill.git "$HOME/.agents/skills/ap-calculus-advisor"
-cp -R "$HOME/.agents/skills/ap-calculus-advisor/ap-psychology-advisor" \
-  "$HOME/.agents/skills/ap-psychology-advisor"
-cp -R "$HOME/.agents/skills/ap-calculus-advisor/ap-biology-advisor" \
-  "$HOME/.agents/skills/ap-biology-advisor"
-```
-
-以上命令会安装三个 Skill；不需要某个子 Skill 时，可跳过对应的复制命令。如果只在
-某个仓库中使用，请把需要的每个 Skill 直接放到
-`<repository>/.agents/skills/` 下。
-
-更新手动克隆的微积分 Skill：
-
-```bash
-git -C "$HOME/.agents/skills/ap-calculus-advisor" pull --ff-only
-```
-
-手动更新后，需要再次把 `ap-psychology-advisor` 和
-`ap-biology-advisor` 复制到各自的同级安装目录；使用 Skill Installer 时，也可以
-直接重新安装新版 Skill。
-
-## 验证与使用
-
-在 Codex 中打开 `/skills`，确认列表里有已安装的 Skill；也可以直接调用：
+安装后如未自动发现 Skill，请重启 Codex。调用示例：
 
 ```text
-$ap-calculus-advisor 请审阅这份 AP Calculus AB 解答，并指出第一个实质性错误。
-$ap-psychology-advisor 请审阅这份 AP Psychology 作答，并指出第一个实质性错误。
-$ap-biology-advisor 请审阅这份 AP Biology 作答，并指出第一个实质性错误。
+$ap-calculus-advisor 审阅这份 AP Calculus BC 解答并指出第一个实质性错误。
+$ap-calculus-advisor 生成一道不显示答案的 AP Precalculus 练习题。
+$ap-calculus-advisor 一步一步 Coach 我完成这道 AP Calculus AB Unit 6 题。
+$ap-psychology-advisor 审阅这份 AP Psychology 作答并指出第一个实质性错误。
+$ap-biology-advisor 审阅这份 AP Biology 作答并指出第一个实质性错误。
 ```
 
-可选的 validator 冒烟检查：在仓库检出目录中运行以下命令；必要时把 `python`
-改为 `python3`。
+## 验证仓库
+
+在仓库根目录运行（必要时把 `python` 换成 `python3`）：
 
 ```bash
-python scripts/validate_topic_code.py --course calc-ab --evidence-json \
-  "Unit 3, Topic 3.1 — The Chain Rule"
-python ap-psychology-advisor/scripts/validate_topic_code.py \
-  --self-check --evidence-json
-python ap-biology-advisor/scripts/validate_topic_code.py \
-  --self-check --evidence-json
+python scripts/validate_topic_code.py --self-check --evidence-json
+python ap-psychology-advisor/scripts/validate_topic_code.py --self-check --evidence-json
+python ap-biology-advisor/scripts/validate_topic_code.py --self-check --evidence-json
+python scripts/run_evals.py --self-check --evidence-json
+python -m unittest discover -s tests -v
+python scripts/check_release.py --evidence-json
 ```
 
-成功时退出码为 `0`，输出包含 `"overall_status":"pass"`。
+三条 validator self-check 分别覆盖三个 Skill 的映射和边界包。根目录的 Calculus
+adaptive v1 release gate 还会校验必需产物、assessment contract、错因/题目交叉
+引用、数学审计哈希、学习状态安全、selector 确定性、行为评审门槛、Python 编译与
+纯标准库依赖、单元测试和已安装的 skill-creator validator。只有所有命令都以退出码
+`0` 结束，且最后一条输出小写 `"overall_status":"pass"`，才视为仓库验证通过。
 
-## 维护者：一次性 `/goal` 过夜执行提示词
-
-如需无人值守地完成一次上线前检查，请先在 Codex 的界面或配置中选择支持
-`xhigh`（极高）的模型并把推理强度设为该档位；下面的提示词本身不会切换模型。
-该写法按照 OpenAI 的建议，为 `/goal` 提供单一持久目标、权限边界、验证方法和
-可验证的停止条件。参见官方
-[Follow a goal 指南](https://learn.chatgpt.com/use-cases/follow-goals)。
-
-在 Codex 中打开本仓库，然后把下面整段作为一条消息发送：
-
-在 Windows 上，如果 `quick_validate.py` 继承了旧版控制台编码，请为该命令设置
-`PYTHONUTF8=1`；这只会改变该次检查的 Python 文本解码方式。
-
-```text
-/goal 在 ap-biology-advisor 中完成可直接发布的 AP Biology Advisor Skill，并持续工作，直到下面所有停止条件均已验证。首先完整阅读仓库中现有的 AP Calculus 与 AP Psychology Skill、已安装的 skill-creator 指令，以及 ap-biology-advisor 下已有的全部文件；保留无关的用户改动。只使用 College Board 官方来源核对当前 AP Biology 框架：现行 CED、CED clarifications/corrections、AP Biology 课程页、考试页、课程变更页和已发布试题页。随后以最小但完整的范围实现或修正：SKILL.md、agents/openai.yaml、精简的现行 Topic 与 Science Practice 目录、带核对日期和来源元数据且只保留决策性内容的边界文件、当前 MCQ/FRQ 任务合约、Advisor 协议，以及仅使用 Python 3.10+ 标准库、支持精确 Topic/边界校验并带有实质性 --self-check 的 validator。Topic 映射与 Science Practice 映射必须分开；区分 instructional、assessed-topic 和 exam-oriented 声明；识别 Fall 2025 之前的旧框架材料；禁止无依据的“官方风格”或评分声称，也不得捏造研究和数据。同步更新 README.md 与 README.zh-CN.md，确保两个语言版本中的 Skill 数量、安装路径、手动复制与更新步骤、调用示例、冒烟检查和本 /goal 章节完全一致。运行 Biology validator 自检、有针对性的 CLI 正向与负向用例、Python 编译检查，并使用已安装 skill-creator 的 quick_validate.py 校验 ap-biology-advisor。逐个检查所有改动文件和 git diff，排除矛盾、过期数量、无效 JSON/YAML、TODO、占位符、生成的缓存文件和无关改动。不要 commit、push、发布、全局安装、删除用户工作，也不要改变现有 Skill 的行为。若某个官方来源暂时无法访问，应使用其他当前 College Board 官方来源并明确说明未核实点，绝不编造。只有在全部必需文件存在、每项验证均按预期退出、适用的成功回执都包含小写 overall_status pass、双语 README 相互一致，且最终报告列出改动文件、核对过的官方来源、运行过的命令和任何剩余限制后，才停止执行。如果同一外部阻塞连续三个 goal turn 都无法解决，应报告准确阻塞原因，不要无限重试。
-```
-
-如果命令列表里没有 `/goal`，先运行
-`codex features enable goals`，再按需重启或重新打开 Codex。
+首版有意采用透明规则，不引入 BKT、IRT、向量检索或伪精确 mastery 概率。聚合校准
+导出只提供描述性统计；样本不足时返回 `insufficient_data`。后续经验校准必须使用
+真实、经同意且去标识化的作答数据，并另行评审。
 
 ## 许可证与 AP 声明
 
-MIT。“AP” 是 College Board 的商标。本项目不是 College Board 官方出版物，也未获
-其认可。涉及考试的时效性信息应以 College Board 当前官方资料为准。
+MIT。“AP”是 College Board 的商标。本项目不是 College Board 官方出版物，也未获
+其认可。涉及考试的时效性信息，请以 College Board 当前官方来源为准。

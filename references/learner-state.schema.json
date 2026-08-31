@@ -1,0 +1,276 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AP Calculus AB Learner State",
+  "description": "Local opt-in profile schema. Attempts are stored as validated JSONL records using definitions.attempt.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "profile_id",
+    "course",
+    "attempt_ids",
+    "seen_item_ids",
+    "topic_states",
+    "review_queue",
+    "updated_at"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "profile_id": {"type": "string", "pattern": "^[A-Za-z0-9_-]{1,64}$"},
+    "course": {"const": "calc-ab"},
+    "attempt_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^[A-Za-z0-9._:-]{1,128}$"}
+    },
+    "seen_item_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^[A-Za-z0-9._:-]{1,128}$"}
+    },
+    "topic_states": {
+      "type": "object",
+      "propertyNames": {"pattern": "^[1-8]\\.[0-9]+$"},
+      "additionalProperties": {"$ref": "#/definitions/topic_state"}
+    },
+    "review_queue": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/review_entry"}
+    },
+    "updated_at": {"type": "string", "format": "date-time"}
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "attempt": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "attempt_id",
+        "profile_id",
+        "course",
+        "topic",
+        "practice",
+        "correctness",
+        "completion_time_seconds",
+        "confidence",
+        "observed_error",
+        "hypothesized_misconception",
+        "diagnostic_confidence",
+        "independence",
+        "hint_level",
+        "same_form_confirmation",
+        "transfer_result",
+        "transfer_item_unseen",
+        "observed_at",
+        "next_review_at",
+        "source_attempt_id",
+        "source_item_id"
+      ],
+      "properties": {
+        "schema_version": {"const": 1},
+        "attempt_id": {"type": "string", "pattern": "^[A-Za-z0-9._:-]{1,128}$"},
+        "profile_id": {"type": "string", "pattern": "^[A-Za-z0-9_-]{1,64}$"},
+        "course": {"const": "calc-ab"},
+        "topic": {"type": ["string", "null"], "pattern": "^[1-8]\\.[0-9]+$"},
+        "practice": {
+          "type": ["string", "null"],
+          "enum": [
+            "calc-1-implementing-processes",
+            "calc-2-connecting-representations",
+            "calc-3-justification",
+            "calc-4-communication-notation",
+            null
+          ]
+        },
+        "correctness": {
+          "type": "string",
+          "enum": ["correct", "incorrect", "partial", "unknown"]
+        },
+        "completion_time_seconds": {"type": ["integer", "null"], "minimum": 0},
+        "confidence": {
+          "type": ["string", "null"],
+          "enum": ["low", "medium", "high", "unknown", null]
+        },
+        "observed_error": {"type": ["string", "null"], "minLength": 1},
+        "hypothesized_misconception": {
+          "type": ["string", "null"],
+          "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+        },
+        "diagnostic_confidence": {
+          "type": ["string", "null"],
+          "enum": ["low", "medium", "high", "unknown", null]
+        },
+        "independence": {
+          "type": "string",
+          "enum": ["independent", "assisted", "unknown"]
+        },
+        "hint_level": {"type": ["integer", "null"], "minimum": 0, "maximum": 3},
+        "same_form_confirmation": {
+          "type": ["string", "null"],
+          "enum": ["pass", "fail", "not_attempted", "unknown", null]
+        },
+        "transfer_result": {
+          "type": ["string", "null"],
+          "enum": ["pass", "fail", "not_attempted", "unknown", null]
+        },
+        "transfer_item_unseen": {"type": ["boolean", "null"]},
+        "observed_at": {"type": "string", "format": "date-time"},
+        "next_review_at": {"type": ["string", "null"], "format": "date-time"},
+        "source_attempt_id": {
+          "type": ["string", "null"],
+          "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+        },
+        "source_item_id": {"type": "string", "pattern": "^[A-Za-z0-9._:-]{1,128}$"}
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {"properties": {"same_form_confirmation": {"const": "pass"}}},
+          "then": {
+            "properties": {
+              "correctness": {"const": "correct"},
+              "independence": {"const": "independent"},
+              "hint_level": {"const": 0}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"transfer_result": {"const": "pass"}}},
+          "then": {
+            "properties": {
+              "correctness": {"const": "correct"},
+              "transfer_item_unseen": {"const": true},
+              "independence": {"const": "independent"},
+              "hint_level": {"const": 0}
+            }
+          }
+        }
+      ]
+    },
+    "topic_state": {
+      "type": "object",
+      "required": [
+        "topic",
+        "practice",
+        "evidence_count",
+        "correctness",
+        "completion_time_seconds",
+        "confidence",
+        "source_item_id",
+        "status",
+        "last_observed_at",
+        "next_review_at",
+        "observed_error",
+        "hypothesized_misconception",
+        "diagnostic_confidence",
+        "independence",
+        "hint_level",
+        "same_form_confirmation",
+        "transfer_result",
+        "transfer_item_unseen"
+      ],
+      "properties": {
+        "topic": {"type": "string", "pattern": "^[1-8]\\.[0-9]+$"},
+        "practice": {
+          "type": ["string", "null"],
+          "enum": [
+            "calc-1-implementing-processes",
+            "calc-2-connecting-representations",
+            "calc-3-justification",
+            "calc-4-communication-notation",
+            null
+          ]
+        },
+        "evidence_count": {"type": "integer", "minimum": 1},
+        "correctness": {
+          "type": "string",
+          "enum": ["correct", "incorrect", "partial", "unknown"]
+        },
+        "completion_time_seconds": {"type": ["integer", "null"], "minimum": 0},
+        "confidence": {
+          "type": ["string", "null"],
+          "enum": ["low", "medium", "high", "unknown", null]
+        },
+        "source_item_id": {"type": "string", "pattern": "^[A-Za-z0-9._:-]{1,128}$"},
+        "status": {
+          "type": "string",
+          "enum": ["provisional", "needs-confirmation", "scheduled-retest", "passed"]
+        },
+        "last_observed_at": {"type": "string", "format": "date-time"},
+        "next_review_at": {"type": ["string", "null"], "format": "date-time"},
+        "observed_error": {"type": ["string", "null"]},
+        "hypothesized_misconception": {
+          "type": ["string", "null"],
+          "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+        },
+        "diagnostic_confidence": {
+          "type": ["string", "null"],
+          "enum": ["low", "medium", "high", "unknown", null]
+        },
+        "independence": {"type": "string", "enum": ["independent", "assisted", "unknown"]},
+        "hint_level": {"type": ["integer", "null"], "minimum": 0, "maximum": 3},
+        "same_form_confirmation": {
+          "type": ["string", "null"],
+          "enum": ["pass", "fail", "not_attempted", "unknown", null]
+        },
+        "transfer_result": {
+          "type": ["string", "null"],
+          "enum": ["pass", "fail", "not_attempted", "unknown", null]
+        },
+        "transfer_item_unseen": {"type": ["boolean", "null"]}
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {"properties": {"same_form_confirmation": {"const": "pass"}}},
+          "then": {
+            "properties": {
+              "correctness": {"const": "correct"},
+              "independence": {"const": "independent"},
+              "hint_level": {"const": 0}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"transfer_result": {"const": "pass"}}},
+          "then": {
+            "properties": {
+              "correctness": {"const": "correct"},
+              "transfer_item_unseen": {"const": true},
+              "independence": {"const": "independent"},
+              "hint_level": {"const": 0},
+              "status": {"const": "passed"}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"status": {"const": "passed"}}},
+          "then": {"properties": {"transfer_result": {"const": "pass"}}}
+        }
+      ]
+    },
+    "review_entry": {
+      "type": "object",
+      "required": ["review_id", "topic", "misconception_id", "item_id", "reason", "due_at", "status"],
+      "properties": {
+        "review_id": {"type": "string", "minLength": 1},
+        "topic": {"type": "string", "pattern": "^[1-8]\\.[0-9]+$"},
+        "misconception_id": {
+          "type": ["string", "null"],
+          "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+        },
+        "item_id": {
+          "type": ["string", "null"],
+          "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+        },
+        "reason": {
+          "type": "string",
+          "enum": ["same-form-confirmation", "transfer", "delayed-retest", "evidence-needed"]
+        },
+        "due_at": {"type": "string", "format": "date-time"},
+        "status": {"type": "string", "enum": ["pending", "completed"]}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

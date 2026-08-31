@@ -1,0 +1,231 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "case-schema.json",
+  "title": "AP Calculus Advisor Stage-1 Behavioral Golden Case",
+  "description": "Strict schema for one independently reviewable JSONL behavioral case. Rubrics describe semantic outcomes and never require exact response wording.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "case_id",
+    "category",
+    "language",
+    "unit",
+    "representations",
+    "user_request",
+    "supplied_evidence",
+    "expected_primary_topic",
+    "expected_primary_practice",
+    "expected_first_substantive_error",
+    "allowed_diagnoses",
+    "forbidden_inferences",
+    "required_behaviors",
+    "forbidden_behaviors",
+    "expected_minimum_next_step",
+    "severity",
+    "critical_lanes",
+    "semantic_rubric_invariants"
+  ],
+  "properties": {
+    "case_id": {
+      "type": "string",
+      "pattern": "^(REV|ADV|COA|GEN|BND)-[0-9]{3}$"
+    },
+    "category": {
+      "type": "string",
+      "enum": ["Review", "Advisor", "Coach", "Generate", "Boundary"]
+    },
+    "language": {
+      "type": "string",
+      "enum": ["en", "zh-CN"]
+    },
+    "unit": {
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "maximum": 8
+    },
+    "representations": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": ["analytical", "graphical", "numerical", "tabular", "verbal"]
+      }
+    },
+    "user_request": {
+      "type": "string",
+      "minLength": 12
+    },
+    "supplied_evidence": {
+      "$ref": "#/definitions/evidence"
+    },
+    "expected_primary_topic": {
+      "$ref": "#/definitions/topicExpectation"
+    },
+    "expected_primary_practice": {
+      "$ref": "#/definitions/practiceExpectation"
+    },
+    "expected_first_substantive_error": {
+      "$ref": "#/definitions/errorExpectation"
+    },
+    "allowed_diagnoses": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 5}
+    },
+    "forbidden_inferences": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 5}
+    },
+    "required_behaviors": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 5}
+    },
+    "forbidden_behaviors": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 5}
+    },
+    "expected_minimum_next_step": {
+      "type": "string",
+      "minLength": 8
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["critical", "noncritical"]
+    },
+    "critical_lanes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "math_correctness",
+          "first_substantive_error",
+          "answer_visibility",
+          "topic_practice_boundary",
+          "unauthorized_persistence",
+          "unsupported_mastery"
+        ]
+      }
+    },
+    "semantic_rubric_invariants": {
+      "type": "array",
+      "minItems": 2,
+      "uniqueItems": true,
+      "items": {"$ref": "#/definitions/semanticInvariant"}
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"severity": {"const": "critical"}}},
+      "then": {"properties": {"critical_lanes": {"minItems": 1}}},
+      "else": {"properties": {"critical_lanes": {"maxItems": 0}}}
+    }
+  ],
+  "definitions": {
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "content"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["student_work", "performance_summary", "conversation_state", "generation_constraints", "external_material"]
+        },
+        "content": {"type": "string", "minLength": 3}
+      }
+    },
+    "topicExpectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "code", "citation", "rationale"],
+      "properties": {
+        "status": {"type": "string", "enum": ["established", "not_established"]},
+        "code": {"type": ["string", "null"], "pattern": "^(?:[1-8])\\.[0-9]+$"},
+        "citation": {"type": ["string", "null"], "minLength": 5},
+        "rationale": {"type": "string", "minLength": 8}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"status": {"const": "established"}}},
+          "then": {
+            "properties": {
+              "code": {"type": "string"},
+              "citation": {"type": "string"}
+            }
+          },
+          "else": {
+            "properties": {
+              "code": {"type": "null"},
+              "citation": {"type": "null"}
+            }
+          }
+        }
+      ]
+    },
+    "practiceExpectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "id", "label", "rationale"],
+      "properties": {
+        "status": {"type": "string", "enum": ["established", "not_established"]},
+        "id": {
+          "type": ["string", "null"],
+          "enum": [
+            "calc-1-implementing-processes",
+            "calc-2-connecting-representations",
+            "calc-3-justification",
+            "calc-4-communication-notation",
+            null
+          ]
+        },
+        "label": {"type": ["string", "null"], "minLength": 5},
+        "rationale": {"type": "string", "minLength": 8}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"status": {"const": "established"}}},
+          "then": {
+            "properties": {
+              "id": {"type": "string"},
+              "label": {"type": "string"}
+            }
+          },
+          "else": {
+            "properties": {
+              "id": {"type": "null"},
+              "label": {"type": "null"}
+            }
+          }
+        }
+      ]
+    },
+    "errorExpectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "statement", "rationale"],
+      "properties": {
+        "status": {"type": "string", "enum": ["identified", "none", "not_established"]},
+        "statement": {"type": "string", "minLength": 3},
+        "rationale": {"type": "string", "minLength": 8}
+      }
+    },
+    "semanticInvariant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["invariant_id", "criterion", "failure_condition"],
+      "properties": {
+        "invariant_id": {"type": "string", "pattern": "^[A-Z0-9-]+$"},
+        "criterion": {"type": "string", "minLength": 12},
+        "failure_condition": {"type": "string", "minLength": 12}
+      }
+    }
+  }
+}
