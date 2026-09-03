@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run every required local release check for AP Calculus Advisor."""
+"""Run every required local release check for AP Advisor Skills."""
 
 from __future__ import annotations
 
@@ -20,12 +20,46 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parent.parent
-PRACTICES = {
-    "calc-1-implementing-processes",
-    "calc-2-connecting-representations",
-    "calc-3-justification",
-    "calc-4-communication-notation",
+CALC_SKILL_ROOT = ROOT / "ap-calculus-advisor"
+SKILL_ROOTS = {
+    "calculus": CALC_SKILL_ROOT,
+    "psychology": ROOT / "ap-psychology-advisor",
+    "biology": ROOT / "ap-biology-advisor",
 }
+COURSES = {"precalculus", "calc-ab", "calc-bc"}
+PRACTICES = {
+    "precalculus": {
+        "precalc-1-procedural-symbolic-fluency",
+        "precalc-2-multiple-representations",
+        "precalc-3-communication-reasoning",
+    },
+    "calc-ab": {
+        "calc-1-implementing-processes",
+        "calc-2-connecting-representations",
+        "calc-3-justification",
+        "calc-4-communication-notation",
+    },
+}
+PRACTICES["calc-bc"] = PRACTICES["calc-ab"]
+COURSE_UNITS = {
+    "precalculus": range(1, 5),
+    "calc-ab": range(1, 9),
+    "calc-bc": range(1, 11),
+}
+MIN_MISCONCEPTIONS_BY_UNIT = {
+    "precalculus": {unit: 2 for unit in range(1, 5)},
+    "calc-ab": {unit: 2 for unit in range(1, 9)},
+    "calc-bc": {6: 1, 7: 1, 8: 1, 9: 2, 10: 2},
+}
+MIN_ITEMS_BY_UNIT = {
+    "precalculus": {unit: 6 for unit in range(1, 5)},
+    "calc-ab": {unit: 4 for unit in range(1, 9)},
+    "calc-bc": {6: 3, 7: 3, 8: 3, 9: 6, 10: 6},
+}
+MIN_ITEMS_BY_COURSE = {"precalculus": 24, "calc-ab": 40, "calc-bc": 21}
+ADAPTIVE_SCOPE = (
+    "ap-precalculus-units-1-4-calculus-ab-units-1-8-calculus-bc-units-1-10"
+)
 REPRESENTATIONS = {"analytical", "graphical", "numerical", "tabular", "verbal"}
 ITEM_FIELDS = {
     "schema_version",
@@ -56,6 +90,7 @@ ITEM_FIELDS = {
 }
 MISCONCEPTION_FIELDS = {
     "misconception_id",
+    "course",
     "internal_diagnostic",
     "unit",
     "topic",
@@ -73,7 +108,6 @@ MISCONCEPTION_FIELDS = {
     "uncertain_action",
 }
 ID_RE = re.compile(r"^[A-Za-z0-9._:-]{1,128}$")
-TOPIC_RE = re.compile(r"^[1-8]\.[0-9]+$")
 
 
 class ReleaseError(ValueError):
@@ -115,6 +149,30 @@ def _strings(value: Any, label: str, minimum: int = 1) -> list[str]:
     if len(value) != len(set(value)):
         raise ReleaseError(f"{label} must be a unique nonempty string array")
     return value
+
+
+def _valid_unit(course: str, unit: Any) -> bool:
+    return (
+        course in COURSE_UNITS
+        and isinstance(unit, int)
+        and not isinstance(unit, bool)
+        and unit in COURSE_UNITS[course]
+    )
+
+
+def _valid_topic(course: str, topic: Any, unit: int) -> bool:
+    return (
+        isinstance(topic, str)
+        and re.fullmatch(r"(?:[1-9]|10)\.[0-9]+", topic) is not None
+        and int(topic.split(".", 1)[0]) == unit
+        and _valid_unit(course, unit)
+    )
+
+
+def _course_applies(record_course: str, learner_course: str) -> bool:
+    return record_course == learner_course or (
+        learner_course == "calc-bc" and record_course == "calc-ab"
+    )
 
 
 def _evaluate(expression: str) -> int | float | bool:
@@ -368,15 +426,49 @@ def _check_cycle(graph: dict[str, dict[str, Any]]) -> None:
         visit(identifier)
 
 
+def _validate_chain_design(
+    misconception_id: str,
+    diagnostic: dict[str, Any],
+    confirmation: dict[str, Any],
+    transfer: dict[str, Any],
+    prerequisites: list[str],
+) -> None:
+    expected_prerequisites = set(prerequisites)
+    if any(
+        set(item["prerequisites"]) != expected_prerequisites
+        for item in (diagnostic, confirmation, transfer)
+    ):
+        raise ReleaseError(
+            f"{misconception_id} graph and diagnostic chain prerequisites do not match"
+        )
+    if any(
+        diagnostic[field] != confirmation[field]
+        for field in ("task_type", "representation")
+    ) or any(
+        diagnostic["selection"][field] != confirmation["selection"][field]
+        for field in ("representation_family", "context_family")
+    ):
+        raise ReleaseError(
+            f"{misconception_id} confirmation item is not the same form as its diagnostic"
+        )
+    if all(
+        diagnostic["selection"][field] == transfer["selection"][field]
+        for field in ("representation_family", "context_family")
+    ):
+        raise ReleaseError(
+            f"{misconception_id} transfer item changes neither representation nor context family"
+        )
+
+
 def validate_adaptive_artifacts() -> dict[str, Any]:
-    graph_path = ROOT / "references" / "calculus-misconceptions.json"
-    items_path = ROOT / "references" / "diagnostic-items.jsonl"
+    graph_path = CALC_SKILL_ROOT / "references" / "calculus-misconceptions.json"
+    items_path = CALC_SKILL_ROOT / "references" / "diagnostic-items.jsonl"
     graph_value = _json_file(graph_path)
     if not isinstance(graph_value, dict) or graph_value.keys() != {"schema_version", "scope", "status", "misconceptions"}:
         raise ReleaseError("misconception graph has missing or unexpected top-level fields")
     if (
         graph_value["schema_version"] != 1
-        or graph_value["scope"] != "ap-calculus-ab-units-1-8"
+        or graph_value["scope"] != ADAPTIVE_SCOPE
         or graph_value["status"] != "internal-teaching-diagnostics-not-official"
         or not isinstance(graph_value["misconceptions"], list)
     ):
@@ -390,11 +482,14 @@ def validate_adaptive_artifacts() -> dict[str, Any]:
             raise ReleaseError("misconception graph contains an invalid or duplicate ID")
         if record["internal_diagnostic"] is not True:
             raise ReleaseError(f"{identifier} is not labeled as an internal teaching diagnostic")
-        if not isinstance(record["unit"], int) or isinstance(record["unit"], bool) or not 1 <= record["unit"] <= 8:
+        course = record["course"]
+        if course not in COURSES:
+            raise ReleaseError(f"{identifier} has invalid course metadata")
+        if not _valid_unit(course, record["unit"]):
             raise ReleaseError(f"{identifier} has invalid Unit")
-        if not isinstance(record["topic"], str) or not TOPIC_RE.fullmatch(record["topic"]) or int(record["topic"].split('.')[0]) != record["unit"]:
+        if not _valid_topic(course, record["topic"], record["unit"]):
             raise ReleaseError(f"{identifier} has invalid Topic metadata")
-        if record["practice"] not in PRACTICES:
+        if record["practice"] not in PRACTICES[course]:
             raise ReleaseError(f"{identifier} has invalid Practice metadata")
         for field in ("observable_features", "evidence_required", "alternative_causes"):
             values = _strings(record[field], f"{identifier} {field}")
@@ -419,18 +514,40 @@ def validate_adaptive_artifacts() -> dict[str, Any]:
             if not isinstance(record[field], str) or not ID_RE.fullmatch(record[field]):
                 raise ReleaseError(f"{identifier} has invalid {field}")
         graph[identifier] = record
-    if len(graph) < 16:
-        raise ReleaseError("misconception graph needs at least 16 diagnostic patterns")
-    unit_patterns = Counter(record["unit"] for record in graph.values())
-    if any(unit_patterns[unit] < 2 for unit in range(1, 9)):
-        raise ReleaseError("each Unit needs at least two diagnostic patterns")
+    course_patterns = Counter(record["course"] for record in graph.values())
+    minimum_patterns = {course: sum(units.values()) for course, units in MIN_MISCONCEPTIONS_BY_UNIT.items()}
+    if any(course_patterns[course] < minimum for course, minimum in minimum_patterns.items()):
+        raise ReleaseError(
+            f"misconception graph lacks per-course coverage: {dict(sorted(course_patterns.items()))}"
+        )
+    unit_patterns = Counter((record["course"], record["unit"]) for record in graph.values())
+    for course, minimums in MIN_MISCONCEPTIONS_BY_UNIT.items():
+        for unit, minimum in minimums.items():
+            if unit_patterns[course, unit] < minimum:
+                raise ReleaseError(
+                    f"{course} Unit {unit} needs at least {minimum} diagnostic pattern(s)"
+                )
     edge_count = sum(len(record["prerequisites"]) for record in graph.values())
-    if edge_count < 4:
-        raise ReleaseError("misconception graph needs maintained, explained prerequisite edges")
+    ab_edge_count = sum(
+        len(record["prerequisites"])
+        for record in graph.values()
+        if record["course"] == "calc-ab"
+    )
+    if ab_edge_count < 4:
+        raise ReleaseError("Calculus AB needs maintained, explained prerequisite edges")
     for record in graph.values():
         missing = set(record["prerequisites"]) - set(graph)
         if missing:
             raise ReleaseError(f"{record['misconception_id']} has dangling prerequisites: {sorted(missing)}")
+        incompatible = [
+            prerequisite
+            for prerequisite in record["prerequisites"]
+            if not _course_applies(graph[prerequisite]["course"], record["course"])
+        ]
+        if incompatible:
+            raise ReleaseError(
+                f"{record['misconception_id']} has cross-course prerequisites: {sorted(incompatible)}"
+            )
     _check_cycle(graph)
 
     item_bytes = items_path.read_bytes()
@@ -445,17 +562,18 @@ def validate_adaptive_artifacts() -> dict[str, Any]:
         identifier = item["item_id"]
         if not isinstance(identifier, str) or not ID_RE.fullmatch(identifier) or identifier in items:
             raise ReleaseError(f"diagnostic item line {line_number} has an invalid or duplicate item_id")
-        if item["schema_version"] != 1 or item["course"] != "calc-ab":
+        course = item["course"]
+        if item["schema_version"] != 1 or course not in COURSES:
             raise ReleaseError(f"{identifier} has invalid schema/course metadata")
-        if not isinstance(item["unit"], int) or isinstance(item["unit"], bool) or not 1 <= item["unit"] <= 8:
+        if not _valid_unit(course, item["unit"]):
             raise ReleaseError(f"{identifier} has invalid Unit")
-        if not isinstance(item["topic_code"], str) or not TOPIC_RE.fullmatch(item["topic_code"]) or int(item["topic_code"].split('.')[0]) != item["unit"]:
+        if not _valid_topic(course, item["topic_code"], item["unit"]):
             raise ReleaseError(f"{identifier} has invalid Topic code")
         if not isinstance(item["topic_citation"], str) or not item["topic_citation"].startswith(
             f"Unit {item['unit']}, Topic {item['topic_code']} — "
         ):
             raise ReleaseError(f"{identifier} has invalid canonical Topic citation")
-        if item["mathematical_practice"] not in PRACTICES:
+        if item["mathematical_practice"] not in PRACTICES[course]:
             raise ReleaseError(f"{identifier} has invalid Practice")
         if item["task_type"] not in {"multiple-choice", "free-response"}:
             raise ReleaseError(f"{identifier} has invalid task type")
@@ -479,6 +597,8 @@ def validate_adaptive_artifacts() -> dict[str, Any]:
         targets = _strings(item["target_misconceptions"], f"{identifier} target_misconceptions")
         if set(prerequisites) - set(graph) or set(targets) - set(graph):
             raise ReleaseError(f"{identifier} has dangling misconception references")
+        if any(not _course_applies(graph[reference]["course"], course) for reference in prerequisites + targets):
+            raise ReleaseError(f"{identifier} has cross-course misconception references")
         if any(graph[target]["unit"] != item["unit"] for target in targets):
             raise ReleaseError(f"{identifier} targets a misconception from another Unit")
         if not isinstance(item["prompt"], str) or len(item["prompt"]) < 30:
@@ -532,33 +652,68 @@ def validate_adaptive_artifacts() -> dict[str, Any]:
             raise ReleaseError(f"{identifier} has invalid expected time")
         if not isinstance(selection["exit_eligible"], bool):
             raise ReleaseError(f"{identifier} has invalid exit eligibility")
+        if selection["exit_eligible"] is not (
+            selection["stage"] in {"transfer", "retest"}
+        ):
+            raise ReleaseError(f"{identifier} exit eligibility contradicts its selection stage")
         if any(not isinstance(selection[field], str) or not selection[field] for field in ("representation_family", "context_family")):
             raise ReleaseError(f"{identifier} has invalid selection family metadata")
         items[identifier] = item
-    if len(items) < 40:
-        raise ReleaseError("diagnostic bank needs at least 40 original items")
-    unit_items = Counter(item["unit"] for item in items.values())
-    if any(unit_items[unit] < 4 for unit in range(1, 9)):
-        raise ReleaseError("each Unit needs at least four diagnostic items")
-    if {item["representation"] for item in items.values()} != REPRESENTATIONS:
-        raise ReleaseError("diagnostic bank must cover all five representations")
-    task_counts = Counter(item["task_type"] for item in items.values())
-    if min(task_counts["multiple-choice"], task_counts["free-response"]) < 8:
-        raise ReleaseError("diagnostic bank needs meaningful MCQ and FRQ coverage")
-    for unit in range(1, 9):
-        records = [item for item in items.values() if item["unit"] == unit]
-        practices = {item["mathematical_practice"] for item in records}
-        if not {"calc-1-implementing-processes", "calc-2-connecting-representations"} <= practices or not practices & {
-            "calc-3-justification", "calc-4-communication-notation"
-        }:
-            raise ReleaseError(f"Unit {unit} lacks process, representation, and justification/communication coverage")
-        if {item["difficulty"]["label"] for item in records} != {"foundational", "standard", "challenge"}:
-            raise ReleaseError(f"Unit {unit} lacks all three provisional difficulty labels")
-        if not {"diagnostic", "confirmation", "transfer"} <= {item["selection"]["stage"] for item in records}:
-            raise ReleaseError(f"Unit {unit} lacks diagnostic, confirmation, and transfer stages")
+    course_items = Counter(item["course"] for item in items.values())
+    if any(course_items[course] < minimum for course, minimum in MIN_ITEMS_BY_COURSE.items()):
+        raise ReleaseError(
+            f"diagnostic bank lacks per-course coverage: {dict(sorted(course_items.items()))}"
+        )
+    unit_items = Counter((item["course"], item["unit"]) for item in items.values())
+    for course, minimums in MIN_ITEMS_BY_UNIT.items():
+        for unit, minimum in minimums.items():
+            if unit_items[course, unit] < minimum:
+                raise ReleaseError(
+                    f"{course} Unit {unit} needs at least {minimum} diagnostic item(s)"
+                )
+    course_representations = {
+        course: {item["representation"] for item in items.values() if item["course"] == course}
+        for course in COURSES
+    }
+    if course_representations["calc-ab"] != REPRESENTATIONS:
+        raise ReleaseError("Calculus AB diagnostic items must cover all five representations")
+    if any(len(course_representations[course]) < 3 for course in ("precalculus", "calc-bc")):
+        raise ReleaseError("Precalculus and Calculus BC diagnostic items each need at least three representations")
+    task_counts = Counter((item["course"], item["task_type"]) for item in items.values())
+    if min(task_counts["calc-ab", "multiple-choice"], task_counts["calc-ab", "free-response"]) < 8:
+        raise ReleaseError("Calculus AB needs meaningful MCQ and FRQ coverage")
+    for course in ("precalculus", "calc-bc"):
+        if min(task_counts[course, "multiple-choice"], task_counts[course, "free-response"]) < 3:
+            raise ReleaseError(f"{course} needs meaningful MCQ and FRQ coverage")
+    for course, units in MIN_ITEMS_BY_UNIT.items():
+        for unit in units:
+            records = [
+                item
+                for item in items.values()
+                if item["course"] == course and item["unit"] == unit
+            ]
+            practices = {item["mathematical_practice"] for item in records}
+            if course == "precalculus":
+                if practices != PRACTICES[course]:
+                    raise ReleaseError(f"{course} Unit {unit} lacks all three mathematical practices")
+            elif not {"calc-1-implementing-processes", "calc-2-connecting-representations"} <= practices or not practices & {
+                "calc-3-justification", "calc-4-communication-notation"
+            }:
+                raise ReleaseError(
+                    f"{course} Unit {unit} lacks process, representation, and justification/communication coverage"
+                )
+            if {item["difficulty"]["label"] for item in records} != {"foundational", "standard", "challenge"}:
+                raise ReleaseError(f"{course} Unit {unit} lacks all three provisional difficulty labels")
+            if not {"diagnostic", "confirmation", "transfer"} <= {item["selection"]["stage"] for item in records}:
+                raise ReleaseError(f"{course} Unit {unit} lacks diagnostic, confirmation, and transfer stages")
     for identifier, item in items.items():
         if item["same_form_confirmation_item_id"] not in items or item["transfer_item_id"] not in items:
             raise ReleaseError(f"{identifier} has dangling confirmation/transfer item links")
+        if any(
+            items[item[link]]["course"] != item["course"]
+            for link in ("same_form_confirmation_item_id", "transfer_item_id")
+        ):
+            raise ReleaseError(f"{identifier} has cross-course confirmation/transfer item links")
     for identifier, record in graph.items():
         linked = {
             "diagnostic": record["diagnostic_item_id"],
@@ -569,8 +724,19 @@ def validate_adaptive_artifacts() -> dict[str, Any]:
             if item_id not in items:
                 raise ReleaseError(f"{identifier} has dangling {stage} item {item_id}")
             item = items[item_id]
-            if item["selection"]["stage"] != stage or identifier not in item["target_misconceptions"]:
+            if (
+                item["course"] != record["course"]
+                or item["selection"]["stage"] != stage
+                or identifier not in item["target_misconceptions"]
+            ):
                 raise ReleaseError(f"{identifier} {stage} item has inconsistent stage/target metadata")
+        _validate_chain_design(
+            identifier,
+            items[linked["diagnostic"]],
+            items[linked["confirmation"]],
+            items[linked["transfer"]],
+            record["prerequisites"],
+        )
         if items[linked["diagnostic"]]["same_form_confirmation_item_id"] != linked["confirmation"]:
             raise ReleaseError(f"{identifier} diagnostic-to-confirmation link is inconsistent")
         if items[linked["diagnostic"]]["transfer_item_id"] != linked["transfer"]:
@@ -583,25 +749,81 @@ def validate_adaptive_artifacts() -> dict[str, Any]:
     )
     return {
         "misconception_count": len(graph),
+        "course_misconception_counts": dict(sorted(course_patterns.items())),
+        "unit_misconception_counts": {
+            course: {
+                unit: unit_patterns[course, unit]
+                for unit in MIN_MISCONCEPTIONS_BY_UNIT[course]
+            }
+            for course in sorted(COURSES)
+        },
         "prerequisite_edge_count": edge_count,
+        "calculus_ab_prerequisite_edge_count": ab_edge_count,
         "item_count": len(items),
-        "unit_item_counts": dict(sorted(unit_items.items())),
-        "task_type_counts": dict(sorted(task_counts.items())),
+        "course_item_counts": dict(sorted(course_items.items())),
+        "unit_item_counts": {
+            course: {unit: unit_items[course, unit] for unit in MIN_ITEMS_BY_UNIT[course]}
+            for course in sorted(COURSES)
+        },
+        "task_type_counts": {
+            course: {
+                task_type: task_counts[course, task_type]
+                for task_type in ("multiple-choice", "free-response")
+            }
+            for course in sorted(COURSES)
+        },
+        "representation_counts": {
+            course: len(course_representations[course]) for course in sorted(COURSES)
+        },
         "machine_math_check_count": check_count,
         "independently_audited_item_count": audited_item_count,
         "topic_citations": sorted({item["topic_citation"] for item in items.values()}),
+        "topic_citations_by_course": {
+            course: sorted(
+                {
+                    item["topic_citation"]
+                    for item in items.values()
+                    if item["course"] == course
+                }
+            )
+            for course in sorted(COURSES)
+        },
+        "precalculus_instructional_topic_citations": sorted(
+            {
+                item["topic_citation"]
+                for item in items.values()
+                if item["course"] == "precalculus" and item["unit"] == 4
+            }
+        ),
     }
 
 
 def validate_repository_files() -> dict[str, Any]:
     required = [
-        "SKILL.md",
-        "agents/openai.yaml",
-        "references/assessment-tasks.md",
-        "references/session-protocol.md",
-        "references/learner-state.schema.json",
-        "references/calculus-misconceptions.json",
-        "references/diagnostic-items.jsonl",
+        "ap-calculus-advisor/SKILL.md",
+        "ap-calculus-advisor/LICENSE",
+        "ap-calculus-advisor/agents/openai.yaml",
+        "ap-calculus-advisor/assets/ap-advisor-icon.png",
+        "ap-calculus-advisor/references/assessment-tasks.md",
+        "ap-calculus-advisor/references/session-protocol.md",
+        "ap-calculus-advisor/references/learner-state.schema.json",
+        "ap-calculus-advisor/references/calculus-misconceptions.json",
+        "ap-calculus-advisor/references/diagnostic-items.jsonl",
+        "ap-calculus-advisor/scripts/validate_topic_code.py",
+        "ap-calculus-advisor/scripts/update_learner_state.py",
+        "ap-calculus-advisor/scripts/select_next_task.py",
+        "ap-psychology-advisor/SKILL.md",
+        "ap-psychology-advisor/LICENSE",
+        "ap-psychology-advisor/agents/openai.yaml",
+        "ap-psychology-advisor/assets/ap-advisor-icon.png",
+        "ap-psychology-advisor/references/session-protocol.md",
+        "ap-psychology-advisor/scripts/validate_topic_code.py",
+        "ap-biology-advisor/SKILL.md",
+        "ap-biology-advisor/LICENSE",
+        "ap-biology-advisor/agents/openai.yaml",
+        "ap-biology-advisor/assets/ap-advisor-icon.png",
+        "ap-biology-advisor/references/session-protocol.md",
+        "ap-biology-advisor/scripts/validate_topic_code.py",
         "evals/case-schema.json",
         "evals/review-schema.json",
         "evals/cases.jsonl",
@@ -609,9 +831,6 @@ def validate_repository_files() -> dict[str, Any]:
         "evals/blind-run-manifest.json",
         "evals/regression-summary.json",
         "evals/release-reviews.jsonl",
-        "scripts/validate_topic_code.py",
-        "scripts/update_learner_state.py",
-        "scripts/select_next_task.py",
         "scripts/run_evals.py",
         "scripts/check_release.py",
         "tests/test_evals.py",
@@ -665,11 +884,25 @@ def validate_repository_files() -> dict[str, Any]:
                 broken_links.append(f"{markdown.relative_to(ROOT)} -> {target}")
     if broken_links:
         raise ReleaseError(f"broken relative Markdown links: {broken_links}")
-    yaml = (ROOT / "agents" / "openai.yaml").read_text(encoding="utf-8")
-    icons = re.findall(r"^\s*icon_(?:small|large):\s*[\"']?([^\"'\r\n]+)", yaml, re.MULTILINE)
-    if len(icons) != 2 or any(not (ROOT / icon.strip()).resolve().is_file() for icon in icons):
-        raise ReleaseError("agents/openai.yaml has a broken icon path")
-    return {"required_artifact_count": len(required), "json_file_count": json_count, "jsonl_file_count": jsonl_count}
+    broken_icons = []
+    nested_skills = []
+    for label, skill_root in SKILL_ROOTS.items():
+        if list(skill_root.rglob("SKILL.md")) != [skill_root / "SKILL.md"]:
+            nested_skills.append(label)
+        yaml = (skill_root / "agents" / "openai.yaml").read_text(encoding="utf-8")
+        icons = re.findall(r"^\s*icon_(?:small|large):\s*[\"']?([^\"'\r\n]+)", yaml, re.MULTILINE)
+        if len(icons) != 2 or any(not (skill_root / icon.strip()).resolve().is_file() for icon in icons):
+            broken_icons.append(label)
+    if broken_icons:
+        raise ReleaseError(f"skills have missing or broken icon paths: {broken_icons}")
+    if nested_skills:
+        raise ReleaseError(f"skill packages contain nested or missing SKILL.md files: {nested_skills}")
+    return {
+        "required_artifact_count": len(required),
+        "json_file_count": json_count,
+        "jsonl_file_count": jsonl_count,
+        "skill_icon_count": len(SKILL_ROOTS),
+    }
 
 
 def _validate_blind_manifest(value: Any, reviews: list[Any]) -> dict[str, Any]:
@@ -888,12 +1121,14 @@ def validate_fixed_set_regression() -> dict[str, Any]:
 
 def compile_and_check_imports() -> dict[str, Any]:
     python_files = sorted((ROOT / "scripts").glob("*.py")) + sorted((ROOT / "tests").glob("*.py"))
+    for skill_root in SKILL_ROOTS.values():
+        python_files.extend(sorted((skill_root / "scripts").glob("*.py")))
     external_imports: dict[str, list[str]] = {}
     with tempfile.TemporaryDirectory(prefix="ap-calculus-release-compile-") as temporary:
         target = Path(temporary)
         for index, path in enumerate(python_files):
             py_compile.compile(str(path), cfile=str(target / f"{index}.pyc"), doraise=True)
-            tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+            tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path), feature_version=(3, 10))
             roots = set()
             for node in ast.walk(tree):
                 if isinstance(node, ast.Import):
@@ -905,7 +1140,7 @@ def compile_and_check_imports() -> dict[str, Any]:
                 external_imports[str(path.relative_to(ROOT))] = invalid
     if external_imports:
         raise ReleaseError(f"runtime/test code imports non-stdlib modules: {external_imports}")
-    return {"compiled_file_count": len(python_files), "stdlib_only": True}
+    return {"compiled_file_count": len(python_files), "minimum_python_syntax": "3.10", "stdlib_only": True}
 
 
 def _command_receipt(name: str, command: list[str], *, json_receipt: bool = False, extra_env: dict[str, str] | None = None) -> dict[str, Any]:
@@ -997,7 +1232,8 @@ def parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     parser().parse_args(argv)
     checks: list[dict[str, Any]] = []
-    citations: list[str] = []
+    citations_by_course: dict[str, list[str]] = {}
+    precalculus_instructional: list[str] = []
     for name, function in (
         ("repository_artifacts", validate_repository_files),
         ("adaptive_artifacts", validate_adaptive_artifacts),
@@ -1009,7 +1245,10 @@ def main(argv: list[str] | None = None) -> int:
             evidence = function()
             checks.append({"name": name, "status": "pass", "evidence": evidence})
             if name == "adaptive_artifacts":
-                citations = evidence["topic_citations"]
+                citations_by_course = evidence["topic_citations_by_course"]
+                precalculus_instructional = evidence[
+                    "precalculus_instructional_topic_citations"
+                ]
         except (ReleaseError, OSError, UnicodeError, py_compile.PyCompileError, SyntaxError) as exc:
             checks.append({"name": name, "status": "fail", "error": str(exc)})
 
@@ -1017,19 +1256,40 @@ def main(argv: list[str] | None = None) -> int:
     checks.append(
         _command_receipt(
             "validator_self_check",
-            [python, str(ROOT / "scripts" / "validate_topic_code.py"), "--self-check", "--evidence-json"],
+            [python, str(CALC_SKILL_ROOT / "scripts" / "validate_topic_code.py"), "--self-check", "--evidence-json"],
             json_receipt=True,
         )
     )
-    if citations:
+    for label in ("psychology", "biology"):
         checks.append(
             _command_receipt(
-                "diagnostic_topic_mappings",
+                f"{label}_validator_self_check",
+                [python, str(SKILL_ROOTS[label] / "scripts" / "validate_topic_code.py"), "--self-check", "--evidence-json"],
+                json_receipt=True,
+            )
+        )
+    for course in ("precalculus", "calc-ab", "calc-bc"):
+        citations = citations_by_course.get(course, [])
+        if course == "precalculus":
+            citations = [citation for citation in citations if citation not in precalculus_instructional]
+        name = f"diagnostic_topic_mappings_{course.replace('-', '_')}"
+        if not citations:
+            checks.append(
+                {
+                    "name": name,
+                    "status": "fail",
+                    "error": "adaptive artifact validation did not yield assessed citations",
+                }
+            )
+            continue
+        checks.append(
+            _command_receipt(
+                name,
                 [
                     python,
-                    str(ROOT / "scripts" / "validate_topic_code.py"),
+                    str(CALC_SKILL_ROOT / "scripts" / "validate_topic_code.py"),
                     "--course",
-                    "calc-ab",
+                    course,
                     "--assessed-topic",
                     "--evidence-json",
                     *citations,
@@ -1037,8 +1297,29 @@ def main(argv: list[str] | None = None) -> int:
                 json_receipt=True,
             )
         )
+    if precalculus_instructional:
+        checks.append(
+            _command_receipt(
+                "diagnostic_topic_mappings_precalculus_instructional",
+                [
+                    python,
+                    str(CALC_SKILL_ROOT / "scripts" / "validate_topic_code.py"),
+                    "--course",
+                    "precalculus",
+                    "--evidence-json",
+                    *precalculus_instructional,
+                ],
+                json_receipt=True,
+            )
+        )
     else:
-        checks.append({"name": "diagnostic_topic_mappings", "status": "fail", "error": "adaptive artifact validation did not yield citations"})
+        checks.append(
+            {
+                "name": "diagnostic_topic_mappings_precalculus_instructional",
+                "status": "fail",
+                "error": "adaptive artifact validation did not yield Unit 4 instructional citations",
+            }
+        )
     checks.append(
         _command_receipt(
             "eval_scorer_self_check",
@@ -1062,17 +1343,18 @@ def main(argv: list[str] | None = None) -> int:
     if quick is None:
         checks.append({"name": "skill_creator_quick_validate", "status": "fail", "error": "installed quick_validate.py was not found"})
     else:
-        checks.append(
-            _command_receipt(
-                "skill_creator_quick_validate",
-                [python, str(quick), str(ROOT)],
-                extra_env={"PYTHONUTF8": "1"},
+        for label, skill_root in SKILL_ROOTS.items():
+            checks.append(
+                _command_receipt(
+                    f"skill_creator_quick_validate_{label}",
+                    [python, str(quick), str(skill_root)],
+                    extra_env={"PYTHONUTF8": "1"},
+                )
             )
-        )
     overall = "pass" if checks and all(check["status"] == "pass" for check in checks) else "fail"
     payload = {
         "schema_version": 1,
-        "release_gate": "ap-calculus-advisor-adaptive-v1",
+        "release_gate": "ap-advisor-adaptive-v2",
         "overall_status": overall,
         "check_count": len(checks),
         "checks": checks,

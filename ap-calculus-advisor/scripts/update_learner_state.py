@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Manage opt-in AP Calculus AB learner state using only local JSON files."""
+"""Manage opt-in AP Precalculus and Calculus Coach state using local JSON files."""
 
 from __future__ import annotations
 
@@ -23,13 +23,26 @@ DEFAULT_ITEMS = SKILL_ROOT / "references" / "diagnostic-items.jsonl"
 SCHEMA_VERSION = 1
 ID_RE = re.compile(r"^[A-Za-z0-9._:-]{1,128}$")
 PROFILE_RE = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
-TOPIC_RE = re.compile(r"^[1-8]\.[0-9]+$")
-PRACTICES = {
-    "calc-1-implementing-processes",
-    "calc-2-connecting-representations",
-    "calc-3-justification",
-    "calc-4-communication-notation",
+COURSES = {"precalculus", "calc-ab", "calc-bc"}
+TOPIC_RES = {
+    "precalculus": re.compile(r"^[1-4]\.[0-9]+$"),
+    "calc-ab": re.compile(r"^[1-8]\.[0-9]+$"),
+    "calc-bc": re.compile(r"^(?:[1-9]|10)\.[0-9]+$"),
 }
+PRACTICES = {
+    "precalculus": {
+        "precalc-1-procedural-symbolic-fluency",
+        "precalc-2-multiple-representations",
+        "precalc-3-communication-reasoning",
+    },
+    "calc-ab": {
+        "calc-1-implementing-processes",
+        "calc-2-connecting-representations",
+        "calc-3-justification",
+        "calc-4-communication-notation",
+    },
+}
+PRACTICES["calc-bc"] = PRACTICES["calc-ab"]
 ATTEMPT_FIELDS = {
     "schema_version",
     "attempt_id",
@@ -180,11 +193,16 @@ def _identifier_or_null(value: Any, field: str) -> None:
         raise StateError(f"{field} must be a stable identifier or null")
 
 
+def _valid_topic(course: str, topic: Any) -> bool:
+    return isinstance(topic, str) and bool(TOPIC_RES[course].fullmatch(topic))
+
+
 def validate_profile(value: dict[str, Any], *, as_of: datetime) -> dict[str, Any]:
     if not isinstance(value, dict) or value.keys() != PROFILE_FIELDS:
         raise StateError("profile.json has an unsupported or incomplete schema")
-    if value["schema_version"] != SCHEMA_VERSION or value["course"] != "calc-ab":
+    if value["schema_version"] != SCHEMA_VERSION or value["course"] not in COURSES:
         raise StateError("profile.json has unsupported schema or course metadata")
+    course = value["course"]
     validate_profile_id(value["profile_id"])
     updated_at = parse_timestamp(value["updated_at"], "updated_at")
     if updated_at > as_of:
@@ -205,13 +223,13 @@ def validate_profile(value: dict[str, Any], *, as_of: datetime) -> dict[str, Any
     if not isinstance(topic_states, dict):
         raise StateError("profile topic_states must be an object")
     for topic, state in topic_states.items():
-        if not isinstance(topic, str) or not TOPIC_RE.fullmatch(topic):
+        if not _valid_topic(course, topic):
             raise StateError("profile contains an invalid Topic key")
         if not isinstance(state, dict) or state.keys() != TOPIC_STATE_FIELDS:
             raise StateError(f"topic state {topic} has invalid fields")
         if state["topic"] != topic:
             raise StateError(f"topic state {topic} does not match its key")
-        if state["practice"] is not None and state["practice"] not in PRACTICES:
+        if state["practice"] is not None and state["practice"] not in PRACTICES[course]:
             raise StateError(f"topic state {topic} has invalid practice")
         count = state["evidence_count"]
         if not isinstance(count, int) or isinstance(count, bool) or count < 1:
@@ -319,13 +337,12 @@ def validate_attempt(value: dict[str, Any], *, as_of: datetime) -> dict[str, Any
     if not isinstance(value["attempt_id"], str) or not ID_RE.fullmatch(value["attempt_id"]):
         raise StateError("attempt_id is invalid")
     validate_profile_id(value["profile_id"])
-    if value["course"] != "calc-ab":
-        raise StateError("course must be calc-ab")
-    if value["topic"] is not None and (
-        not isinstance(value["topic"], str) or not TOPIC_RE.fullmatch(value["topic"])
-    ):
-        raise StateError("topic must be an AP Calculus AB Topic code or null")
-    if value["practice"] is not None and value["practice"] not in PRACTICES:
+    if value["course"] not in COURSES:
+        raise StateError("course must be precalculus, calc-ab, or calc-bc")
+    course = value["course"]
+    if value["topic"] is not None and not _valid_topic(course, value["topic"]):
+        raise StateError("topic must be a valid Topic code for the selected course or null")
+    if value["practice"] is not None and value["practice"] not in PRACTICES[course]:
         raise StateError("practice is invalid")
     if value["correctness"] not in {"correct", "incorrect", "partial", "unknown"}:
         raise StateError("correctness is invalid")
@@ -425,12 +442,22 @@ def attempt_status(attempt: dict[str, Any]) -> str:
     return "provisional"
 
 
-def rebuild_profile(profile_id: str, attempts: Iterable[dict[str, Any]], *, as_of: datetime) -> dict[str, Any]:
+def rebuild_profile(
+    profile_id: str,
+    attempts: Iterable[dict[str, Any]],
+    *,
+    as_of: datetime,
+    course: str = "calc-ab",
+) -> dict[str, Any]:
+    if course not in COURSES:
+        raise StateError("course must be precalculus, calc-ab, or calc-bc")
     attempts = list(attempts)
     topic_groups: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for attempt in attempts:
         if attempt["profile_id"] != profile_id:
             raise StateError("attempt profile_id does not match the initialized profile")
+        if attempt["course"] != course:
+            raise StateError("attempt course does not match the initialized profile")
         if attempt["topic"] is not None:
             topic_groups[attempt["topic"]].append(attempt)
 
@@ -490,7 +517,7 @@ def rebuild_profile(profile_id: str, attempts: Iterable[dict[str, Any]], *, as_o
     return {
         "schema_version": SCHEMA_VERSION,
         "profile_id": profile_id,
-        "course": "calc-ab",
+        "course": course,
         "attempt_ids": [attempt["attempt_id"] for attempt in attempts],
         "seen_item_ids": list(dict.fromkeys(attempt["source_item_id"] for attempt in attempts)),
         "topic_states": topic_states,
@@ -499,13 +526,20 @@ def rebuild_profile(profile_id: str, attempts: Iterable[dict[str, Any]], *, as_o
     }
 
 
-def initialize(data_dir: Path, profile_id: str, *, as_of: datetime, test_data: bool) -> dict[str, Any]:
+def initialize(
+    data_dir: Path,
+    profile_id: str,
+    *,
+    as_of: datetime,
+    test_data: bool,
+    course: str = "calc-ab",
+) -> dict[str, Any]:
     validate_profile_id(profile_id)
     if data_dir.exists() and any(data_dir.iterdir()):
         raise StateError("data directory must be new or empty")
     data_dir.mkdir(exist_ok=True)
     (data_dir / ATTEMPTS_NAME).write_text("", encoding="utf-8", newline="\n")
-    profile = rebuild_profile(profile_id, [], as_of=as_of)
+    profile = rebuild_profile(profile_id, [], as_of=as_of, course=course)
     atomic_write_json(data_dir / PROFILE_NAME, profile)
     if test_data:
         atomic_write_json(
@@ -526,6 +560,8 @@ def record_attempt(data_dir: Path, attempt: dict[str, Any], *, as_of: datetime) 
         raise StateError("profile seen_item_ids do not match attempts.jsonl; rebuild is required")
     if attempt["profile_id"] != profile["profile_id"]:
         raise StateError("attempt profile_id does not match profile.json")
+    if attempt["course"] != profile["course"]:
+        raise StateError("attempt course does not match profile.json")
     if attempt["attempt_id"] in {item["attempt_id"] for item in attempts}:
         raise StateError(f"duplicate attempt_id: {attempt['attempt_id']}")
     with (data_dir / ATTEMPTS_NAME).open("a", encoding="utf-8", newline="\n") as handle:
@@ -533,7 +569,9 @@ def record_attempt(data_dir: Path, attempt: dict[str, Any], *, as_of: datetime) 
         handle.flush()
         os.fsync(handle.fileno())
     attempts.append(attempt)
-    rebuilt = rebuild_profile(profile["profile_id"], attempts, as_of=as_of)
+    rebuilt = rebuild_profile(
+        profile["profile_id"], attempts, as_of=as_of, course=profile["course"]
+    )
     atomic_write_json(data_dir / PROFILE_NAME, rebuilt)
     return rebuilt
 
@@ -576,8 +614,9 @@ def load_calibration_items(path: Path) -> dict[str, dict[str, Any]]:
             or any(not isinstance(target, str) or not ID_RE.fullmatch(target) for target in targets)
         ):
             raise StateError(f"diagnostic item {identifier} has invalid target misconceptions")
+        course = item.get("course")
         topic = item.get("topic_code")
-        if not isinstance(topic, str) or not TOPIC_RE.fullmatch(topic):
+        if course not in COURSES or not _valid_topic(course, topic):
             raise StateError(f"diagnostic item {identifier} has invalid Topic metadata")
         result[identifier] = {
             "topic": topic,
@@ -770,6 +809,7 @@ def parser() -> argparse.ArgumentParser:
     commands = result.add_subparsers(dest="command", required=True)
     init = commands.add_parser("init")
     init.add_argument("--profile-id", required=True)
+    init.add_argument("--course", choices=sorted(COURSES), default="calc-ab")
     init.add_argument("--test-data", action="store_true")
     record = commands.add_parser("record")
     record.add_argument("--attempt-file", type=Path, required=True)
@@ -790,14 +830,22 @@ def main(argv: list[str] | None = None) -> int:
         as_of = parse_timestamp(args.as_of, "as_of") if args.as_of else datetime.now(timezone.utc)
         data_dir = resolve_data_dir(args.data_dir, create=args.command == "init")
         if args.command == "init":
-            result = initialize(data_dir, args.profile_id, as_of=as_of, test_data=args.test_data)
+            result = initialize(
+                data_dir,
+                args.profile_id,
+                as_of=as_of,
+                test_data=args.test_data,
+                course=args.course,
+            )
         elif args.command == "record":
             attempt = read_json(args.attempt_file.resolve(strict=True))
             result = record_attempt(data_dir, attempt, as_of=as_of)
         elif args.command == "rebuild":
             profile = validate_profile(read_json(data_dir / PROFILE_NAME), as_of=as_of)
             attempts = load_attempts(data_dir / ATTEMPTS_NAME, as_of=as_of)
-            result = rebuild_profile(profile["profile_id"], attempts, as_of=as_of)
+            result = rebuild_profile(
+                profile["profile_id"], attempts, as_of=as_of, course=profile["course"]
+            )
             atomic_write_json(data_dir / PROFILE_NAME, result)
         elif args.command == "queue":
             profile = validate_profile(read_json(data_dir / PROFILE_NAME), as_of=as_of)

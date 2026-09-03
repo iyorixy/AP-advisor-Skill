@@ -11,7 +11,8 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPT = ROOT / "scripts" / "validate_topic_code.py"
+SKILL_ROOT = ROOT / "ap-calculus-advisor"
+SCRIPT = SKILL_ROOT / "scripts" / "validate_topic_code.py"
 SPEC = importlib.util.spec_from_file_location("validate_topic_code", SCRIPT)
 assert SPEC and SPEC.loader
 validator = importlib.util.module_from_spec(SPEC)
@@ -117,8 +118,8 @@ class ValidatorTests(unittest.TestCase):
             (copied_root / "references").mkdir()
             copied_script = copied_root / "scripts" / SCRIPT.name
             shutil.copy2(SCRIPT, copied_script)
-            shutil.copy2(ROOT / "references" / "ap-calc-framework.md", copied_root / "references")
-            shutil.copy2(ROOT / "references" / "ap-content-boundaries.json", copied_root / "references")
+            shutil.copy2(SKILL_ROOT / "references" / "ap-calc-framework.md", copied_root / "references")
+            shutil.copy2(SKILL_ROOT / "references" / "ap-content-boundaries.json", copied_root / "references")
             process = subprocess.run(
                 [sys.executable, str(copied_script), "--self-check", "--evidence-json"],
                 cwd=temporary,

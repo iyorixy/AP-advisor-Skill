@@ -1,6 +1,6 @@
 ---
 name: ap-biology-advisor
-description: Create, review, or prioritize study content for AP Biology under the current Fall 2025 framework. Use for concept explanations, original MCQ/FRQ practice, experimental design, models, data and statistics, response review, course-scope checks, and evidence-based study interventions; do not use for general biology, personal medical advice, other AP subjects, exam administration, or admissions.
+description: Create, review, coach, or prioritize study content for AP Biology under the current Fall 2025 framework. Use for concept explanations, original MCQ/FRQ practice, experimental design, models, data and statistics, response review, course-scope checks, evidence-based interventions, and the adaptive Coach loop; do not use for general biology, personal medical advice, other AP subjects, exam administration, or admissions.
 ---
 
 # AP Biology Advisor
@@ -19,6 +19,11 @@ exam policy.
   Science Practice. Name the first substantive error; if none, say so.
 - **Advisor:** read `references/advisor.md`, diagnose from supplied evidence,
   and prioritize one to three tasks.
+- **Coach:** read `references/session-protocol.md`. Locate the first substantive
+  error, separate observation from hypothesis, give one minimal hint, and wait
+  for real learner work. Use an unseen same-form confirmation and then an unseen
+  transfer before passing the intervention. Keep the loop session-only and do
+  not write learner data to files or external services.
 
 Treat requested Topic, task type, difficulty, style, language, answer visibility,
 and supplied data as fixed. If no exam year is given, use the framework recorded

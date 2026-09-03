@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Select one AP Calculus AB diagnostic item with transparent deterministic rules."""
+"""Select one AP Precalculus or Calculus Coach item deterministically."""
 
 from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -14,6 +15,26 @@ from typing import Any, Iterable
 SKILL_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_ITEMS = SKILL_ROOT / "references" / "diagnostic-items.jsonl"
 DEFAULT_MISCONCEPTIONS = SKILL_ROOT / "references" / "calculus-misconceptions.json"
+COURSES = {"precalculus", "calc-ab", "calc-bc"}
+TOPIC_RES = {
+    "precalculus": re.compile(r"^[1-4]\.[0-9]+$"),
+    "calc-ab": re.compile(r"^[1-8]\.[0-9]+$"),
+    "calc-bc": re.compile(r"^(?:[1-9]|10)\.[0-9]+$"),
+}
+PRACTICES = {
+    "precalculus": {
+        "precalc-1-procedural-symbolic-fluency",
+        "precalc-2-multiple-representations",
+        "precalc-3-communication-reasoning",
+    },
+    "calc-ab": {
+        "calc-1-implementing-processes",
+        "calc-2-connecting-representations",
+        "calc-3-justification",
+        "calc-4-communication-notation",
+    },
+}
+PRACTICES["calc-bc"] = PRACTICES["calc-ab"]
 
 
 class SelectionError(ValueError):
@@ -52,7 +73,11 @@ def load_state(path: Path) -> dict[str, Any]:
         "review_queue",
         "updated_at",
     }
-    if value.keys() != required or value["schema_version"] != 1 or value["course"] != "calc-ab":
+    if (
+        value.keys() != required
+        or value["schema_version"] != 1
+        or value["course"] not in COURSES
+    ):
         raise SelectionError("learner state has an unsupported or incomplete schema")
     if (
         not isinstance(value["attempt_ids"], list)
@@ -70,6 +95,7 @@ def load_state(path: Path) -> dict[str, Any]:
         raise SelectionError("learner state attempt_ids is invalid")
     if not isinstance(value["review_queue"], list):
         raise SelectionError("review_queue must be an array")
+    course = value["course"]
     timestamp(value["updated_at"], "updated_at")
     state_fields = {
         "topic",
@@ -92,8 +118,12 @@ def load_state(path: Path) -> dict[str, Any]:
         "transfer_item_unseen",
     }
     for topic, state in value["topic_states"].items():
+        if not isinstance(topic, str) or not TOPIC_RES[course].fullmatch(topic):
+            raise SelectionError(f"topic state {topic!r} is invalid for {course}")
         if not isinstance(state, dict) or state.keys() != state_fields or state.get("topic") != topic:
             raise SelectionError(f"topic state {topic!r} has invalid fields")
+        if state["practice"] is not None and state["practice"] not in PRACTICES[course]:
+            raise SelectionError(f"topic state {topic!r} has an invalid practice for {course}")
         timestamp(state["last_observed_at"], f"topic state {topic} last_observed_at")
         if state["next_review_at"] is not None:
             timestamp(state["next_review_at"], f"topic state {topic} next_review_at")
@@ -193,7 +223,7 @@ def load_items(path: Path) -> dict[str, dict[str, Any]]:
         item_id = item.get("item_id")
         if not isinstance(item_id, str) or not item_id or item_id in items:
             raise SelectionError(f"diagnostic item line {line_number} has a duplicate or invalid item_id")
-        if item.get("schema_version") != 1 or item.get("course") != "calc-ab":
+        if item.get("schema_version") != 1 or item.get("course") not in COURSES:
             raise SelectionError(f"diagnostic item {item_id} has invalid course/schema metadata")
         if item.get("answer_visibility") != "hidden":
             raise SelectionError(f"diagnostic item {item_id} must default to hidden")
@@ -218,6 +248,7 @@ def load_misconceptions(path: Path) -> dict[str, dict[str, Any]]:
     result: dict[str, dict[str, Any]] = {}
     required = {
         "misconception_id",
+        "course",
         "internal_diagnostic",
         "unit",
         "topic",
@@ -242,8 +273,16 @@ def load_misconceptions(path: Path) -> dict[str, dict[str, Any]]:
             raise SelectionError("misconception_id is invalid or duplicated")
         if record.get("internal_diagnostic") is not True:
             raise SelectionError(f"{identifier} must be labeled as an internal diagnostic")
+        if record.get("course") not in COURSES:
+            raise SelectionError(f"{identifier} has invalid course metadata")
         result[identifier] = record
     return result
+
+
+def _course_applies(record_course: str | None, learner_course: str) -> bool:
+    return record_course == learner_course or (
+        learner_course == "calc-bc" and record_course == "calc-ab"
+    )
 
 
 def _candidate(
@@ -305,6 +344,17 @@ def select_next(
     *,
     as_of: datetime,
 ) -> dict[str, Any]:
+    course = state["course"]
+    items = {
+        identifier: item
+        for identifier, item in items.items()
+        if _course_applies(item.get("course"), course)
+    }
+    misconceptions = {
+        identifier: record
+        for identifier, record in misconceptions.items()
+        if _course_applies(record.get("course", "calc-ab"), course)
+    }
     seen = set(state["seen_item_ids"])
     due_fallbacks: list[str] = []
     blocked_due_reviews: list[str] = []

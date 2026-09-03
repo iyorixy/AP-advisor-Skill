@@ -12,8 +12,9 @@ from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[1]
+SKILL_ROOT = ROOT / "ap-calculus-advisor"
 SPEC = importlib.util.spec_from_file_location(
-    "update_learner_state", ROOT / "scripts" / "update_learner_state.py"
+    "update_learner_state", SKILL_ROOT / "scripts" / "update_learner_state.py"
 )
 assert SPEC and SPEC.loader
 state = importlib.util.module_from_spec(SPEC)
@@ -52,10 +53,62 @@ def attempt(**changes):
 
 
 class LearnerStateTests(unittest.TestCase):
-    def new_profile(self, parent: str, *, test_data: bool = True) -> Path:
+    def new_profile(
+        self, parent: str, *, test_data: bool = True, course: str = "calc-ab"
+    ) -> Path:
         data_dir = state.resolve_data_dir(str(Path(parent) / "learner data"), create=True)
-        state.initialize(data_dir, "test_profile", as_of=AS_OF, test_data=test_data)
+        state.initialize(
+            data_dir, "test_profile", as_of=AS_OF, test_data=test_data, course=course
+        )
         return data_dir
+
+    def test_initializes_all_supported_courses(self):
+        for course in ("precalculus", "calc-ab", "calc-bc"):
+            with self.subTest(course=course), tempfile.TemporaryDirectory() as temporary:
+                data_dir = self.new_profile(temporary, course=course)
+                profile = json.loads(
+                    (data_dir / state.PROFILE_NAME).read_text(encoding="utf-8")
+                )
+                self.assertEqual(profile["course"], course)
+
+    def test_course_topic_and_practice_boundaries(self):
+        valid = (
+            ("precalculus", "4.10", "precalc-3-communication-reasoning"),
+            ("calc-ab", "8.12", "calc-4-communication-notation"),
+            ("calc-bc", "10.12", "calc-2-connecting-representations"),
+        )
+        for course, topic, practice in valid:
+            with self.subTest(course=course):
+                self.assertEqual(
+                    state.validate_attempt(
+                        attempt(course=course, topic=topic, practice=practice), as_of=AS_OF
+                    )["topic"],
+                    topic,
+                )
+        invalid = (
+            ("precalculus", "5.1", "precalc-1-procedural-symbolic-fluency"),
+            ("calc-ab", "9.1", "calc-1-implementing-processes"),
+            ("calc-bc", "11.1", "calc-1-implementing-processes"),
+        )
+        for course, topic, practice in invalid:
+            with self.subTest(course=course), self.assertRaisesRegex(
+                state.StateError, "valid Topic code"
+            ):
+                state.validate_attempt(
+                    attempt(course=course, topic=topic, practice=practice), as_of=AS_OF
+                )
+        with self.assertRaisesRegex(state.StateError, "practice is invalid"):
+            state.validate_attempt(
+                attempt(course="precalculus", topic="1.1"), as_of=AS_OF
+            )
+
+    def test_attempt_course_must_match_profile_without_append(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            data_dir = self.new_profile(temporary, course="precalculus")
+            before = (data_dir / state.ATTEMPTS_NAME).read_bytes()
+            with self.assertRaisesRegex(state.StateError, "does not match profile"):
+                state.record_attempt(data_dir, attempt(), as_of=AS_OF)
+            self.assertEqual(before, (data_dir / state.ATTEMPTS_NAME).read_bytes())
 
     def test_single_correct_attempt_is_not_mastery(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -219,7 +272,7 @@ class LearnerStateTests(unittest.TestCase):
 
     def test_paths_inside_repository_and_file_paths_fail(self):
         with self.assertRaisesRegex(state.StateError, "outside the skill repository"):
-            state.resolve_data_dir(str(ROOT / "learner-data"), create=True)
+            state.resolve_data_dir(str(SKILL_ROOT / "learner-data"), create=True)
         with tempfile.NamedTemporaryFile() as handle:
             with self.assertRaisesRegex(state.StateError, "not a directory"):
                 state.resolve_data_dir(handle.name)
@@ -229,14 +282,14 @@ class LearnerStateTests(unittest.TestCase):
             link = Path(temporary) / "linked-data"
             if os.name == "nt":
                 created = subprocess.run(
-                    ["cmd", "/c", "mklink", "/J", str(link), str(ROOT / "tests")],
+                    ["cmd", "/c", "mklink", "/J", str(link), str(SKILL_ROOT / "references")],
                     capture_output=True,
                     text=True,
                     check=False,
                 )
                 self.assertEqual(created.returncode, 0, created.stderr or created.stdout)
             else:
-                link.symlink_to(ROOT / "tests", target_is_directory=True)
+                link.symlink_to(SKILL_ROOT / "references", target_is_directory=True)
             try:
                 with self.assertRaisesRegex(state.StateError, "outside the skill repository"):
                     state.resolve_data_dir(str(link), create=True)

@@ -1,10 +1,11 @@
 {
   "schema_version": 1,
-  "scope": "ap-calculus-ab-units-1-8",
+  "scope": "ap-precalculus-units-1-4-calculus-ab-units-1-8-calculus-bc-units-1-10",
   "status": "internal-teaching-diagnostics-not-official",
   "misconceptions": [
     {
       "misconception_id": "u1-limit-value-substitution",
+      "course": "calc-ab",
       "internal_diagnostic": true,
       "unit": 1,
       "topic": "1.10",
@@ -32,6 +33,7 @@
     },
     {
       "misconception_id": "u1-continuity-missing-condition",
+      "course": "calc-ab",
       "internal_diagnostic": true,
       "unit": 1,
       "topic": "1.11",
@@ -63,6 +65,7 @@
     },
     {
       "misconception_id": "u2-derivative-not-rate",
+      "course": "calc-ab",
       "internal_diagnostic": true,
       "unit": 2,
       "topic": "2.2",
@@ -94,6 +97,7 @@
     },
     {
       "misconception_id": "u2-product-rule-distribution",
+      "course": "calc-ab",
       "internal_diagnostic": true,
       "unit": 2,
       "topic": "2.8",
@@ -125,6 +129,7 @@
     },
     {
       "misconception_id": "u3-chain-rule-inner-factor",
+      "course": "calc-ab",
       "internal_diagnostic": true,
       "unit": 3,
       "topic": "3.1",
@@ -156,6 +161,7 @@
     },
     {
       "misconception_id": "u3-implicit-y-prime-omission",
+      "course": "calc-ab",
       "internal_diagnostic": true,
       "unit": 3,
       "topic": "3.2",
@@ -187,6 +193,7 @@
     },
     {
       "misconception_id": "u4-context-derivative-units",
+      "course": "calc-ab",
       "internal_diagnostic": true,
       "unit": 4,
       "topic": "4.1",
@@ -218,6 +225,7 @@
     },
     {
       "misconception_id": "u4-related-rates-premature-substitution",
+      "course": "calc-ab",
       "internal_diagnostic": true,
       "unit": 4,
       "topic": "4.5",
@@ -251,6 +259,7 @@
     },
     {
       "misconception_id": "u5-critical-points-endpoints",
+      "course": "calc-ab",
       "internal_diagnostic": true,
       "unit": 5,
       "topic": "5.5",
@@ -282,6 +291,7 @@
     },
     {
       "misconception_id": "u5-concavity-wrong-sign-source",
+      "course": "calc-ab",
       "internal_diagnostic": true,
       "unit": 5,
       "topic": "5.6",
@@ -313,6 +323,7 @@
     },
     {
       "misconception_id": "u6-signed-accumulation-area",
+      "course": "calc-ab",
       "internal_diagnostic": true,
       "unit": 6,
       "topic": "6.1",
@@ -340,6 +351,7 @@
     },
     {
       "misconception_id": "u6-ftc-variable-bound-chain",
+      "course": "calc-ab",
       "internal_diagnostic": true,
       "unit": 6,
       "topic": "6.4",
@@ -373,6 +385,7 @@
     },
     {
       "misconception_id": "u7-slope-field-segment-meaning",
+      "course": "calc-ab",
       "internal_diagnostic": true,
       "unit": 7,
       "topic": "7.4",
@@ -404,6 +417,7 @@
     },
     {
       "misconception_id": "u7-particular-solution-constant",
+      "course": "calc-ab",
       "internal_diagnostic": true,
       "unit": 7,
       "topic": "7.7",
@@ -435,6 +449,7 @@
     },
     {
       "misconception_id": "u8-net-change-versus-distance",
+      "course": "calc-ab",
       "internal_diagnostic": true,
       "unit": 8,
       "topic": "8.2",
@@ -466,6 +481,7 @@
     },
     {
       "misconception_id": "u8-washer-radius-axis-offset",
+      "course": "calc-ab",
       "internal_diagnostic": true,
       "unit": 8,
       "topic": "8.12",
@@ -494,6 +510,486 @@
       "transfer_item_id": "ab-u8-m2-t",
       "exit_standard": "Correctly complete the unseen transfer item independently with hint level 0 using valid outer and inner radius distances.",
       "uncertain_action": "Ask only for the two radius expressions at a generic slice before requesting a volume integral."
+    },
+    {
+      "misconception_id": "pc-u1-average-rate-scale",
+      "course": "precalculus",
+      "internal_diagnostic": true,
+      "unit": 1,
+      "topic": "1.2",
+      "practice": "precalc-1-procedural-symbolic-fluency",
+      "observable_features": [
+        "Reports only the output change when an average rate of change is requested.",
+        "Divides by an endpoint value instead of by the full input-interval length."
+      ],
+      "evidence_required": [
+        "Ask the learner to label output change and input change separately before forming the quotient.",
+        "Require a signed rate with output-per-input units in one contextual example."
+      ],
+      "alternative_causes": [
+        "The learner may know the quotient but copy one endpoint value incorrectly.",
+        "The learner may compute the rate correctly and omit only the contextual units."
+      ],
+      "prerequisites": [],
+      "prerequisite_rationale": {},
+      "minimum_remediation": "Use a two-row change table, then divide the consistently ordered output difference by the matching input difference.",
+      "diagnostic_item_id": "pc-u1-m1-d",
+      "confirmation_item_id": "pc-u1-m1-c",
+      "transfer_item_id": "pc-u1-m1-t",
+      "exit_standard": "Correctly complete the unseen transfer independently at hint level 0 and interpret the signed output-per-input rate.",
+      "uncertain_action": "Ask for only the numerator and denominator of one fresh average-rate quotient."
+    },
+    {
+      "misconception_id": "pc-u1-hole-domain-restriction",
+      "course": "precalculus",
+      "internal_diagnostic": true,
+      "unit": 1,
+      "topic": "1.10",
+      "practice": "precalc-2-multiple-representations",
+      "observable_features": [
+        "Cancels a common factor and then treats the original rational function as defined at the canceled zero.",
+        "Labels a removable hole as a vertical asymptote after simplifying the expression."
+      ],
+      "evidence_required": [
+        "Require the learner to state the original domain restriction before canceling a factor.",
+        "Compare the simplified curve with the excluded input and its corresponding missing output value."
+      ],
+      "alternative_causes": [
+        "The learner may factor correctly but forget to carry the original restriction forward.",
+        "The learner may know the distinction but misidentify the zero of the canceled factor."
+      ],
+      "prerequisites": [],
+      "prerequisite_rationale": {},
+      "minimum_remediation": "Write the original restriction beside the equivalent simplified rule and identify the missing point before describing the graph.",
+      "diagnostic_item_id": "pc-u1-m2-d",
+      "confirmation_item_id": "pc-u1-m2-c",
+      "transfer_item_id": "pc-u1-m2-t",
+      "exit_standard": "Correctly complete the unseen transfer independently at hint level 0 and preserve the original domain restriction.",
+      "uncertain_action": "Ask the learner to name the excluded input before asking for any graph feature."
+    },
+    {
+      "misconception_id": "pc-u2-growth-factor",
+      "course": "precalculus",
+      "internal_diagnostic": true,
+      "unit": 2,
+      "topic": "2.3",
+      "practice": "precalc-3-communication-reasoning",
+      "observable_features": [
+        "Uses the decimal growth rate itself as the repeated multiplier instead of one plus that rate.",
+        "Adds the same absolute amount each period when the context specifies constant percent growth."
+      ],
+      "evidence_required": [
+        "Ask the learner to compute two successive values and compare their ratios and differences.",
+        "Require an explanation connecting the percent change to the one-period multiplier."
+      ],
+      "alternative_causes": [
+        "The learner may build the correct model but enter a percent as a whole number.",
+        "The learner may confuse a constant absolute increase in the wording with a constant relative increase."
+      ],
+      "prerequisites": [],
+      "prerequisite_rationale": {},
+      "minimum_remediation": "Translate the stated percent into a one-period multiplier, verify one update numerically, and only then write the exponential model.",
+      "diagnostic_item_id": "pc-u2-m1-d",
+      "confirmation_item_id": "pc-u2-m1-c",
+      "transfer_item_id": "pc-u2-m1-t",
+      "exit_standard": "Correctly complete the unseen transfer independently at hint level 0 and justify the multiplier from the percent change.",
+      "uncertain_action": "Ask for the value after exactly one period before requesting a general model."
+    },
+    {
+      "misconception_id": "pc-u2-log-inverse-domain",
+      "course": "precalculus",
+      "internal_diagnostic": true,
+      "unit": 2,
+      "topic": "2.10",
+      "practice": "precalc-2-multiple-representations",
+      "observable_features": [
+        "Writes a logarithmic inverse but retains the exponential function's domain instead of swapping domain and range.",
+        "Reflects a point incorrectly across the line y equals x when moving between a function and its inverse."
+      ],
+      "evidence_required": [
+        "Require the learner to swap one ordered pair and state the inverse domain and range.",
+        "Check the proposed inverse by composing it with the original function on a valid input."
+      ],
+      "alternative_causes": [
+        "The learner may know the inverse relationship but make a notation error in the logarithm base.",
+        "The learner may state the correct restriction verbally but omit it from symbolic work."
+      ],
+      "prerequisites": [
+        "pc-u2-growth-factor"
+      ],
+      "prerequisite_rationale": {
+        "pc-u2-growth-factor": "Interpreting the exponential rule and its positive range supports constructing and restricting its logarithmic inverse."
+      },
+      "minimum_remediation": "Swap input and output, solve for the new output, then transfer the original range into the inverse domain before checking composition.",
+      "diagnostic_item_id": "pc-u2-m2-d",
+      "confirmation_item_id": "pc-u2-m2-c",
+      "transfer_item_id": "pc-u2-m2-t",
+      "exit_standard": "Correctly complete the unseen transfer independently at hint level 0 with a valid inverse rule and domain.",
+      "uncertain_action": "Ask the learner to swap one point and name only the inverse domain."
+    },
+    {
+      "misconception_id": "pc-u3-period-parameter",
+      "course": "precalculus",
+      "internal_diagnostic": true,
+      "unit": 3,
+      "topic": "3.4",
+      "practice": "precalc-1-procedural-symbolic-fluency",
+      "observable_features": [
+        "Reports the coefficient of x as the period of a sine or cosine function.",
+        "Multiplies the parent period by the frequency factor instead of dividing by its magnitude."
+      ],
+      "evidence_required": [
+        "Ask the learner to locate two consecutive matching-cycle points and compare their input coordinates.",
+        "Require a check that the argument changes by two pi over the proposed period."
+      ],
+      "alternative_causes": [
+        "The learner may know the period formula but overlook a factor inside grouped input notation.",
+        "The learner may calculate the period correctly but confuse it with horizontal shift."
+      ],
+      "prerequisites": [],
+      "prerequisite_rationale": {},
+      "minimum_remediation": "Set the change in the angle expression equal to one full cycle and solve for the corresponding input change.",
+      "diagnostic_item_id": "pc-u3-m1-d",
+      "confirmation_item_id": "pc-u3-m1-c",
+      "transfer_item_id": "pc-u3-m1-t",
+      "exit_standard": "Correctly complete the unseen transfer independently at hint level 0 and verify one full-cycle input interval.",
+      "uncertain_action": "Ask which two input values produce arguments that differ by exactly two pi."
+    },
+    {
+      "misconception_id": "pc-u3-polar-negative-radius",
+      "course": "precalculus",
+      "internal_diagnostic": true,
+      "unit": 3,
+      "topic": "3.14",
+      "practice": "precalc-2-multiple-representations",
+      "observable_features": [
+        "Plots a negative polar radius on the ray for theta instead of on the opposite ray.",
+        "Treats negative r as an invalid coordinate rather than an equivalent positive-radius representation."
+      ],
+      "evidence_required": [
+        "Require conversion of one negative-radius polar point to Cartesian coordinates.",
+        "Ask for an equivalent positive-radius polar coordinate and compare its direction."
+      ],
+      "alternative_causes": [
+        "The learner may understand the direction reversal but use the wrong reference angle.",
+        "The learner may plot correctly and only state a nonstandard equivalent angle."
+      ],
+      "prerequisites": [],
+      "prerequisite_rationale": {},
+      "minimum_remediation": "Convert once to Cartesian coordinates, then rewrite the point with positive radius and angle shifted by pi.",
+      "diagnostic_item_id": "pc-u3-m2-d",
+      "confirmation_item_id": "pc-u3-m2-c",
+      "transfer_item_id": "pc-u3-m2-t",
+      "exit_standard": "Correctly complete the unseen transfer independently at hint level 0 and reconcile polar and Cartesian locations.",
+      "uncertain_action": "Ask for the Cartesian signs of the coordinates before requesting a polar rewrite."
+    },
+    {
+      "misconception_id": "pc-u4-parametric-rate-ratio",
+      "course": "precalculus",
+      "internal_diagnostic": true,
+      "unit": 4,
+      "topic": "4.3",
+      "practice": "precalc-3-communication-reasoning",
+      "observable_features": [
+        "Reports dy over dt as dy over dx without accounting for the simultaneous change in x.",
+        "Forms the parametric slope quotient in the reverse order."
+      ],
+      "evidence_required": [
+        "Ask the learner to compute both component rates at the same parameter value before forming a ratio.",
+        "Require units or a tangent-direction check for the resulting dy-over-dx value."
+      ],
+      "alternative_causes": [
+        "The learner may know the ratio but make an error differentiating one component.",
+        "The learner may form the correct ratio at a parameter where dx over dt is zero without checking definition."
+      ],
+      "prerequisites": [
+        "pc-u1-average-rate-scale"
+      ],
+      "prerequisite_rationale": {
+        "pc-u1-average-rate-scale": "Both average and parametric rates require comparing output change against the corresponding input change."
+      },
+      "minimum_remediation": "Create a component-rate table for dx over dt and dy over dt, then divide vertical rate by horizontal rate only when defined.",
+      "diagnostic_item_id": "pc-u4-m1-d",
+      "confirmation_item_id": "pc-u4-m1-c",
+      "transfer_item_id": "pc-u4-m1-t",
+      "exit_standard": "Correctly complete the unseen instructional transfer independently at hint level 0 and justify the component-rate ratio.",
+      "uncertain_action": "Ask for dx over dt and dy over dt separately before requesting their ratio."
+    },
+    {
+      "misconception_id": "pc-u4-matrix-composition-order",
+      "course": "precalculus",
+      "internal_diagnostic": true,
+      "unit": 4,
+      "topic": "4.12",
+      "practice": "precalc-2-multiple-representations",
+      "observable_features": [
+        "Reverses the matrix product for two ordered linear transformations.",
+        "Assumes matrix multiplication is commutative when comparing composed transformations."
+      ],
+      "evidence_required": [
+        "Require the learner to apply both transformations sequentially to one test vector.",
+        "Compare that result with each candidate matrix product in the stated order."
+      ],
+      "alternative_causes": [
+        "The learner may choose the correct product order but make one row-column arithmetic error.",
+        "The verbal phrase first and then may have been read in the opposite temporal order."
+      ],
+      "prerequisites": [],
+      "prerequisite_rationale": {},
+      "minimum_remediation": "Track one vector through the first transformation and then the second, and match that action to the right-to-left matrix product.",
+      "diagnostic_item_id": "pc-u4-m2-d",
+      "confirmation_item_id": "pc-u4-m2-c",
+      "transfer_item_id": "pc-u4-m2-t",
+      "exit_standard": "Correctly complete the unseen instructional transfer independently at hint level 0 and preserve transformation order.",
+      "uncertain_action": "Ask the learner to transform one vector step by step before naming a product matrix."
+    },
+    {
+      "misconception_id": "bc-u6-parts-product-term",
+      "course": "calc-bc",
+      "internal_diagnostic": true,
+      "unit": 6,
+      "topic": "6.11",
+      "practice": "calc-1-implementing-processes",
+      "observable_features": [
+        "Applies integration by parts but omits the product term u times v.",
+        "Uses a plus sign before the remaining integral or differentiates and integrates the wrong selected factors."
+      ],
+      "evidence_required": [
+        "Require explicit labels for u, dv, du, and v before substitution into the identity.",
+        "Differentiate the proposed antiderivative to compare it with the original integrand."
+      ],
+      "alternative_causes": [
+        "The learner may know the identity but make an arithmetic error in finding v.",
+        "The learner may choose a valid but inefficient factor assignment and stop too early."
+      ],
+      "prerequisites": [
+        "u2-product-rule-distribution"
+      ],
+      "prerequisite_rationale": {
+        "u2-product-rule-distribution": "Integration by parts reverses the product rule and depends on preserving both product-rule contributions."
+      },
+      "minimum_remediation": "Write the four labeled parts, substitute once into u-v minus the remaining integral, and verify by differentiation.",
+      "diagnostic_item_id": "bc-u6-m1-d",
+      "confirmation_item_id": "bc-u6-m1-c",
+      "transfer_item_id": "bc-u6-m1-t",
+      "exit_standard": "Correctly complete the unseen transfer independently at hint level 0 and verify the antiderivative by differentiation.",
+      "uncertain_action": "Ask only for a valid choice of u and dv and the resulting du and v."
+    },
+    {
+      "misconception_id": "bc-u7-euler-step-update",
+      "course": "calc-bc",
+      "internal_diagnostic": true,
+      "unit": 7,
+      "topic": "7.5",
+      "practice": "calc-1-implementing-processes",
+      "observable_features": [
+        "Uses the initial slope for every Euler step instead of reevaluating at the latest point.",
+        "Adds the slope without multiplying by the specified step size."
+      ],
+      "evidence_required": [
+        "Require a row for each current x, current y, slope, and step increment.",
+        "Check that every new row evaluates the differential equation at the previous row's updated point."
+      ],
+      "alternative_causes": [
+        "The learner may understand the update rule but make one substitution error in the slope function.",
+        "The learner may use the correct step size but perform the requested number of steps incorrectly."
+      ],
+      "prerequisites": [
+        "u7-slope-field-segment-meaning"
+      ],
+      "prerequisite_rationale": {
+        "u7-slope-field-segment-meaning": "Euler updates use the local slope attached to each newly reached point."
+      },
+      "minimum_remediation": "Use one update row at a time with new y equal to old y plus step size times the slope at the old point.",
+      "diagnostic_item_id": "bc-u7-m1-d",
+      "confirmation_item_id": "bc-u7-m1-c",
+      "transfer_item_id": "bc-u7-m1-t",
+      "exit_standard": "Correctly complete the unseen transfer independently at hint level 0 with every slope reevaluated at the current point.",
+      "uncertain_action": "Ask the learner to fill only the first Euler update row before assigning a cause."
+    },
+    {
+      "misconception_id": "bc-u8-arc-length-integrand",
+      "course": "calc-bc",
+      "internal_diagnostic": true,
+      "unit": 8,
+      "topic": "8.13",
+      "practice": "calc-2-connecting-representations",
+      "observable_features": [
+        "Uses the integral of the absolute derivative as planar curve length for a graph y equals f of x.",
+        "Omits either the added one or the square root in the arc-length integrand."
+      ],
+      "evidence_required": [
+        "Require a small horizontal and vertical change diagram leading to the Pythagorean length element.",
+        "Check the proposed integrand on a straight line whose geometric length is known."
+      ],
+      "alternative_causes": [
+        "The learner may use the correct integrand but evaluate the derivative incorrectly.",
+        "The learner may confuse total variation in y with distance traveled along the plane curve."
+      ],
+      "prerequisites": [
+        "u6-signed-accumulation-area"
+      ],
+      "prerequisite_rationale": {
+        "u6-signed-accumulation-area": "Arc length is accumulated from nonnegative local length elements over the parameter interval."
+      },
+      "minimum_remediation": "Reconstruct the local length from horizontal and vertical differentials, then test the formula on a line segment.",
+      "diagnostic_item_id": "bc-u8-m1-d",
+      "confirmation_item_id": "bc-u8-m1-c",
+      "transfer_item_id": "bc-u8-m1-t",
+      "exit_standard": "Correctly complete the unseen transfer independently at hint level 0 using a valid nonnegative arc-length element.",
+      "uncertain_action": "Ask for the length of one infinitesimal right-triangle hypotenuse before requesting an integral."
+    },
+    {
+      "misconception_id": "bc-u9-parametric-second-derivative",
+      "course": "calc-bc",
+      "internal_diagnostic": true,
+      "unit": 9,
+      "topic": "9.2",
+      "practice": "calc-1-implementing-processes",
+      "observable_features": [
+        "Differentiates dy over dx with respect to the parameter and reports that result directly as the second derivative.",
+        "Forgets the additional division by dx over dt when converting the second rate back to an x-derivative."
+      ],
+      "evidence_required": [
+        "Require the learner to write dy over dx first and then label which variable differentiates it.",
+        "Check the result against a parameterization that can be eliminated into an explicit y-of-x relation."
+      ],
+      "alternative_causes": [
+        "The learner may know the conversion but simplify the first derivative incorrectly.",
+        "The learner may evaluate at a point where dx over dt is zero without checking whether the derivative is defined."
+      ],
+      "prerequisites": [
+        "u3-chain-rule-inner-factor"
+      ],
+      "prerequisite_rationale": {
+        "u3-chain-rule-inner-factor": "The second parametric derivative converts a parameter derivative to an x-derivative through another chain-rule factor."
+      },
+      "minimum_remediation": "Differentiate the first slope with respect to the parameter, then divide once more by dx over dt and verify by elimination.",
+      "diagnostic_item_id": "bc-u9-m1-d",
+      "confirmation_item_id": "bc-u9-m1-c",
+      "transfer_item_id": "bc-u9-m1-t",
+      "exit_standard": "Correctly complete the unseen transfer independently at hint level 0 and include the second conversion by dx over dt.",
+      "uncertain_action": "Ask the learner what variable their derivative of dy over dx is currently taken with respect to."
+    },
+    {
+      "misconception_id": "bc-u9-polar-area-square",
+      "course": "calc-bc",
+      "internal_diagnostic": true,
+      "unit": 9,
+      "topic": "9.8",
+      "practice": "calc-2-connecting-representations",
+      "observable_features": [
+        "Uses the integral of r rather than one half the integral of r squared for polar area.",
+        "Chooses angular bounds without checking where the traced curve begins and ends the requested region."
+      ],
+      "evidence_required": [
+        "Require a sector-area argument for the one-half r-squared element.",
+        "Ask the learner to identify boundary rays and verify the trace on the proposed angle interval."
+      ],
+      "alternative_causes": [
+        "The learner may know the area formula but solve a trigonometric boundary equation incorrectly.",
+        "The learner may set up the correct integral and make only an evaluation error."
+      ],
+      "prerequisites": [
+        "u6-signed-accumulation-area"
+      ],
+      "prerequisite_rationale": {
+        "u6-signed-accumulation-area": "Polar area accumulates nonnegative sector contributions across an angular interval."
+      },
+      "minimum_remediation": "Derive one sector contribution, square the radius before integrating, and confirm the angular trace of the region.",
+      "diagnostic_item_id": "bc-u9-m2-d",
+      "confirmation_item_id": "bc-u9-m2-c",
+      "transfer_item_id": "bc-u9-m2-t",
+      "exit_standard": "Correctly complete the unseen transfer independently at hint level 0 with valid squared-radius integrand and bounds.",
+      "uncertain_action": "Ask for only the sector-area element and the two boundary angles."
+    },
+    {
+      "misconception_id": "bc-u10-term-test-converse",
+      "course": "calc-bc",
+      "internal_diagnostic": true,
+      "unit": 10,
+      "topic": "10.3",
+      "practice": "calc-3-justification",
+      "observable_features": [
+        "Concludes that an infinite series converges solely because its terms approach zero.",
+        "Treats the nth-term divergence test as an if-and-only-if convergence test."
+      ],
+      "evidence_required": [
+        "Require the learner to state exactly what a nonzero or nonexistent term limit proves.",
+        "Present a zero-limit divergent benchmark and ask which additional convergence test is needed."
+      ],
+      "alternative_causes": [
+        "The learner may know the one-way implication but confuse the limit of partial sums with the limit of terms.",
+        "The learner may correctly identify inconclusive evidence but choose an unsuitable follow-up test."
+      ],
+      "prerequisites": [],
+      "prerequisite_rationale": {},
+      "minimum_remediation": "Separate the sequence of terms from the sequence of partial sums and contrast necessary with sufficient conditions.",
+      "diagnostic_item_id": "bc-u10-m1-d",
+      "confirmation_item_id": "bc-u10-m1-c",
+      "transfer_item_id": "bc-u10-m1-t",
+      "exit_standard": "Correctly complete the unseen transfer independently at hint level 0 and state the nth-term test's one-way conclusion.",
+      "uncertain_action": "Ask what conclusion follows from a zero term limit without requesting a convergence verdict."
+    },
+    {
+      "misconception_id": "bc-u10-taylor-factorial-coefficients",
+      "course": "calc-bc",
+      "internal_diagnostic": true,
+      "unit": 10,
+      "topic": "10.11",
+      "practice": "calc-1-implementing-processes",
+      "observable_features": [
+        "Uses derivative values directly as Taylor coefficients without dividing by the matching factorial.",
+        "Uses powers of x rather than powers of x minus the stated center for a non-Maclaurin polynomial."
+      ],
+      "evidence_required": [
+        "Require a coefficient table pairing derivative order, derivative value at the center, and factorial.",
+        "Ask the learner to evaluate the proposed polynomial and its first derivatives at the center."
+      ],
+      "alternative_causes": [
+        "The learner may know the Taylor formula but make one derivative arithmetic error.",
+        "The learner may construct the correct polynomial and only simplify a factorial incorrectly."
+      ],
+      "prerequisites": [],
+      "prerequisite_rationale": {},
+      "minimum_remediation": "Build one row per derivative order using f^(k)(a)/k! times (x-a)^k, then check values at the center.",
+      "diagnostic_item_id": "bc-u10-m3-d",
+      "confirmation_item_id": "bc-u10-m3-c",
+      "transfer_item_id": "bc-u10-m3-t",
+      "exit_standard": "Correctly complete the unseen transfer independently at hint level 0 with centered powers and factorial-scaled coefficients.",
+      "uncertain_action": "Ask only for the coefficient and centered power of one specified Taylor term."
+    },
+    {
+      "misconception_id": "bc-u10-lagrange-order-bound",
+      "course": "calc-bc",
+      "internal_diagnostic": true,
+      "unit": 10,
+      "topic": "10.12",
+      "practice": "calc-3-justification",
+      "observable_features": [
+        "Uses the nth derivative and n factorial for the remainder after a degree-n Taylor polynomial.",
+        "Chooses a derivative bound only at the center instead of over the full interval between center and evaluation point."
+      ],
+      "evidence_required": [
+        "Require the learner to name the first omitted Taylor term's derivative order and factorial.",
+        "Ask for an explicit maximum bound on the closed interval from the center to the target input."
+      ],
+      "alternative_causes": [
+        "The learner may select the correct derivative order but make an arithmetic error in the power or factorial.",
+        "The learner may know the interval requirement but use an unnecessarily loose valid upper bound."
+      ],
+      "prerequisites": [
+        "bc-u10-taylor-factorial-coefficients"
+      ],
+      "prerequisite_rationale": {
+        "bc-u10-taylor-factorial-coefficients": "Lagrange remainders begin with the first Taylor term omitted after a correctly identified polynomial degree."
+      },
+      "minimum_remediation": "Mark the first omitted degree, bound that derivative across the entire interval, and then assemble the factorial remainder bound.",
+      "diagnostic_item_id": "bc-u10-m2-d",
+      "confirmation_item_id": "bc-u10-m2-c",
+      "transfer_item_id": "bc-u10-m2-t",
+      "exit_standard": "Correctly complete the unseen transfer independently at hint level 0 with the proper derivative order, interval maximum, and factorial.",
+      "uncertain_action": "Ask only for the derivative order and interval used to define M before any numerical bound."
     }
   ]
 }

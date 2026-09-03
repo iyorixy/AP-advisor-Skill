@@ -1,6 +1,6 @@
 ---
 name: ap-psychology-advisor
-description: Create, review, or prioritize study content for AP Psychology under the current five-unit framework. Use for concept application, original MCQ/AAQ/EBQ practice, research methods and design, data interpretation, response review, course-scope checks, and evidence-based study interventions; do not use for general psychology, personal mental-health diagnosis or treatment, other AP subjects, exam administration, or admissions.
+description: Create, review, coach, or prioritize study content for AP Psychology under the current five-unit framework. Use for concept application, original MCQ/AAQ/EBQ practice, research methods and design, data interpretation, response review, adaptive coaching from learner work, course-scope checks, and evidence-based study interventions; do not use for general psychology, personal mental-health diagnosis or treatment, other AP subjects, exam administration, or admissions.
 ---
 
 # AP Psychology Advisor
@@ -19,6 +19,13 @@ policy.
   error; if none, say so.
 - **Advisor:** read `references/advisor.md`, diagnose from supplied evidence, and
   prioritize one to three tasks.
+- **Coach:** read `references/session-protocol.md`. From a real learner response,
+  locate the first substantive error, separate observation from hypothesis, give
+  one minimal hint, and wait. Use an unseen same-form confirmation followed by an
+  unseen transfer before marking the intervention passed. If no work is supplied,
+  give one original diagnostic item and wait. The loop covers all five current
+  Units and is session-only; do not claim a maintained item bank or persistent
+  learner profile.
 
 Treat requested Topic, task type, difficulty, style, language, and answer visibility
 as fixed. If no exam year is given, use the current framework recorded in

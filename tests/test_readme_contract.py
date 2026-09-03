@@ -20,6 +20,9 @@ class ReadmeContractTests(unittest.TestCase):
                     "AP Calculus AB",
                     "Precalculus",
                     "BC",
+                    "AP Psychology",
+                    "AP Biology",
+                    "Coach",
                     "Units 1–8",
                     "session-only",
                     "clear-test-profile",
@@ -28,9 +31,13 @@ class ReadmeContractTests(unittest.TestCase):
                 ):
                     self.assertIn(token, text)
 
+    def test_local_state_example_selects_its_math_course_explicitly(self):
+        for text in (self.english, self.chinese):
+            self.assertIn("--course calc-ab", text)
+
     def test_verification_commands_are_kept_in_sync(self):
         commands = (
-            "python scripts/validate_topic_code.py --self-check --evidence-json",
+            "python ap-calculus-advisor/scripts/validate_topic_code.py --self-check --evidence-json",
             "python scripts/run_evals.py --self-check --evidence-json",
             "python -m unittest discover -s tests -v",
             "python scripts/check_release.py --evidence-json",

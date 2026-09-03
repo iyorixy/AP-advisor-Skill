@@ -9,8 +9,9 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+SKILL_ROOT = ROOT / "ap-calculus-advisor"
 SPEC = importlib.util.spec_from_file_location(
-    "select_next_task", ROOT / "scripts" / "select_next_task.py"
+    "select_next_task", SKILL_ROOT / "scripts" / "select_next_task.py"
 )
 assert SPEC and SPEC.loader
 selector = importlib.util.module_from_spec(SPEC)
@@ -19,15 +20,30 @@ SPEC.loader.exec_module(selector)
 AS_OF = datetime(2026, 8, 31, 12, 0, tzinfo=timezone.utc)
 
 
-def item(item_id, topic, misconception, stage, *, unit, representation, priority, difficulty="standard"):
+def item(
+    item_id,
+    topic,
+    misconception,
+    stage,
+    *,
+    unit,
+    representation,
+    priority,
+    difficulty="standard",
+    course="calc-ab",
+):
     return {
         "schema_version": 1,
         "item_id": item_id,
-        "course": "calc-ab",
+        "course": course,
         "unit": unit,
         "topic_code": topic,
         "topic_citation": f"Unit {unit}, Topic {topic} — Test fixture",
-        "mathematical_practice": "calc-1-implementing-processes",
+        "mathematical_practice": (
+            "precalc-1-procedural-symbolic-fluency"
+            if course == "precalculus"
+            else "calc-1-implementing-processes"
+        ),
         "task_type": "free-response",
         "representation": representation,
         "calculator_condition": "calculator-not-permitted",
@@ -59,13 +75,28 @@ def item(item_id, topic, misconception, stage, *, unit, representation, priority
     }
 
 
-def misconception(identifier, topic, diagnostic, confirmation, transfer, *, unit, prerequisites=None):
+def misconception(
+    identifier,
+    topic,
+    diagnostic,
+    confirmation,
+    transfer,
+    *,
+    unit,
+    prerequisites=None,
+    course="calc-ab",
+):
     return {
         "misconception_id": identifier,
+        "course": course,
         "internal_diagnostic": True,
         "unit": unit,
         "topic": topic,
-        "practice": "calc-1-implementing-processes",
+        "practice": (
+            "precalc-1-procedural-symbolic-fluency"
+            if course == "precalculus"
+            else "calc-1-implementing-processes"
+        ),
         "observable_features": ["Observable fixture error."],
         "evidence_required": ["One complete worked response."],
         "alternative_causes": ["A transcription error."],
@@ -106,11 +137,11 @@ def topic_state(topic, *, misconception_id=None, confidence="unknown", status="p
     }
 
 
-def state(*, seen=None, topics=None, queue=None):
+def state(*, seen=None, topics=None, queue=None, course="calc-ab"):
     return {
         "schema_version": 1,
         "profile_id": "fixture",
-        "course": "calc-ab",
+        "course": course,
         "attempt_ids": [],
         "seen_item_ids": seen or [],
         "topic_states": topics or {},
@@ -147,6 +178,71 @@ class SelectorTests(unittest.TestCase):
         receipt = self.select(state())
         self.assertEqual(receipt["item_id"], "I-A-D")
         self.assertEqual(receipt["uncertainty"], "high")
+
+    def test_precalculus_profile_selects_only_precalculus_items(self):
+        record = item(
+            "PC-I-D",
+            "1.1",
+            "PC-M",
+            "diagnostic",
+            unit=1,
+            representation="analytical",
+            priority=1,
+            difficulty="foundational",
+            course="precalculus",
+        )
+        self.items[record["item_id"]] = record
+        self.misconceptions["PC-M"] = misconception(
+            "PC-M", "1.1", "PC-I-D", "PC-I-C", "PC-I-T", unit=1, course="precalculus"
+        )
+        receipt = self.select(state(course="precalculus"))
+        self.assertEqual(receipt["item_id"], "PC-I-D")
+        self.assertNotIn("I-A-D", json.dumps(receipt))
+
+    def test_calc_bc_inherits_ab_and_selects_bc_only_after_ab_is_seen(self):
+        ab_ids = sorted(self.items)
+        record = item(
+            "BC-I-D",
+            "9.2",
+            "BC-M",
+            "diagnostic",
+            unit=9,
+            representation="numerical",
+            priority=1,
+            difficulty="foundational",
+            course="calc-bc",
+        )
+        self.items[record["item_id"]] = record
+        self.misconceptions["BC-M"] = misconception(
+            "BC-M", "9.2", "BC-I-D", "BC-I-C", "BC-I-T", unit=9, course="calc-bc"
+        )
+        self.assertEqual(self.select(state(course="calc-bc"))["item_id"], "I-A-D")
+        self.assertEqual(
+            self.select(state(course="calc-bc", seen=ab_ids))["item_id"], "BC-I-D"
+        )
+        self.assertIsNone(self.select(state(course="calc-ab", seen=ab_ids))["item_id"])
+
+    def test_shipped_bank_routes_precalculus_and_bc_only_items(self):
+        items = selector.load_items(
+            SKILL_ROOT / "references" / "diagnostic-items.jsonl"
+        )
+        misconceptions = selector.load_misconceptions(
+            SKILL_ROOT / "references" / "calculus-misconceptions.json"
+        )
+        precalculus = selector.select_next(
+            state(course="precalculus"), items, misconceptions, as_of=AS_OF
+        )
+        self.assertEqual(items[precalculus["item_id"]]["course"], "precalculus")
+        inherited_ab = [
+            item_id for item_id, record in items.items() if record["course"] == "calc-ab"
+        ]
+        bc_only = selector.select_next(
+            state(course="calc-bc", seen=inherited_ab),
+            items,
+            misconceptions,
+            as_of=AS_OF,
+        )
+        self.assertEqual(items[bc_only["item_id"]]["course"], "calc-bc")
 
     def test_equal_priority_tie_break_uses_item_id(self):
         extra = item(
@@ -400,6 +496,31 @@ class SelectorTests(unittest.TestCase):
             path.write_text(json.dumps(profile), encoding="utf-8")
             with self.assertRaisesRegex(selector.SelectionError, "contradicts"):
                 selector.load_state(path)
+
+    def test_loader_rejects_topic_and_practice_outside_profile_course(self):
+        profiles = (
+            (
+                state(
+                    course="precalculus",
+                    topics={"10.1": topic_state("10.1")},
+                ),
+                "invalid for precalculus",
+            ),
+            (
+                state(
+                    course="precalculus",
+                    topics={"1.1": topic_state("1.1")},
+                ),
+                "invalid practice for precalculus",
+            ),
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "profile.json"
+            for profile, error in profiles:
+                with self.subTest(error=error):
+                    path.write_text(json.dumps(profile), encoding="utf-8")
+                    with self.assertRaisesRegex(selector.SelectionError, error):
+                        selector.load_state(path)
 
 
 if __name__ == "__main__":

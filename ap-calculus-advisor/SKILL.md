@@ -1,6 +1,6 @@
 ---
 name: ap-calculus-advisor
-description: Create, review, coach, or prioritize study content for AP Precalculus, AP Calculus AB, and AP Calculus BC. Use for explanations, original practice, worked examples, Topic/practice scope checks, evidence-based interventions, and the AP Calculus AB Units 1–8 adaptive Coach loop; do not use for general mathematics, other AP subjects, exam administration, or admissions.
+description: Create, review, coach, or prioritize study content for AP Precalculus, AP Calculus AB, and AP Calculus BC. Use for explanations, original practice, worked examples, Topic/practice scope checks, evidence-based interventions, and adaptive Coach loops; do not use for general mathematics, other AP subjects, exam administration, or admissions.
 ---
 
 # AP Precalculus & Calculus Advisor
@@ -18,16 +18,17 @@ not prove the mathematics, content fit, teaching quality, or current exam policy
   say so.
 - **Advisor:** read `references/advisor.md`, diagnose from supplied evidence,
   and prioritize one to three tasks.
-- **Coach (Calculus AB Units 1–8 only):** read
+- **Coach (Precalculus Units 1–4, Calculus AB Units 1–8, or Calculus BC
+  Units 1–10):** read
   `references/session-protocol.md`. Locate the first substantive error, separate
   observation from hypothesis, give one minimal hint, wait for real learner
   work, then use unseen confirmation and transfer before marking an
   intervention passed. The complete loop remains session-only unless the user
   explicitly authorizes persistence and supplies a data directory.
 
-Generate, Review, and Advisor remain available for AP Precalculus, Calculus AB,
-and Calculus BC. Do not imply that the maintained Coach diagnosis and item bank
-covers Precalculus or BC.
+The maintained bank is intentionally bounded. For an uncovered Topic, disclose
+that no maintained item is available and offer one clearly labeled original
+Coach item; do not imply that a partial bank exhaustively diagnoses a course.
 
 Treat course, topic, content type, difficulty, style, and language as fixed. For
 ambiguous “AP Calculus,” proceed only with shared AB/BC content and say that the

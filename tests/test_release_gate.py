@@ -16,6 +16,70 @@ SPEC.loader.exec_module(gate)
 
 
 class ReleaseGateTests(unittest.TestCase):
+    def test_multicourse_topic_and_inheritance_contract(self):
+        self.assertTrue(gate._valid_topic("precalculus", "4.10", 4))
+        self.assertFalse(gate._valid_topic("precalculus", "5.1", 5))
+        self.assertTrue(gate._valid_topic("calc-ab", "8.12", 8))
+        self.assertFalse(gate._valid_topic("calc-ab", "9.1", 9))
+        self.assertTrue(gate._valid_topic("calc-bc", "10.12", 10))
+        self.assertFalse(gate._valid_topic("calc-bc", "11.1", 11))
+        self.assertTrue(gate._course_applies("calc-ab", "calc-bc"))
+        self.assertFalse(gate._course_applies("calc-bc", "calc-ab"))
+        self.assertFalse(gate._course_applies("calc-ab", "precalculus"))
+        self.assertIn("course", gate.MISCONCEPTION_FIELDS)
+        self.assertEqual(
+            gate.ADAPTIVE_SCOPE,
+            "ap-precalculus-units-1-4-calculus-ab-units-1-8-calculus-bc-units-1-10",
+        )
+
+    def test_learner_schema_declares_all_supported_courses(self):
+        schema = json.loads(
+            (
+                ROOT
+                / "ap-calculus-advisor"
+                / "references"
+                / "learner-state.schema.json"
+            ).read_text(encoding="utf-8")
+        )
+        courses = ["precalculus", "calc-ab", "calc-bc"]
+        self.assertEqual(schema["properties"]["course"]["enum"], courses)
+        self.assertEqual(schema["definitions"]["attempt"]["properties"]["course"]["enum"], courses)
+
+    def test_confirmation_and_transfer_structure_is_machine_enforced(self):
+        def item(
+            *,
+            task_type="free-response",
+            representation="analytical",
+            representation_family="symbolic",
+            context_family="base",
+        ):
+            return {
+                "task_type": task_type,
+                "representation": representation,
+                "prerequisites": ["P"],
+                "selection": {
+                    "representation_family": representation_family,
+                    "context_family": context_family,
+                },
+            }
+
+        diagnostic = item()
+        confirmation = item()
+        transfer = item(context_family="transfer")
+        gate._validate_chain_design("M", diagnostic, confirmation, transfer, ["P"])
+
+        bad_confirmation = item(representation="tabular")
+        with self.assertRaisesRegex(gate.ReleaseError, "not the same form"):
+            gate._validate_chain_design("M", diagnostic, bad_confirmation, transfer, ["P"])
+
+        bad_transfer = item(task_type="multiple-choice")
+        with self.assertRaisesRegex(gate.ReleaseError, "changes neither"):
+            gate._validate_chain_design("M", diagnostic, confirmation, bad_transfer, ["P"])
+
+        bad_transfer["prerequisites"] = []
+        with self.assertRaisesRegex(gate.ReleaseError, "prerequisites do not match"):
+            gate._validate_chain_design("M", diagnostic, confirmation, bad_transfer, ["P"])
+
     def test_blind_manifest_must_match_review_context_and_digest(self):
         records = []
         reviews = []

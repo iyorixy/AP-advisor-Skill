@@ -3,6 +3,10 @@
 Read only in Advisor mode. Diagnose the most actionable weakness and prescribe
 the smallest useful intervention; do not inventory the course.
 
+If the learner asks to attempt, correct, confirm, and transfer interactively,
+route subsequent turns to `session-protocol.md`. An Advisor plan must not
+simulate future learner responses or persist a profile.
+
 ## Evidence and diagnosis
 
 Record only what the learner supplied: exam year, deadline, study time,

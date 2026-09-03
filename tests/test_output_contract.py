@@ -6,13 +6,14 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+SKILL_ROOT = ROOT / "ap-calculus-advisor"
 
 
 class OutputContractTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.schema = json.loads(
-            (ROOT / "references" / "output-schema.json").read_text(encoding="utf-8")
+            (SKILL_ROOT / "references" / "output-schema.json").read_text(encoding="utf-8")
         )
 
     def test_deprecated_style_is_not_emittable(self):
@@ -53,7 +54,7 @@ class OutputContractTests(unittest.TestCase):
 
     def test_machine_error_contract_is_strict(self):
         error_schema = json.loads(
-            (ROOT / "references" / "machine-error-schema.json").read_text(encoding="utf-8")
+            (SKILL_ROOT / "references" / "machine-error-schema.json").read_text(encoding="utf-8")
         )
         self.assertIs(error_schema["additionalProperties"], False)
         self.assertEqual(error_schema["properties"]["status"]["const"], "cannot_fulfill")

@@ -1,9 +1,16 @@
-# AP Calculus AB Coach Protocol
+# AP Precalculus and Calculus Coach Protocol
 
-Read this file only for **Coach** requests in AP Calculus AB Units 1–8. The
-protocol is an internal teaching workflow, not a College Board taxonomy. For
-Precalculus and Calculus BC, keep using Generate, Review, or Advisor; do not
-claim that this diagnostic bank covers those courses.
+Read this file only for **Coach** requests in AP Precalculus Units 1–4, AP
+Calculus AB Units 1–8, or AP Calculus BC Units 1–10. The protocol is an
+internal teaching workflow, not a College Board taxonomy. AP Precalculus Unit
+4 Coach work is instructional and not AP Exam-assessed.
+
+The maintained bank covers two patterns in each Precalculus Unit, two patterns
+in each Calculus AB Unit, and selected BC-only patterns in Units 6–10. A
+Calculus BC profile may use Calculus AB items for shared Topics. Do not claim
+that this bounded bank exhaustively diagnoses any course. Keep the requested
+course fixed throughout a session and use its matching Topic and Mathematical
+Practice family.
 
 ## Start with the evidence actually present
 
@@ -77,7 +84,9 @@ be used only with a validated state and an injected `as_of` time:
 <python-3.10+> "<SKILL_ROOT>/scripts/select_next_task.py" --state "<PROFILE_JSON>" --as-of "<ISO-8601>" --evidence-json
 ```
 
-Its reason is an audit explanation, not learner evidence. If it returns no
+The learner state's `course` selects the applicable bank; Calculus BC also
+inherits shared Calculus AB records. Its reason is an audit explanation, not
+learner evidence. If it returns no
 candidate, say that no applicable maintained item is available and request the
 smallest missing evidence or offer a clearly labeled original item.
 
@@ -88,7 +97,9 @@ and the next review recommendation in the conversation and do not invoke the
 state persistence script.
 
 Persist only after the user explicitly authorizes local persistence **and**
-provides a specific data directory. Do not choose a directory, write inside the
+provides a specific data directory. Initialize that profile with
+`--course precalculus`, `--course calc-ab`, or `--course calc-bc`; an omitted
+course preserves the legacy `calc-ab` default. Do not choose a directory, write inside the
 Skill repository, request a name/email, or infer an identity. Before a record
 operation, show or confirm the fields that will be stored. Then use
 `update_learner_state.py` with that exact directory for initialization,

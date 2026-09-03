@@ -8,9 +8,15 @@ policy facts.
 
 ## Scope and source status
 
+- AP Precalculus adaptive Coach coverage is Units 1–4; Unit 4 remains
+  instructional and is not assessed on the AP Exam. The maintained bank has
+  two diagnostic patterns per Precalculus Unit.
 - AP Calculus AB adaptive Coach coverage is Units 1–8, excluding BC-only
   Topics embedded in those Units: 6.11–6.13, 7.5, 7.9, and 8.13. Topic 6.14 is
   shared only when the selected technique itself is AB content.
+- AP Calculus BC adaptive Coach coverage is Units 1–10. It reuses maintained AB
+  items for shared content and adds selected BC-only patterns in Units 6–10;
+  the bank is not an exhaustive Topic inventory.
 - The current framework is the Fall 2020 CED in its consolidated 2026 PDF,
   with the Fall 2026 clarifications. It is not a new Fall 2026 framework.
 - The course page and framework table use “Differentiation: Definition and

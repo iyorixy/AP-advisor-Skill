@@ -1,5 +1,7 @@
 interface:
   display_name: "AP Psychology Advisor"
-  short_description: "AP Psychology study content, review, and intervention"
+  short_description: "AP Psychology study, review, and adaptive coaching"
+  icon_small: "./assets/ap-advisor-icon.png"
+  icon_large: "./assets/ap-advisor-icon.png"
   brand_color: "#D97706"
-  default_prompt: "Use $ap-psychology-advisor to review this AP Psychology response and identify the first substantive error."
+  default_prompt: "Use $ap-psychology-advisor to coach me from this AP Psychology response, one hint at a time."

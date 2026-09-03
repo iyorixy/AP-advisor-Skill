@@ -1,5 +1,7 @@
 interface:
-  display_name: "AP Biology Advisor"
-  short_description: "AP Biology study content, review, and intervention"
+  display_name: "AP Biology Adaptive Advisor"
+  short_description: "Adaptive Coach, review, and AP Biology practice"
+  icon_small: "./assets/ap-advisor-icon.png"
+  icon_large: "./assets/ap-advisor-icon.png"
   brand_color: "#15803D"
-  default_prompt: "Use $ap-biology-advisor to review this AP Biology response and identify the first substantive error."
+  default_prompt: "Use $ap-biology-advisor in Coach mode to review this AP Biology attempt, identify the first substantive error, give one minimal hint, and keep state session-only."

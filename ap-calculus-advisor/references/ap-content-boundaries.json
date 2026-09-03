@@ -41,10 +41,20 @@
       "version": "current calculator policy"
     },
     {
-      "id": "precalculus-practices",
-      "url": "https://apcentral.collegeboard.org/media/pdf/offer-ap-precalculus.pdf",
-      "version": "current AP Central overview",
-      "locators": ["Mathematical Practices", "p. 13"]
+      "id": "precalculus-ced",
+      "url": "https://apcentral.collegeboard.org/media/pdf/ap-precalculus-course-and-exam-description.pdf",
+      "version": "Effective Fall 2026",
+      "locators": ["pp. 13-20", "pp. 23-152"]
+    },
+    {
+      "id": "precalculus-course-page",
+      "url": "https://apcentral.collegeboard.org/courses/ap-precalculus",
+      "version": "2026-27 course page"
+    },
+    {
+      "id": "precalculus-clarifications",
+      "url": "https://apcentral.collegeboard.org/media/pdf/ap-precalculus-ced-clarification-and-guidance.pdf",
+      "version": "Effective Fall 2026"
     }
   ],
   "ab_adaptive_scope": {
@@ -127,7 +137,7 @@
       "content_topic_prefix": "4.",
       "excluded_from": "assessed-topic",
       "reason": "AP Precalculus Unit 4 is course content but is not assessed on the AP Exam.",
-      "source": "precalculus-practices"
+      "source": "precalculus-ced"
     }
   ],
   "corrections": [

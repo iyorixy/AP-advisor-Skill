@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "AP Calculus AB Learner State",
+  "title": "AP Precalculus and Calculus Coach Learner State",
   "description": "Local opt-in profile schema. Attempts are stored as validated JSONL records using definitions.attempt.",
   "type": "object",
   "required": [
@@ -16,7 +16,7 @@
   "properties": {
     "schema_version": {"const": 1},
     "profile_id": {"type": "string", "pattern": "^[A-Za-z0-9_-]{1,64}$"},
-    "course": {"const": "calc-ab"},
+    "course": {"enum": ["precalculus", "calc-ab", "calc-bc"]},
     "attempt_ids": {
       "type": "array",
       "uniqueItems": true,
@@ -29,7 +29,7 @@
     },
     "topic_states": {
       "type": "object",
-      "propertyNames": {"pattern": "^[1-8]\\.[0-9]+$"},
+      "propertyNames": {"pattern": "^(?:[1-9]|10)\\.[0-9]+$"},
       "additionalProperties": {"$ref": "#/definitions/topic_state"}
     },
     "review_queue": {
@@ -38,7 +38,76 @@
     },
     "updated_at": {"type": "string", "format": "date-time"}
   },
-  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {"properties": {"course": {"const": "precalculus"}}},
+      "then": {
+        "properties": {
+          "topic_states": {
+            "propertyNames": {"pattern": "^[1-4]\\.[0-9]+$"},
+            "additionalProperties": {
+              "properties": {
+                "practice": {
+                  "enum": [
+                    "precalc-1-procedural-symbolic-fluency",
+                    "precalc-2-multiple-representations",
+                    "precalc-3-communication-reasoning",
+                    null
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"course": {"const": "calc-ab"}}},
+      "then": {
+        "properties": {
+          "topic_states": {
+            "propertyNames": {"pattern": "^[1-8]\\.[0-9]+$"},
+            "additionalProperties": {
+              "properties": {
+                "practice": {
+                  "enum": [
+                    "calc-1-implementing-processes",
+                    "calc-2-connecting-representations",
+                    "calc-3-justification",
+                    "calc-4-communication-notation",
+                    null
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"course": {"const": "calc-bc"}}},
+      "then": {
+        "properties": {
+          "topic_states": {
+            "propertyNames": {"pattern": "^(?:[1-9]|10)\\.[0-9]+$"},
+            "additionalProperties": {
+              "properties": {
+                "practice": {
+                  "enum": [
+                    "calc-1-implementing-processes",
+                    "calc-2-connecting-representations",
+                    "calc-3-justification",
+                    "calc-4-communication-notation",
+                    null
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
   "definitions": {
     "attempt": {
       "type": "object",
@@ -69,8 +138,8 @@
         "schema_version": {"const": 1},
         "attempt_id": {"type": "string", "pattern": "^[A-Za-z0-9._:-]{1,128}$"},
         "profile_id": {"type": "string", "pattern": "^[A-Za-z0-9_-]{1,64}$"},
-        "course": {"const": "calc-ab"},
-        "topic": {"type": ["string", "null"], "pattern": "^[1-8]\\.[0-9]+$"},
+        "course": {"enum": ["precalculus", "calc-ab", "calc-bc"]},
+        "topic": {"type": ["string", "null"], "pattern": "^(?:[1-9]|10)\\.[0-9]+$"},
         "practice": {
           "type": ["string", "null"],
           "enum": [
@@ -78,6 +147,9 @@
             "calc-2-connecting-representations",
             "calc-3-justification",
             "calc-4-communication-notation",
+            "precalc-1-procedural-symbolic-fluency",
+            "precalc-2-multiple-representations",
+            "precalc-3-communication-reasoning",
             null
           ]
         },
@@ -124,6 +196,55 @@
       "additionalProperties": false,
       "allOf": [
         {
+          "if": {"properties": {"course": {"const": "precalculus"}}},
+          "then": {
+            "properties": {
+              "topic": {"type": ["string", "null"], "pattern": "^[1-4]\\.[0-9]+$"},
+              "practice": {
+                "enum": [
+                  "precalc-1-procedural-symbolic-fluency",
+                  "precalc-2-multiple-representations",
+                  "precalc-3-communication-reasoning",
+                  null
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {"properties": {"course": {"const": "calc-ab"}}},
+          "then": {
+            "properties": {
+              "topic": {"type": ["string", "null"], "pattern": "^[1-8]\\.[0-9]+$"},
+              "practice": {
+                "enum": [
+                  "calc-1-implementing-processes",
+                  "calc-2-connecting-representations",
+                  "calc-3-justification",
+                  "calc-4-communication-notation",
+                  null
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {"properties": {"course": {"const": "calc-bc"}}},
+          "then": {
+            "properties": {
+              "practice": {
+                "enum": [
+                  "calc-1-implementing-processes",
+                  "calc-2-connecting-representations",
+                  "calc-3-justification",
+                  "calc-4-communication-notation",
+                  null
+                ]
+              }
+            }
+          }
+        },
+        {
           "if": {"properties": {"same_form_confirmation": {"const": "pass"}}},
           "then": {
             "properties": {
@@ -169,7 +290,7 @@
         "transfer_item_unseen"
       ],
       "properties": {
-        "topic": {"type": "string", "pattern": "^[1-8]\\.[0-9]+$"},
+        "topic": {"type": "string", "pattern": "^(?:[1-9]|10)\\.[0-9]+$"},
         "practice": {
           "type": ["string", "null"],
           "enum": [
@@ -177,6 +298,9 @@
             "calc-2-connecting-representations",
             "calc-3-justification",
             "calc-4-communication-notation",
+            "precalc-1-procedural-symbolic-fluency",
+            "precalc-2-multiple-representations",
+            "precalc-3-communication-reasoning",
             null
           ]
         },
@@ -253,7 +377,7 @@
       "required": ["review_id", "topic", "misconception_id", "item_id", "reason", "due_at", "status"],
       "properties": {
         "review_id": {"type": "string", "minLength": 1},
-        "topic": {"type": "string", "pattern": "^[1-8]\\.[0-9]+$"},
+        "topic": {"type": "string", "pattern": "^(?:[1-9]|10)\\.[0-9]+$"},
         "misconception_id": {
           "type": ["string", "null"],
           "pattern": "^[A-Za-z0-9._:-]{1,128}$"
