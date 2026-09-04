@@ -52,6 +52,61 @@ class OutputContractTests(unittest.TestCase):
         )
         self.assertEqual(style_rule["else"], {"not": {"required": ["exam_features"]}})
 
+    def test_precalculus_frq_type_is_conditional_and_calculator_bound(self):
+        exam_features = self.schema["properties"]["exam_features"]
+        self.assertEqual(
+            set(exam_features["properties"]["free_response_type"]["enum"]),
+            {
+                "function-concepts",
+                "modeling-non-periodic-context",
+                "modeling-periodic-context",
+                "symbolic-manipulations",
+            },
+        )
+        subtype_rule = next(
+            rule
+            for rule in self.schema["allOf"]
+            if rule.get("then", {})
+            .get("properties", {})
+            .get("exam_features", {})
+            .get("required")
+            == ["free_response_type"]
+        )
+        self.assertEqual(
+            set(subtype_rule["if"]["required"]),
+            {"course", "style", "exam_features"},
+        )
+        condition_properties = subtype_rule["if"]["properties"]
+        self.assertEqual(condition_properties["course"], {"const": "precalculus"})
+        self.assertEqual(condition_properties["style"], {"const": "exam-oriented"})
+        self.assertEqual(
+            condition_properties["exam_features"]["required"], ["question_type"]
+        )
+        self.assertEqual(
+            condition_properties["exam_features"]["properties"]["question_type"],
+            {"const": "free-response"},
+        )
+        self.assertEqual(
+            subtype_rule["else"]["properties"]["exam_features"]["not"],
+            {"required": ["free_response_type"]},
+        )
+        calculator_mapping = {
+            frozenset(rule["if"]["properties"]["free_response_type"]["enum"]):
+            rule["then"]["properties"]["calculator"]["const"]
+            for rule in exam_features["allOf"]
+        }
+        self.assertEqual(
+            calculator_mapping,
+            {
+                frozenset(
+                    {"function-concepts", "modeling-non-periodic-context"}
+                ): "calculator-required-section",
+                frozenset(
+                    {"modeling-periodic-context", "symbolic-manipulations"}
+                ): "calculator-not-permitted",
+            },
+        )
+
     def test_machine_error_contract_is_strict(self):
         error_schema = json.loads(
             (SKILL_ROOT / "references" / "machine-error-schema.json").read_text(encoding="utf-8")

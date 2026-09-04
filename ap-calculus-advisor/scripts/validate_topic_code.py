@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate exact AP Precalculus and Calculus Advisor Topic mappings and high-risk content boundaries.
+"""Validate AP Precalculus/Calculus Topic mappings and assessment boundaries.
 
 The matcher compares the entire citation after Unicode NFKC normalization.
 It intentionally does not extract a plausible Topic from surrounding text.
@@ -25,8 +25,14 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_FRAMEWORK_PATH = REPO_ROOT / "references" / "ap-calc-framework.md"
 DEFAULT_BOUNDARIES_PATH = REPO_ROOT / "references" / "ap-content-boundaries.json"
 COURSES = {"precalculus", "calc-ab", "calc-bc"}
-EVIDENCE_SCHEMA_VERSION = 2
+EVIDENCE_SCHEMA_VERSION = 3
 EVIDENCE_VALIDATOR = "ap-calculus-advisor-topic-code"
+PRECALCULUS_FREE_RESPONSE_TYPES = {
+    "function-concepts",
+    "modeling-non-periodic-context",
+    "modeling-periodic-context",
+    "symbolic-manipulations",
+}
 
 RE_COURSE = re.compile(r"^##\s+(.+?)\s*$")
 RE_UNIT = re.compile(r"^-\s+Unit\s+(\d+)\s+—\s+(.+?)\s*$")
@@ -315,7 +321,7 @@ def load_boundaries(path: Path = DEFAULT_BOUNDARIES_PATH) -> dict[str, Any]:
     }
     if not isinstance(value, dict) or value.keys() != required:
         raise BoundaryDataError("content-boundary object has missing or unexpected fields")
-    if value["schema_version"] != 1 or not isinstance(value["sources"], list):
+    if value["schema_version"] != 2 or not isinstance(value["sources"], list):
         raise BoundaryDataError("unsupported schema version or invalid sources")
     if (
         not isinstance(value["source_checked_at"], str)
@@ -354,9 +360,10 @@ def load_boundaries(path: Path = DEFAULT_BOUNDARIES_PATH) -> dict[str, Any]:
         raise BoundaryDataError("mathematical_practices is invalid")
     practice_names = value["practice_names"]
     calculus_practices = set(practices["calculus"])
+    precalculus_practices = set(practices["precalculus"])
     if (
         not isinstance(practice_names, dict)
-        or set(practice_names) != calculus_practices
+        or set(practice_names) != (calculus_practices | precalculus_practices)
         or any(not isinstance(name, str) or not name for name in practice_names.values())
     ):
         raise BoundaryDataError("practice_names is invalid")
@@ -372,22 +379,164 @@ def load_boundaries(path: Path = DEFAULT_BOUNDARIES_PATH) -> dict[str, Any]:
 
     exam_tasks = value["exam_tasks"]
     if not isinstance(exam_tasks, dict) or set(exam_tasks) != {
+        "calculus",
+        "precalculus",
+    }:
+        raise BoundaryDataError("exam_tasks must contain course-scoped contracts")
+    allowed_conditions = {"calculator-not-permitted", "calculator-required-section"}
+    allowed_representations = {"analytical", "graphical", "numerical", "tabular", "verbal"}
+    calculus_tasks = exam_tasks["calculus"]
+    if not isinstance(calculus_tasks, dict) or set(calculus_tasks) != {
         "multiple-choice",
         "free-response",
     }:
-        raise BoundaryDataError("exam_tasks must contain current MCQ and FRQ contracts")
-    allowed_conditions = {"calculator-not-permitted", "calculator-required-section"}
-    allowed_representations = {"analytical", "graphical", "numerical", "tabular", "verbal"}
-    for name, task in exam_tasks.items():
+        raise BoundaryDataError("exam_tasks.calculus must contain MCQ and FRQ contracts")
+    for name, task in calculus_tasks.items():
+        expected_justification = (
+            "not-required" if name == "multiple-choice" else "verb-dependent"
+        )
+        expected_practices = (
+            calculus_practices - {"calc-4-communication-notation"}
+            if name == "multiple-choice"
+            else calculus_practices
+        )
         if (
             not isinstance(task, dict)
             or not isinstance(task.get("supports_full_task"), bool)
+            or task["supports_full_task"] != (name == "free-response")
             or set(task.get("allowed_calculator_conditions", [])) != allowed_conditions
             or set(task.get("allowed_representations", [])) != allowed_representations
-            or not set(task.get("allowed_practices", [])) <= calculus_practices
+            or set(task.get("allowed_practices", [])) != expected_practices
+            or task.get("justification_requirement") != expected_justification
             or task.get("source") not in source_ids
         ):
-            raise BoundaryDataError(f"exam_tasks.{name} is invalid")
+            raise BoundaryDataError(f"exam_tasks.calculus.{name} is invalid")
+
+    precalculus_tasks = exam_tasks["precalculus"]
+    if not isinstance(precalculus_tasks, dict) or set(precalculus_tasks) != {
+        "multiple-choice",
+        "free-response",
+    }:
+        raise BoundaryDataError(
+            "exam_tasks.precalculus must contain MCQ and FRQ contracts"
+        )
+    precalculus_mcq = precalculus_tasks["multiple-choice"]
+    if (
+        not isinstance(precalculus_mcq, dict)
+        or precalculus_mcq.get("supports_full_task") is not False
+        or precalculus_mcq.get("allowed_units") != [1, 2, 3]
+        or precalculus_mcq.get("section_parts")
+        != {
+            "I-A": "calculator-not-permitted",
+            "I-B": "calculator-required-section",
+        }
+        or set(precalculus_mcq.get("allowed_calculator_conditions", []))
+        != allowed_conditions
+        or set(precalculus_mcq.get("allowed_representations", []))
+        != allowed_representations
+        or set(precalculus_mcq.get("allowed_practices", []))
+        != precalculus_practices
+        or precalculus_mcq.get("required_practices_for_full_task") != []
+        or precalculus_mcq.get("required_representation_groups_for_full_task") != []
+        or precalculus_mcq.get("justification_requirement") != "not-required"
+        or precalculus_mcq.get("source") not in source_ids
+    ):
+        raise BoundaryDataError("exam_tasks.precalculus.multiple-choice is invalid")
+
+    precalculus_frq = precalculus_tasks["free-response"]
+    if (
+        not isinstance(precalculus_frq, dict)
+        or precalculus_frq.get("requires_free_response_type") is not True
+        or not isinstance(precalculus_frq.get("free_response_types"), dict)
+        or set(precalculus_frq["free_response_types"])
+        != PRECALCULUS_FREE_RESPONSE_TYPES
+    ):
+        raise BoundaryDataError("exam_tasks.precalculus.free-response is invalid")
+    expected_precalculus_frq = {
+        "function-concepts": {
+            "title": "Function Concepts",
+            "section_part": "II-A",
+            "context": "non-contextual",
+            "units": [1, 2],
+            "conditions": {"calculator-required-section"},
+            "practices": precalculus_practices,
+            "representation_groups": {
+                frozenset({"analytical"}),
+                frozenset({"graphical"}),
+                frozenset({"numerical", "tabular"}),
+            },
+            "justification": "required-for-full-task",
+        },
+        "modeling-non-periodic-context": {
+            "title": "Modeling a Non-Periodic Context",
+            "section_part": "II-A",
+            "context": "real-world",
+            "units": [1, 2],
+            "conditions": {"calculator-required-section"},
+            "practices": {
+                "precalc-1-procedural-symbolic-fluency",
+                "precalc-3-communication-reasoning",
+            },
+            "representation_groups": set(),
+            "justification": "required-for-full-task",
+        },
+        "modeling-periodic-context": {
+            "title": "Modeling a Periodic Context",
+            "section_part": "II-B",
+            "context": "real-world",
+            "units": [3],
+            "conditions": {"calculator-not-permitted"},
+            "practices": precalculus_practices,
+            "representation_groups": set(),
+            "justification": "verb-dependent",
+        },
+        "symbolic-manipulations": {
+            "title": "Symbolic Manipulations",
+            "section_part": "II-B",
+            "context": "non-contextual",
+            "units": [2, 3],
+            "conditions": {"calculator-not-permitted"},
+            "practices": {"precalc-1-procedural-symbolic-fluency"},
+            "representation_groups": set(),
+            "justification": "verb-dependent",
+        },
+    }
+    for name, expected in expected_precalculus_frq.items():
+        task = precalculus_frq["free_response_types"][name]
+        representation_groups = task.get(
+            "required_representation_groups_for_full_task", []
+        ) if isinstance(task, dict) else []
+        if (
+            not isinstance(task, dict)
+            or task.get("title") != expected["title"]
+            or task.get("section_part") != expected["section_part"]
+            or task.get("context") != expected["context"]
+            or task.get("supports_full_task") is not True
+            or task.get("allowed_units") != expected["units"]
+            or set(task.get("allowed_calculator_conditions", []))
+            != expected["conditions"]
+            or set(task.get("allowed_representations", []))
+            != allowed_representations
+            or set(task.get("allowed_practices", [])) != expected["practices"]
+            or set(task.get("required_practices_for_full_task", []))
+            != expected["practices"]
+            or not isinstance(representation_groups, list)
+            or any(
+                not isinstance(group, list)
+                or not group
+                or any(not isinstance(representation, str) for representation in group)
+                or not set(group) <= allowed_representations
+                for group in representation_groups
+            )
+            or {frozenset(group) for group in representation_groups}
+            != expected["representation_groups"]
+            or task.get("justification_requirement") != expected["justification"]
+            or task.get("supporting_work_requirement") != "required"
+            or task.get("source") not in source_ids
+        ):
+            raise BoundaryDataError(
+                f"exam_tasks.precalculus.free-response.{name} is invalid"
+            )
     for section in ("high_risk_methods", "topic_dependencies"):
         if not isinstance(value[section], dict):
             raise BoundaryDataError(f"{section} must be an object")
@@ -493,19 +642,24 @@ def validate_content_boundary(
             )
 
     if assessed_topic:
+        assessed_topics = {content_topic, *supporting}
         for exclusion in data["exclusions"]:
-            if (
-                exclusion["course"] == course
-                and content_topic.startswith(exclusion["content_topic_prefix"])
-                and exclusion["excluded_from"] == "assessed-topic"
-            ):
-                failures.append(exclusion["reason"])
+            for topic in sorted(assessed_topics):
+                if (
+                    exclusion["course"] == course
+                    and topic.startswith(exclusion["content_topic_prefix"])
+                    and exclusion["excluded_from"] == "assessed-topic"
+                ):
+                    failures.append(f"{exclusion['reason']} (Topic {topic})")
     return failures
 
 
 def validate_assessment_task(
     *,
+    course: str,
+    topic_numbers: Iterable[str] = (),
     exam_task: str | None,
+    free_response_type: str | None,
     full_task: bool,
     calculator_condition: str | None,
     representations: Iterable[str],
@@ -517,6 +671,8 @@ def validate_assessment_task(
 
     if exam_task is None:
         extras = []
+        if free_response_type is not None:
+            extras.append("--free-response-type")
         if full_task:
             extras.append("--full-task")
         if calculator_condition is not None:
@@ -527,20 +683,61 @@ def validate_assessment_task(
             extras.append("--justification")
         return [f"{', '.join(extras)} requires --exam-task"] if extras else []
 
-    data = load_boundaries(boundaries_path)
-    task = data["exam_tasks"].get(exam_task)
-    if task is None:
+    if exam_task not in {"multiple-choice", "free-response"}:
         return [f"unknown exam task {exam_task!r}"]
+    if course not in COURSES:
+        return [f"unknown course {course!r}"]
+    data = load_boundaries(boundaries_path)
     failures: list[str] = []
+    if course == "precalculus":
+        course_tasks = data["exam_tasks"]["precalculus"]
+        if exam_task == "multiple-choice":
+            task = course_tasks["multiple-choice"]
+            if free_response_type is not None:
+                failures.append(
+                    "--free-response-type is valid only for a Precalculus free-response task"
+                )
+        else:
+            if free_response_type is None:
+                return [
+                    "a Precalculus free-response task requires --free-response-type"
+                ]
+            task = course_tasks["free-response"]["free_response_types"].get(
+                free_response_type
+            )
+            if task is None:
+                return [f"unknown Precalculus free-response type {free_response_type!r}"]
+    else:
+        task = data["exam_tasks"]["calculus"][exam_task]
+        if free_response_type is not None:
+            failures.append(
+                "--free-response-type is valid only for a Precalculus free-response task"
+            )
     representations = list(representations)
     practices = list(mathematical_practices)
+    topic_numbers = list(topic_numbers)
+    task_label = free_response_type or exam_task
     if full_task and not task["supports_full_task"]:
-        failures.append(f"{exam_task} cannot be validated as a full task")
+        failures.append(f"{task_label} cannot be validated as a full task")
+    allowed_units = set(task.get("allowed_units", []))
+    if allowed_units:
+        invalid_topics = []
+        for topic in topic_numbers:
+            unit, separator, _ = topic.partition(".")
+            if not separator or not unit.isdigit() or int(unit) not in allowed_units:
+                invalid_topics.append(topic)
+        if invalid_topics:
+            failures.append(
+                f"{task_label} cannot use Topic(s): "
+                + ", ".join(invalid_topics)
+                + "; allowed Unit(s): "
+                + ", ".join(str(unit) for unit in sorted(allowed_units))
+            )
     if calculator_condition is None:
         failures.append("an exam task requires --calculator-condition")
     elif calculator_condition not in task["allowed_calculator_conditions"]:
         failures.append(
-            f"calculator condition {calculator_condition!r} is invalid for {exam_task}"
+            f"calculator condition {calculator_condition!r} is invalid for {task_label}"
         )
     if not representations:
         failures.append("an exam task requires at least one --representation")
@@ -552,17 +749,39 @@ def validate_assessment_task(
             )
     if justification is None:
         failures.append("an exam task requires --justification")
-    elif exam_task == "multiple-choice" and justification != "not-required":
+    elif task["justification_requirement"] == "not-required" and justification != "not-required":
         failures.append("multiple-choice responses do not require written justification")
+    elif (
+        task["justification_requirement"] == "required-for-full-task"
+        and full_task
+        and justification != "required"
+    ):
+        failures.append(f"a full {task_label} task requires written justification")
     if not practices:
         failures.append("an exam task requires at least one Mathematical Practice")
     else:
         invalid_practices = set(practices) - set(task["allowed_practices"])
         if invalid_practices:
             failures.append(
-                f"{exam_task} does not assess: "
+                f"{task_label} does not assess: "
                 + ", ".join(sorted(invalid_practices))
             )
+        if full_task:
+            missing_practices = set(
+                task.get("required_practices_for_full_task", [])
+            ) - set(practices)
+            if missing_practices:
+                failures.append(
+                    f"a full {task_label} task is missing Mathematical Practice(s): "
+                    + ", ".join(sorted(missing_practices))
+                )
+    if full_task:
+        for group in task.get("required_representation_groups_for_full_task", []):
+            if set(group).isdisjoint(representations):
+                failures.append(
+                    f"a full {task_label} task requires representation group: "
+                    + " or ".join(group)
+                )
     return failures
 
 
@@ -593,6 +812,7 @@ def validate_request(
     mathematical_practices: Iterable[str] = (),
     practice_only: bool = False,
     exam_task: str | None = None,
+    free_response_type: str | None = None,
     full_task: bool = False,
     calculator_condition: str | None = None,
     representations: Iterable[str] = (),
@@ -636,20 +856,19 @@ def validate_request(
                 mathematical_practices=practices,
                 boundaries_path=boundaries_path,
             )
-            if exam_task is not None and course == "precalculus":
-                failures.append("the Calculus assessment-task contract does not validate Precalculus tasks")
-            else:
-                failures.extend(
-                    validate_assessment_task(
-                        exam_task=exam_task,
-                        full_task=full_task,
-                        calculator_condition=calculator_condition,
-                        representations=representations,
-                        justification=justification,
-                        mathematical_practices=practices,
-                        boundaries_path=boundaries_path,
-                    )
+            failures.extend(
+                validate_assessment_task(
+                    course=course,
+                    exam_task=exam_task,
+                    free_response_type=free_response_type,
+                    full_task=full_task,
+                    calculator_condition=calculator_condition,
+                    representations=representations,
+                    justification=justification,
+                    mathematical_practices=practices,
+                    boundaries_path=boundaries_path,
                 )
+            )
         except BoundaryDataError as exc:
             error = _error_evidence(course, False, str(exc))
             error.update({"validation_mode": "practice-only", "topic_status": "not-established"})
@@ -660,6 +879,7 @@ def validate_request(
             or practices
             or assessed_topic
             or exam_task is not None
+            or free_response_type is not None
             or full_task
             or calculator_condition is not None
             or representations
@@ -668,10 +888,11 @@ def validate_request(
             return 2, _error_evidence(
                 None, assessed_topic, "--course is required for boundary or assessment-task checks"
             )
+        effective_assessed = assessed_topic or exam_task is not None
         code, payload = validate_citations(
             citations,
             course=course,
-            assessed_topic=assessed_topic,
+            assessed_topic=effective_assessed,
             framework_path=framework_path,
         )
         payload.update({"validation_mode": "topic", "topic_status": "validated" if code == 0 else "not-established"})
@@ -696,27 +917,28 @@ def validate_request(
                         boundaries_path=boundaries_path,
                     )
                 )
-                if exam_task is not None and course == "precalculus":
-                    failures.append("the Calculus assessment-task contract does not validate Precalculus tasks")
-                else:
-                    failures.extend(
-                        validate_assessment_task(
-                            exam_task=exam_task,
-                            full_task=full_task,
-                            calculator_condition=calculator_condition,
-                            representations=representations,
-                            justification=justification,
-                            mathematical_practices=practices,
-                            boundaries_path=boundaries_path,
-                        )
+                failures.extend(
+                    validate_assessment_task(
+                        course=course,
+                        topic_numbers=topic_numbers,
+                        exam_task=exam_task,
+                        free_response_type=free_response_type,
+                        full_task=full_task,
+                        calculator_condition=calculator_condition,
+                        representations=representations,
+                        justification=justification,
+                        mathematical_practices=practices,
+                        boundaries_path=boundaries_path,
                     )
+                )
             except BoundaryDataError as exc:
-                return 2, _error_evidence(course, assessed_topic, str(exc))
+                return 2, _error_evidence(course, effective_assessed, str(exc))
 
     payload["content_boundary"] = {
         "status": "fail" if failures else "pass",
         "failures": failures,
         "exam_task": exam_task,
+        "free_response_type": free_response_type,
         "task_scope": ("full" if full_task else "partial") if exam_task else None,
         "calculator_condition": calculator_condition,
         "representations": representations,
@@ -761,6 +983,10 @@ def run_self_check(
             raise AssertionError(f"parsed {len(topics)} Topics; expected 169")
         calculus_topics = filter_by_course(topics, "calc-bc")
         by_code = {topic.topic_num: topic for topic in calculus_topics}
+        precalculus_by_code = {
+            topic.topic_num: topic
+            for topic in filter_by_course(topics, "precalculus")
+        }
         embedded = set(boundaries["ab_adaptive_scope"]["embedded_bc_only_topics"])
         if any(code not in by_code or not by_code[code].bc_only for code in embedded):
             raise AssertionError("AB adaptive scope contains a non-BC-only or unknown Topic")
@@ -838,6 +1064,158 @@ def run_self_check(
             justification="required",
             mathematical_practices=["calc-3-justification", "calc-4-communication-notation"],
         )
+        precalc_p1 = "precalc-1-procedural-symbolic-fluency"
+        precalc_p2 = "precalc-2-multiple-representations"
+        precalc_p3 = "precalc-3-communication-reasoning"
+        expect(
+            "Precalculus MCQ contract",
+            0,
+            [precalculus_by_code["2.8"].citation],
+            course="precalculus",
+            exam_task="multiple-choice",
+            calculator_condition="calculator-not-permitted",
+            representations=["analytical"],
+            justification="not-required",
+            mathematical_practices=[precalc_p1],
+        )
+        expect(
+            "Precalculus Function Concepts full task",
+            0,
+            [precalculus_by_code["2.8"].citation],
+            course="precalculus",
+            exam_task="free-response",
+            free_response_type="function-concepts",
+            full_task=True,
+            calculator_condition="calculator-required-section",
+            representations=["analytical", "graphical", "tabular"],
+            justification="required",
+            mathematical_practices=[precalc_p1, precalc_p2, precalc_p3],
+        )
+        expect(
+            "Precalculus non-periodic modeling full task",
+            0,
+            [precalculus_by_code["2.5"].citation],
+            course="precalculus",
+            exam_task="free-response",
+            free_response_type="modeling-non-periodic-context",
+            full_task=True,
+            calculator_condition="calculator-required-section",
+            representations=["numerical", "verbal"],
+            justification="required",
+            mathematical_practices=[precalc_p1, precalc_p3],
+        )
+        expect(
+            "Precalculus periodic modeling full task",
+            0,
+            [precalculus_by_code["3.7"].citation],
+            course="precalculus",
+            exam_task="free-response",
+            free_response_type="modeling-periodic-context",
+            full_task=True,
+            calculator_condition="calculator-not-permitted",
+            representations=["analytical", "graphical"],
+            justification="not-required",
+            mathematical_practices=[precalc_p1, precalc_p2, precalc_p3],
+        )
+        expect(
+            "Precalculus symbolic manipulations full task",
+            0,
+            [precalculus_by_code["3.12"].citation],
+            course="precalculus",
+            exam_task="free-response",
+            free_response_type="symbolic-manipulations",
+            full_task=True,
+            calculator_condition="calculator-not-permitted",
+            representations=["analytical"],
+            justification="not-required",
+            mathematical_practices=[precalc_p1],
+        )
+        expect(
+            "Precalculus FRQ missing type",
+            1,
+            [precalculus_by_code["2.8"].citation],
+            course="precalculus",
+            exam_task="free-response",
+            calculator_condition="calculator-required-section",
+            representations=["analytical"],
+            justification="required",
+            mathematical_practices=[precalc_p1],
+        )
+        expect(
+            "Precalculus FRQ calculator mismatch",
+            1,
+            [precalculus_by_code["3.7"].citation],
+            course="precalculus",
+            exam_task="free-response",
+            free_response_type="modeling-periodic-context",
+            calculator_condition="calculator-required-section",
+            representations=["graphical"],
+            justification="not-required",
+            mathematical_practices=[precalc_p2],
+        )
+        expect(
+            "Precalculus FRQ Unit mismatch",
+            1,
+            [precalculus_by_code["2.8"].citation],
+            course="precalculus",
+            exam_task="free-response",
+            free_response_type="modeling-periodic-context",
+            calculator_condition="calculator-not-permitted",
+            representations=["analytical"],
+            justification="not-required",
+            mathematical_practices=[precalc_p1],
+        )
+        expect(
+            "Precalculus symbolic task Practice mismatch",
+            1,
+            [precalculus_by_code["3.12"].citation],
+            course="precalculus",
+            exam_task="free-response",
+            free_response_type="symbolic-manipulations",
+            calculator_condition="calculator-not-permitted",
+            representations=["analytical"],
+            justification="not-required",
+            mathematical_practices=[precalc_p2],
+        )
+        expect(
+            "Precalculus Function Concepts incomplete full task",
+            1,
+            [precalculus_by_code["2.8"].citation],
+            course="precalculus",
+            exam_task="free-response",
+            free_response_type="function-concepts",
+            full_task=True,
+            calculator_condition="calculator-required-section",
+            representations=["analytical"],
+            justification="not-required",
+            mathematical_practices=[precalc_p1],
+        )
+        expect(
+            "Precalculus exam task with Unit 4 support",
+            1,
+            [
+                precalculus_by_code["2.8"].citation,
+                precalculus_by_code["4.10"].citation,
+            ],
+            course="precalculus",
+            exam_task="multiple-choice",
+            calculator_condition="calculator-not-permitted",
+            representations=["analytical"],
+            justification="not-required",
+            mathematical_practices=[precalc_p1],
+        )
+        expect(
+            "Precalculus practice-only exam metadata",
+            0,
+            course="precalculus",
+            practice_only=True,
+            exam_task="free-response",
+            free_response_type="symbolic-manipulations",
+            calculator_condition="calculator-not-permitted",
+            representations=["analytical"],
+            justification="not-required",
+            mathematical_practices=[precalc_p1],
+        )
         expect(
             "Precalculus Unit 4 assessed",
             1,
@@ -895,6 +1273,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--mathematical-practice", dest="practices", action="append", default=[]
     )
     parser.add_argument("--exam-task", choices=["multiple-choice", "free-response"])
+    parser.add_argument(
+        "--free-response-type",
+        choices=sorted(PRECALCULUS_FREE_RESPONSE_TYPES),
+        help="required for Precalculus free-response tasks; invalid elsewhere",
+    )
     parser.add_argument("--full-task", action="store_true")
     parser.add_argument(
         "--calculator-condition",
@@ -927,6 +1310,7 @@ def main(argv: list[str] | None = None) -> int:
             mathematical_practices=args.practices,
             practice_only=args.practice_only,
             exam_task=args.exam_task,
+            free_response_type=args.free_response_type,
             full_task=args.full_task,
             calculator_condition=args.calculator_condition,
             representations=args.representations,

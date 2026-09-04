@@ -22,12 +22,21 @@ SPEC.loader.exec_module(validator)
 CHAIN_RULE = "Unit 3, Topic 3.1 — The Chain Rule"
 
 
+PRECALCULUS_TOPICS = {
+    topic.topic_num: topic.citation
+    for topic in validator.filter_by_course(validator.parse_framework(), "precalculus")
+}
+PRECALC_P1 = "precalc-1-procedural-symbolic-fluency"
+PRECALC_P2 = "precalc-2-multiple-representations"
+PRECALC_P3 = "precalc-3-communication-reasoning"
+
+
 class ValidatorTests(unittest.TestCase):
     def test_substantive_self_check(self):
         code, payload = validator.run_self_check()
         self.assertEqual(code, 0)
         self.assertEqual(payload["overall_status"], "pass")
-        self.assertGreaterEqual(payload["self_check"]["behavior_check_count"], 15)
+        self.assertGreaterEqual(payload["self_check"]["behavior_check_count"], 27)
 
     def test_exact_topic_positive_and_suffix_negative(self):
         code, _ = validator.validate_request([CHAIN_RULE], course="calc-ab")
@@ -89,6 +98,258 @@ class ValidatorTests(unittest.TestCase):
         )
         self.assertEqual(code, 1)
         self.assertGreaterEqual(len(payload["content_boundary"]["failures"]), 2)
+
+    def test_precalculus_mcq_and_all_four_frq_contracts(self):
+        code, _ = validator.validate_request(
+            [PRECALCULUS_TOPICS["2.8"]],
+            course="precalculus",
+            exam_task="multiple-choice",
+            calculator_condition="calculator-not-permitted",
+            representations=["analytical"],
+            justification="not-required",
+            mathematical_practices=[PRECALC_P1],
+        )
+        self.assertEqual(code, 0)
+
+        cases = (
+            (
+                "function-concepts",
+                "2.8",
+                "calculator-required-section",
+                ["analytical", "graphical", "tabular"],
+                "required",
+                [PRECALC_P1, PRECALC_P2, PRECALC_P3],
+            ),
+            (
+                "modeling-non-periodic-context",
+                "2.5",
+                "calculator-required-section",
+                ["numerical", "verbal"],
+                "required",
+                [PRECALC_P1, PRECALC_P3],
+            ),
+            (
+                "modeling-periodic-context",
+                "3.7",
+                "calculator-not-permitted",
+                ["analytical", "graphical"],
+                "not-required",
+                [PRECALC_P1, PRECALC_P2, PRECALC_P3],
+            ),
+            (
+                "symbolic-manipulations",
+                "3.12",
+                "calculator-not-permitted",
+                ["analytical"],
+                "not-required",
+                [PRECALC_P1],
+            ),
+        )
+        for task_type, topic, calculator, representations, justification, practices in cases:
+            with self.subTest(task_type=task_type):
+                code, payload = validator.validate_request(
+                    [PRECALCULUS_TOPICS[topic]],
+                    course="precalculus",
+                    exam_task="free-response",
+                    free_response_type=task_type,
+                    full_task=True,
+                    calculator_condition=calculator,
+                    representations=representations,
+                    justification=justification,
+                    mathematical_practices=practices,
+                )
+                self.assertEqual(code, 0, payload)
+                self.assertEqual(
+                    payload["content_boundary"]["free_response_type"], task_type
+                )
+
+    def test_precalculus_frq_rejects_missing_or_inconsistent_metadata(self):
+        base = {
+            "course": "precalculus",
+            "exam_task": "free-response",
+            "calculator_condition": "calculator-required-section",
+            "representations": ["analytical"],
+            "justification": "required",
+            "mathematical_practices": [PRECALC_P1],
+        }
+        code, payload = validator.validate_request(
+            [PRECALCULUS_TOPICS["2.8"]], **base
+        )
+        self.assertEqual(code, 1)
+        self.assertIn(
+            "requires --free-response-type",
+            " ".join(payload["content_boundary"]["failures"]),
+        )
+
+        negative_cases = (
+            (
+                "wrong calculator",
+                "3.7",
+                {
+                    **base,
+                    "free_response_type": "modeling-periodic-context",
+                    "mathematical_practices": [PRECALC_P2],
+                },
+            ),
+            (
+                "wrong Unit",
+                "2.8",
+                {
+                    **base,
+                    "free_response_type": "modeling-periodic-context",
+                    "calculator_condition": "calculator-not-permitted",
+                },
+            ),
+            (
+                "wrong Practice",
+                "3.12",
+                {
+                    **base,
+                    "free_response_type": "symbolic-manipulations",
+                    "calculator_condition": "calculator-not-permitted",
+                    "justification": "not-required",
+                    "mathematical_practices": [PRECALC_P2],
+                },
+            ),
+        )
+        for label, topic, arguments in negative_cases:
+            with self.subTest(label=label):
+                code, payload = validator.validate_request(
+                    [PRECALCULUS_TOPICS[topic]], **arguments
+                )
+                self.assertEqual(code, 1, payload)
+
+    def test_precalculus_subtype_is_forbidden_elsewhere(self):
+        code, _ = validator.validate_request(
+            [PRECALCULUS_TOPICS["2.8"]],
+            course="precalculus",
+            exam_task="multiple-choice",
+            free_response_type="function-concepts",
+            calculator_condition="calculator-not-permitted",
+            representations=["analytical"],
+            justification="not-required",
+            mathematical_practices=[PRECALC_P1],
+        )
+        self.assertEqual(code, 1)
+        code, _ = validator.validate_request(
+            [CHAIN_RULE],
+            course="calc-ab",
+            exam_task="free-response",
+            free_response_type="function-concepts",
+            calculator_condition="calculator-required-section",
+            representations=["analytical"],
+            justification="required",
+            mathematical_practices=["calc-3-justification"],
+        )
+        self.assertEqual(code, 1)
+
+    def test_full_function_concepts_requires_each_fixed_component(self):
+        base = {
+            "course": "precalculus",
+            "exam_task": "free-response",
+            "free_response_type": "function-concepts",
+            "full_task": True,
+            "calculator_condition": "calculator-required-section",
+            "representations": ["analytical", "graphical", "numerical"],
+            "justification": "required",
+            "mathematical_practices": [PRECALC_P1, PRECALC_P2, PRECALC_P3],
+        }
+        cases = (
+            (
+                "numerical representation",
+                {**base, "representations": ["analytical", "graphical"]},
+                "representation group",
+            ),
+            (
+                "Practice 3",
+                {**base, "mathematical_practices": [PRECALC_P1, PRECALC_P2]},
+                "missing Mathematical Practice",
+            ),
+            (
+                "justification",
+                {**base, "justification": "not-required"},
+                "requires written justification",
+            ),
+        )
+        for label, arguments, expected_message in cases:
+            with self.subTest(label=label):
+                code, payload = validator.validate_request(
+                    [PRECALCULUS_TOPICS["2.8"]], **arguments
+                )
+                self.assertEqual(code, 1, payload)
+                self.assertIn(
+                    expected_message,
+                    " ".join(payload["content_boundary"]["failures"]),
+                )
+
+    def test_precalculus_exam_scope_rejects_supporting_unit_four(self):
+        failures = validator.validate_content_boundary(
+            course="precalculus",
+            content_topic="2.8",
+            supporting_topics=["4.10"],
+            assessed_topic=True,
+        )
+        self.assertTrue(any("Unit 4" in failure for failure in failures))
+        code, payload = validator.validate_request(
+            [PRECALCULUS_TOPICS["2.8"], PRECALCULUS_TOPICS["4.10"]],
+            course="precalculus",
+            exam_task="multiple-choice",
+            calculator_condition="calculator-not-permitted",
+            representations=["analytical"],
+            justification="not-required",
+            mathematical_practices=[PRECALC_P1],
+        )
+        self.assertEqual(code, 1)
+        self.assertTrue(any(row["status"] == "fail" for row in payload["results"]))
+
+    def test_precalculus_practice_only_exam_contract(self):
+        code, payload = validator.validate_request(
+            [],
+            course="precalculus",
+            practice_only=True,
+            exam_task="free-response",
+            free_response_type="symbolic-manipulations",
+            calculator_condition="calculator-not-permitted",
+            representations=["analytical"],
+            justification="not-required",
+            mathematical_practices=[PRECALC_P1],
+        )
+        self.assertEqual(code, 0, payload)
+
+    def test_precalculus_frq_cli_receipt(self):
+        process = subprocess.run(
+            [
+                sys.executable,
+                str(SCRIPT),
+                "--course",
+                "precalculus",
+                "--exam-task",
+                "free-response",
+                "--free-response-type",
+                "symbolic-manipulations",
+                "--calculator-condition",
+                "calculator-not-permitted",
+                "--representation",
+                "analytical",
+                "--justification",
+                "not-required",
+                "--mathematical-practice",
+                PRECALC_P1,
+                "--evidence-json",
+                PRECALCULUS_TOPICS["3.12"],
+            ],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+        )
+        self.assertEqual(process.returncode, 0, process.stderr)
+        payload = json.loads(process.stdout)
+        self.assertEqual(payload["schema_version"], 3)
+        self.assertEqual(
+            payload["content_boundary"]["free_response_type"],
+            "symbolic-manipulations",
+        )
 
     def test_literal_legacy_alias_is_accepted_but_never_emitted(self):
         process = subprocess.run(

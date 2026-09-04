@@ -55,5 +55,19 @@ class ReadmeContractTests(unittest.TestCase):
             self.assertIn("Practice Exam", text)
 
 
+    def test_both_languages_state_precalculus_exam_contract(self):
+        for text in (self.english, self.chinese):
+            for token in (
+                "May 2027",
+                "Function Concepts",
+                "Modeling a Non-Periodic Context",
+                "Modeling a Periodic Context",
+                "Symbolic Manipulations",
+                "Unit 4",
+                "instructional",
+            ):
+                self.assertIn(token, text)
+
+
 if __name__ == "__main__":
     unittest.main()

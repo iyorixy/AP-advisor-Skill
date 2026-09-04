@@ -92,11 +92,22 @@
     },
     "exam_features": {
       "type": "object",
+      "description": "Exam-task metadata. AP Precalculus free-response items additionally require a named free-response type.",
       "required": ["question_type", "calculator", "representations", "justification"],
       "properties": {
         "question_type": {
           "type": "string",
           "enum": ["multiple-choice", "free-response"]
+        },
+        "free_response_type": {
+          "type": "string",
+          "enum": [
+            "function-concepts",
+            "modeling-non-periodic-context",
+            "modeling-periodic-context",
+            "symbolic-manipulations"
+          ],
+          "description": "Required only for AP Precalculus free-response tasks; forbidden for multiple-choice and Calculus tasks."
         },
         "calculator": {
           "type": "string",
@@ -106,6 +117,7 @@
           "type": "array",
           "minItems": 1,
           "uniqueItems": true,
+          "description": "The official Precalculus families are analytical, graphical, numerical, and verbal; tabular is retained as an internal numerical subtype for shared compatibility.",
           "items": {
             "type": "string",
             "enum": ["analytical", "graphical", "numerical", "tabular", "verbal"]
@@ -116,6 +128,38 @@
           "enum": ["required", "not-required"]
         }
       },
+      "allOf": [
+        {
+          "if": {
+            "required": ["free_response_type"],
+            "properties": {
+              "free_response_type": {
+                "enum": ["function-concepts", "modeling-non-periodic-context"]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "calculator": {"const": "calculator-required-section"}
+            }
+          }
+        },
+        {
+          "if": {
+            "required": ["free_response_type"],
+            "properties": {
+              "free_response_type": {
+                "enum": ["modeling-periodic-context", "symbolic-manipulations"]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "calculator": {"const": "calculator-not-permitted"}
+            }
+          }
+        }
+      ],
       "additionalProperties": false
     },
     "citation_validation": {
@@ -224,6 +268,33 @@
       "if": {"properties": {"style": {"const": "exam-oriented"}}},
       "then": {"required": ["exam_features"]},
       "else": {"not": {"required": ["exam_features"]}}
+    },
+    {
+      "if": {
+        "required": ["course", "style", "exam_features"],
+        "properties": {
+          "course": {"const": "precalculus"},
+          "style": {"const": "exam-oriented"},
+          "exam_features": {
+            "required": ["question_type"],
+            "properties": {
+              "question_type": {"const": "free-response"}
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "exam_features": {"required": ["free_response_type"]}
+        }
+      },
+      "else": {
+        "properties": {
+          "exam_features": {
+            "not": {"required": ["free_response_type"]}
+          }
+        }
+      }
     },
     {
       "if": {"properties": {"answer_visibility": {"const": "hidden"}}},

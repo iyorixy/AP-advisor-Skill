@@ -54,12 +54,18 @@ Keep these styles distinct:
 - `instructional`: course learning without an exam-task claim;
 - `assessed-topic`: every mapped Topic is assessed, but no exam-task claim;
 - `exam-oriented`: also specify a valid question type, calculator condition,
-  representation(s), and justification requirement.
+  representation(s), and justification requirement; for AP Precalculus free
+  response, also specify one of the four named free-response task types.
 
 `ap-oriented` is a deprecated input/CLI alias for `assessed-topic`; never emit
-it. Do not call content exam-oriented unless all four exam features are explicit
-and mutually consistent. Verify current official College Board sources before
-stating changeable format, timing, calculator, weighting, or policy facts.
+it. Do not call content exam-oriented unless the four base exam features are
+explicit and mutually consistent, plus `free_response_type` for Precalculus
+free response. Verify current official College Board sources before stating
+changeable format, timing, calculator, weighting, or policy facts.
+In human-readable exam-oriented output, label every required exam feature and
+the Precalculus subtype explicitly; do not leave metadata implicit in the stem.
+Describe `calculator-required-section` as a section condition; do not imply
+that every item in that section inherently requires calculator use.
 For an exam-oriented request, also read `references/assessment-tasks.md` and
 validate the task contract with `scripts/validate_topic_code.py`.
 
@@ -109,7 +115,7 @@ Search `references/ap-calc-framework.md`, then run one grouped command per
 course/style group:
 
 ```text
-<python-3.10+> "<SKILL_ROOT>/scripts/validate_topic_code.py" --course <precalculus|calc-ab|calc-bc> [--assessed-topic] --evidence-json "<complete-citation>" ...
+<python-3.10+> "<SKILL_ROOT>/scripts/validate_topic_code.py" --course <precalculus|calc-ab|calc-bc> [--assessed-topic] [--exam-task <multiple-choice|free-response>] [--free-response-type <Precalculus-FRQ-type>] --evidence-json "<complete-citation>" ...
 ```
 
 Use the absolute script path. A citation must equal the entire catalog citation

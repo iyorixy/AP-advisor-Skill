@@ -11,13 +11,32 @@
 | `ap-psychology-advisor` | `ap-psychology-advisor/` | 当前五单元框架下的 AP Psychology 学习支持与自适应 Coach |
 | `ap-biology-advisor` | `ap-biology-advisor/` | 当前 Fall 2025 框架下的 AP Biology 学习支持与自适应 Coach |
 
-所有支持课程现在都提供 Generate、Review、Advisor 与 Coach 模式。数学 Skill
-为 AP Precalculus Units 1–4、AP Calculus AB Units 1–8 以及 AP Calculus BC 的
-精选错因维护原创诊断题库、可选本地学习状态和确定性下一题选择器；BC 会复用
-AB 共有内容，并增加 Units 6–10 的精选 BC-only 覆盖。当前题库包含 32 个诊断
-模式和 96 道题，但并不穷尽所有 Topic。Biology 与 Psychology 则按需生成原创题，
-只在对话内保留 Coach 状态，
-不声称拥有静态题库或持久化档案。
+它们是工作流 Skill，不是独立网课产品，也不能替代学科专家。Skill 会约束宿主模型
+遵循“证据优先”的 AP 工作流，只在需要时加载对应课程资料，并用本地 validator
+校验可以机械判断的声明。
+
+## 实际功能
+
+| 模式 | 实际行为 |
+| --- | --- |
+| **Generate** | 在用户指定的课程、Topic、题型、难度、语言和答案可见性约束内，生成原创讲解、练习题、stimulus、数据集或 worked example。 |
+| **Review** | 检查用户提供的作答，定位第一个实质性错误及其后果；若没有实质性错误，就明确说明，而不是编造问题。 |
+| **Advisor** | 只依据学习者给出的证据，排序一至三个有限任务；每个任务包含优先原因、练习动作和可观察的退出标准。 |
+| **Coach** | 运行一次只推进一题的交互闭环：诊断、给一个最小提示、等待真实作答、确认修正，再用迁移题检验是否能独立应用。 |
+
+核心用户是愿意提交真实作答、需要针对性反馈、逐级提示或 AP 对齐原创练习的
+AP 学生。Skill 会保持用户指定的回答语言，因此也适合双语学习环境。教师、导师
+和内容审核者可以把 Generate、Review 与课程范围校验作为第二道检查。它不是官方
+评分服务、AP Classroom 替代品、通用升学顾问，也不是——尤其对 Psychology
+而言——个人临床判断工具。
+
+三个实现有意采用不同方案：
+
+| Skill | 课程专属实现 |
+| --- | --- |
+| 数学 | 维护 96 道原创题、32 个诊断模式：Precalculus 8 个、Calculus AB 16 个、精选 BC-only 8 个；每个模式各有诊断题、同构确认题和迁移题。AB 在 Units 1–8 每单元维护两个模式，Precalculus 在 Units 1–4 每单元维护两个模式；BC 复用 AB 共有内容并增加 Units 6–10 的精选覆盖。题库并不穷尽全部 Topic。 |
+| Psychology | 在当前五个 Units 内按需生成原创题，覆盖概念应用、研究设计、数据/统计、AAQ 与 EBQ；不声称拥有静态题库或跨会话学习档案。 |
+| Biology | 在当前八个 Units 内按需生成原创题，覆盖机制、模型、实验设计、数据/统计、MCQ 与六类现行 FRQ；不声称拥有静态题库或跨会话学习档案。 |
 
 下列框架基线已按 College Board 的
 [2026–27 课程变更表](https://apcentral.collegeboard.org/courses/how-ap-develops-courses-and-exams/course-changes-overview)
@@ -30,16 +49,47 @@ AB 共有内容，并增加 Units 6–10 的精选 BC-only 覆盖。当前题库
 | AP Psychology | Fall 2025 五单元 CED，含 October 2025 勘误 |
 | AP Biology | Fall 2025 CED，含 June 2025 与 June 2026 勘误 |
 
-来源元数据最后核对于 2026 年 8 月 28–31 日。考试形式和政策属于时效性信息，
+AP Precalculus 的 exam-oriented 支持现已覆盖 May 2027 考试的 Units 1–3、MCQ
+和四类命名 FRQ：Function Concepts、Modeling a Non-Periodic Context、
+Modeling a Periodic Context、Symbolic Manipulations；Unit 4 仍仅用于
+instructional 内容。
+
+来源元数据最后核对于 2026 年 8 月 28 日至 9 月 3 日。考试形式和政策属于时效性信息，
 使用时仍需重新查验当前官方来源。
+
+## 端到端工作流
+
+1. **路由：**根据用户意图选择 Generate、Review、Advisor 或 Coach。
+2. **锁定约束：**保持用户指定的课程、Topic、题型、难度、语言、答案可见性和已提供
+   证据不变；发生冲突时明确说明，不静默替换条件。
+3. **只加载必要 contract：**使用对应课程的 catalog 与 boundary package；若是
+   exam-oriented 任务，再读取 assessment-task reference；若是 Coach，再读取
+   session protocol。
+4. **推理、映射、校验：**独立完成或审阅学科推理，把 content 与 Practice 分开映射，
+   再用课程 validator 校验所有展示的 Topic 和已声明的考试题型 contract。
+5. **按所需范围回答：**输出内容、首错 Review、一至三个任务的 Advisor 计划，或严格
+   一个 Coach 动作。除非满足数学 Skill 的独立 opt-in 持久化 contract，否则状态只
+   保留在对话中。
 
 ## 自适应 Coach 闭环
 
-Coach 根据学生实际作答定位第一个实质性错误，把观察事实、有限证据支持的错因
-假设与不确定性分开，只给一个最小提示，然后等待学生真实回应。学生自行修正后，
-进入一道未见同构确认题；独立通过后，再进入一道未见的跨表征或跨情境迁移题。
-只有在 hint level 0 独立通过未见迁移题时，才能把该具体干预标记为 `passed`；
-这不代表整个 Unit 已掌握。
+Coach 是“依据作答证据自适应”，不是“依据分数自适应”。它不会只凭低分、错选项、
+耗时慢或 Topic 标签就推断错因。完整闭环是：
+
+1. 从完整题目/stimulus 和学生真实作答开始。若缺少必要证据，只索取那一项材料，
+   或给一道原创诊断题，然后等待。
+2. 找到最早出现的实质性断点，把观察事实、一个有限的原因假设、一个合理替代解释
+   和尚未确定的部分分开。
+3. 给最少但有效的提示。Hint level 0 只有题目；level 1–3 依次从指向关键特征、
+   局部不完整 setup，推进到示范一个卡住的步骤。每次只升一级，不虚构学生的下一步。
+4. 学生自行修正后，给一道不含答案的未见同构确认题；在 hint level 0 独立通过后，
+   再给一道改变关键情境、表征或题型的未见迁移题。
+5. 只有 hint level 0 独立完成未见迁移题并达到已声明的退出标准，才把这个具体干预
+   标为 `passed`。引导下完成仍是 provisional；一个干预通过不代表整个 Unit 或课程
+   已掌握。
+
+数学 Coach 可以从已审计题库用确定性 selector 选下一道维护题；Biology 和
+Psychology 按需生成原创确认题与迁移题。所有实现每轮最多返回一道新 Coach 题。
 
 示例：
 
@@ -54,6 +104,33 @@ $ap-biology-advisor 请从这份 AP Biology 作答开始 Coach 我，每次只�
 Practice Exam 或其他 College Board 安全材料；隐藏答案不会出现在面向学习者的
 响应中。在取得真实、去标识化的学习者数据之前，数学题库的难度标签一律为
 `provisional`。
+
+## 课程校验与幻觉防护
+
+仓库把模型行为约束与可机器检查的控制结合起来：
+
+- Topic citation 会先做 Unicode NFKC 规范化，再与内部 framework catalog 的完整
+  citation 精确匹配。Validator 返回 canonical citation 和考试范围；格式错误、
+  编造或课程不匹配的映射会失败。
+- Content Topic 与 Mathematical/Science Practice 是两个独立声明。若证据只能确定
+  跨课程 Practice，Skill 会把 Topic 保留为 `not established`，不会为了填字段而猜。
+- Boundary package 会检查 assessed 与 instructional 范围、登记过的 exclusion 和
+  high-risk method、旧框架标记以及考试题型 contract。完整题型校验会检查必需的
+  Practice/representation family，不会把 Topic 匹配当作“符合 AP 题型”的证明。
+- 证据规则禁止虚构学生作答、用时、自信度、独立性、研究、数据、步骤、统计结果、
+  引用、评分指南和掌握结论；合成的练习 stimulus 与数据必须标为 synthetic。
+- 所有题目均为原创，不复现 AP Classroom、Progress Check 或 Practice Exam 等安全
+  材料。给 released question 数字评分时，必须同时拥有同一考试年份、form 和题号的
+  原题与官方 scoring guide；否则只能给明确标注为 unscored 的概念性反馈。
+- 隐藏答案、解析、干扰项诊断、题目链接和 selector 理由不会出现在面向学生的
+  Coach 回合。学生可以主动要求完整解答，但该次辅助作答不能计为独立证据。
+- Self-check、单元测试、schema、数学审计哈希、行为案例和 release gate 共同检查
+  这些 contract 是否保持内部一致。
+
+这些控制会减少常见幻觉路径，但不能让模型输出绝对无误。Validator 的 `pass` 只
+确认映射和已声明的边界元数据，不证明学科推理、教学质量、官方 rubric 对齐，也不
+证明时效性考试政策此刻仍然有效。因此，学科内容仍需独立核查；会变化的考试信息仍
+需重新查验当前官方来源。
 
 ## 隐私与可选本地状态
 
@@ -98,7 +175,7 @@ $skill-installer Install the skill at path ap-biology-advisor from iyorixy/AP-ad
 仓库根目录包含仅用于开发的测试与发布证据，因此有意不作为可安装 Skill；上面三个
 路径可以避免把这些文件复制到用户安装目录。
 
-这些 Skill 会在下一轮对话中可用；若 Codex 界面未刷新，再重启 Codex。调用示例：
+Codex 会自动检测新安装的 Skill；若某个 Skill 没有出现，再重启 Codex。调用示例：
 
 ```text
 $ap-calculus-advisor 审阅这份 AP Calculus BC 解答并指出第一个实质性错误。

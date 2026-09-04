@@ -11,16 +11,35 @@ runtime scripts use Python 3.10+ and the standard library only:
 | `ap-psychology-advisor` | `ap-psychology-advisor/` | AP Psychology study support and adaptive Coach under the current five-unit framework |
 | `ap-biology-advisor` | `ap-biology-advisor/` | AP Biology study support and adaptive Coach under the current Fall 2025 framework |
 
-All supported courses now provide Generate, Review, Advisor, and Coach modes.
-The mathematics Skill includes a maintained, original diagnostic bank, optional
-local learner state, and a deterministic next-item selector for selected
-misconceptions in AP Precalculus Units 1–4, AP Calculus AB Units 1–8, and AP
-Calculus BC. BC reuses shared AB content and adds selected BC-only coverage in
-Units 6–10. The bank currently contains 96 items across 32 diagnostic patterns;
-these are maintained samples, not exhaustive Topic coverage. Biology
-and Psychology instead create original items on demand and keep their Coach
-state in the conversation; they do not claim a static bank or persistent
-profile.
+These are workflow Skills, not standalone tutoring apps or replacements for a
+subject expert. They guide the host model through an evidence-first AP workflow,
+load course-specific references only when needed, and use local validators for
+claims that can be checked mechanically.
+
+## What the Skills actually do
+
+| Mode | Behavior |
+| --- | --- |
+| **Generate** | Create an original explanation, practice item, stimulus, data set, or worked example within the requested course, Topic, task type, difficulty, language, and answer-visibility constraints. |
+| **Review** | Check the supplied work and name the first substantive error and its downstream consequence; if no substantive error is present, say so instead of inventing one. |
+| **Advisor** | Use the learner's evidence to prioritize one to three bounded tasks, each with a reason, a practice action, and an observable exit standard. |
+| **Coach** | Run an interactive one-item loop: diagnose, give one minimal hint, wait for real learner work, confirm the correction, and test transfer before passing the intervention. |
+
+The primary users are AP students who can share an actual attempt and want
+targeted feedback, one-hint-at-a-time coaching, or original AP-aligned practice.
+The Skills preserve the requested language, so they also fit bilingual learning
+settings. Teachers, tutors, and content reviewers can use Generate, Review, and
+scope checks as a second-pass aid. They are not an official scoring service, an
+AP Classroom substitute, a general admissions advisor, or—especially for
+Psychology—a personal clinical tool.
+
+The three implementations deliberately differ:
+
+| Skill | Course-specific implementation |
+| --- | --- |
+| Mathematics | A maintained original bank of 96 items across 32 diagnostic patterns: 8 patterns for Precalculus, 16 for Calculus AB, and 8 selected BC-only patterns. Every pattern has a diagnostic, same-form confirmation, and transfer item. AB covers two maintained patterns per unit across Units 1–8; Precalculus does the same across Units 1–4; BC reuses shared AB content and adds selected coverage in Units 6–10. The bank is not exhaustive Topic coverage. |
+| Psychology | Original items generated on demand across the current five Units, including concept application, research design, data/statistics, AAQ, and EBQ work. There is no claimed static bank or cross-session learner profile. |
+| Biology | Original items generated on demand across the current eight Units, including mechanisms, models, investigations, data/statistics, MCQ, and the six current FRQ task families. There is no claimed static bank or cross-session learner profile. |
 
 Framework baselines were checked for the 2026–27 school year against the
 [College Board course-change table](https://apcentral.collegeboard.org/courses/how-ap-develops-courses-and-exams/course-changes-overview):
@@ -32,18 +51,59 @@ Framework baselines were checked for the 2026–27 school year against the
 | AP Psychology | Fall 2025 five-unit CED with October 2025 clarifications |
 | AP Biology | Fall 2025 CED with June 2025 and June 2026 clarifications |
 
-Source metadata was last checked August 28–31, 2026. Exam-format and policy
+Exam-oriented AP Precalculus support covers Units 1–3 for the May 2027 MCQ and
+all four named FRQ models—Function Concepts, Modeling a Non-Periodic Context,
+Modeling a Periodic Context, and Symbolic Manipulations. Unit 4 remains
+instructional-only.
+
+Source metadata was last checked August 28–September 3, 2026. Exam-format and policy
 facts remain time-sensitive and are rechecked against current official sources.
+
+## End-to-end workflow
+
+1. **Route:** select Generate, Review, Advisor, or Coach from the user's intent.
+2. **Freeze constraints:** keep the requested course, Topic, task type, difficulty,
+   language, answer visibility, and supplied evidence fixed; surface a conflict
+   instead of silently changing one.
+3. **Load only the needed contract:** use the course catalog and boundary package,
+   plus the assessment-task reference for exam-oriented work or the session
+   protocol for Coach.
+4. **Reason, map, and validate:** solve or review the subject matter independently,
+   map content and Practice separately, then run the course validator for every
+   displayed Topic and declared exam-task contract.
+5. **Respond at the requested horizon:** return the content, first-error review,
+   one-to-three-task Advisor plan, or exactly one Coach action. Keep state in the
+   conversation unless the separate mathematics opt-in persistence contract is
+   satisfied.
 
 ## Adaptive Coach loop
 
-In Coach mode, the Skill uses the learner's actual work to identify the first
-substantive error, separate observations from a bounded misconception
-hypothesis, give one minimal hint, and wait for the learner's response. A
-corrected attempt advances to one unseen same-form confirmation; an independent
-success advances to one unseen cross-representation or cross-context transfer.
-Only an independent unseen transfer at hint level 0 can pass the specific
-intervention. It never establishes Unit-wide mastery.
+Coach is evidence-adaptive rather than score-adaptive. It does not infer a
+misconception from a low score, a wrong option, slow work, or a Topic label
+alone. The loop is:
+
+1. Start from the complete prompt/stimulus and the learner's real work. If the
+   necessary evidence is missing, request only the missing artifact or offer one
+   original diagnostic item, then wait.
+2. Identify the earliest substantive break. Keep the observation, one bounded
+   cause hypothesis, a plausible alternative, and the remaining uncertainty
+   separate.
+3. Give the least revealing useful hint. Hint level 0 is the prompt only; levels
+   1–3 progress from a feature cue to an incomplete local setup to one modeled
+   blocked step. Give only one level at a time and never invent the next learner
+   response.
+4. After self-correction, give one unseen same-form confirmation without its
+   answer. After an independent success at hint level 0, give one unseen transfer
+   that changes a meaningful context, representation, or task form.
+5. Mark only the specific intervention `passed` after an independent unseen
+   transfer at hint level 0 meets its stated exit standard. Guided work remains
+   provisional, and one passed intervention never establishes Unit or course
+   mastery.
+
+Mathematics can use its audited bank and deterministic selector for the next
+maintained item. Biology and Psychology generate original confirmation and
+transfer items on demand. Every implementation returns at most one new Coach
+item per turn.
 
 Examples:
 
@@ -59,6 +119,41 @@ Progress Check, Practice Exam, or other secure College Board material. Hidden
 answers stay out of learner-facing responses. Mathematics-bank difficulty
 labels are `provisional` until real, de-identified learner data support
 calibration.
+
+## Course validation and hallucination guardrails
+
+The repository combines model instructions with machine-checkable controls:
+
+- Exact Topic citations are normalized with Unicode NFKC and must match the
+  internal framework catalog in full. The validators return the canonical
+  citation and assessment scope; malformed, invented, or wrong-course mappings
+  fail.
+- Content Topic and Mathematical/Science Practice are separate claims. When the
+  evidence establishes only a cross-course Practice, the Skills leave the Topic
+  `not established` instead of guessing one.
+- Boundary packages check assessed versus instructional scope, registered
+  exclusions and high-risk methods, legacy framework markers, and exam-task
+  contracts. Full-task validation checks the required Practice/representation
+  families rather than treating a Topic match as proof of an AP task.
+- Evidence rules forbid invented learner work, timing, confidence, independence,
+  studies, data, procedures, statistics, citations, scoring guides, and mastery
+  claims. Synthetic practice stimuli and data must be labeled synthetic.
+- Tasks are original and do not reproduce secure AP Classroom, Progress Check,
+  or Practice Exam material. Numeric scoring of released work requires the
+  matching prompt and official scoring guide for the same administration and
+  question; otherwise feedback stays explicitly unscored.
+- Hidden answers, solutions, distractor diagnoses, item links, and selector
+  rationales stay out of learner-facing Coach turns. Asking for a full solution
+  is allowed, but that assisted response cannot count as independent evidence.
+- Self-checks, unit tests, schemas, math-audit hashes, behavioral cases, and the
+  release gate check that these contracts remain internally consistent.
+
+These controls reduce common hallucination paths; they do not make model output
+infallible. A validator `pass` confirms mapping and declared boundary metadata,
+not the subject-matter reasoning, teaching quality, official rubric alignment,
+or the current truth of time-sensitive exam policy. The Skills therefore require
+independent subject checking and a fresh official-source check for changeable
+exam facts.
 
 ## Privacy and optional local state
 
@@ -108,7 +203,7 @@ The repository root contains development-only tests and release evidence, so it
 is intentionally not an installable Skill. The three paths above keep those
 files out of user installations.
 
-The Skills are available on the next turn. If the Codex UI does not refresh,
+Codex detects newly installed Skills automatically. If one does not appear,
 restart Codex. Examples:
 
 ```text
