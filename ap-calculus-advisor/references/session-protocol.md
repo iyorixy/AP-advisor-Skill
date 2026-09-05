@@ -38,8 +38,9 @@ Use this order, stopping whenever a real learner response is required:
 2. State the observation, bounded hypothesis, alternative cause, and current
    uncertainty.
 3. Give the least revealing hint likely to elicit self-correction.
-4. Wait for the learner's next step. If the attempt still does not progress,
-   advance exactly one hint level and wait again.
+4. Wait for the learner's next step. If the same obstruction remains,
+   advance exactly one hint level and wait again. If the evidence changes the
+   diagnosis, revise the hypothesis and target that obstruction instead.
 5. Once the learner corrects the original work, give one unseen same-form
    confirmation item without its answer.
 6. After an independent same-form success, give one unseen transfer item that
@@ -74,6 +75,14 @@ the result as independent confirmation or transfer.
 
 ## Select from maintained data
 
+Before selecting another item, use the learner's latest work to distinguish a
+local execution slip from a persistent prerequisite or representation gap.
+Ask for the smallest discriminating step when those explanations would lead
+to different interventions. Do not repeat a mastered prerequisite solely
+because it appears earlier in the catalog or escalate difficulty merely after
+a corrected answer. Choose confirmation, transfer, or retest from the actual
+stage and preserve earlier valid evidence when a later attempt fails.
+
 Read `calculus-misconceptions.json` and `diagnostic-items.jsonl` only when a
 Coach turn needs a maintained diagnosis, confirmation, transfer, retest, or
 next item. Use the observable features and evidence requirements; never expose
@@ -101,7 +110,9 @@ provides a specific data directory. Initialize that profile with
 `--course precalculus`, `--course calc-ab`, or `--course calc-bc`; an omitted
 course preserves the legacy `calc-ab` default. Do not choose a directory, write inside the
 Skill repository, request a name/email, or infer an identity. Before a record
-operation, show or confirm the fields that will be stored. Then use
+operation, show the fields that will be stored. Authorization already given for
+the same directory and fields remains valid; ask again only if that scope changes.
+Then use
 `update_learner_state.py` with that exact directory for initialization,
 append-only attempt recording, deterministic rebuilds, queue inspection, or
 summary export. A delayed review is a recommendation until a valid record has
@@ -132,3 +143,20 @@ Difficulty labels in the item bank are provisional. Aggregate summaries are
 calibration preparation only: when sample requirements are not met, report
 `insufficient_data` and do not emit p-values, IRT parameters, or claims of
 empirical calibration.
+
+## Resume and accept corrections
+
+A side question does not count as an attempt or advance the hint level. Answer
+it at the requested depth, then retain the pending item. If that answer reveals
+the pending item's solution, mark the item assisted and use a new unseen item
+for later independent evidence. Honor an explicit switch to Review, Generate,
+or a new target; do not insist on finishing the previous loop.
+
+When a learner corrects a transcription or earlier claim, update only affected
+observations and any diagnosis or outcome that depended on them. Before a long
+session is handed off, retain a compact in-conversation checkpoint: course,
+target, pending prompt, latest actual attempt, stage, hint level, answer
+visibility, confirmation/transfer evidence, and next action. Exclude hidden
+keys and diagnostic annotations from any learner-visible summary. If the
+history is unavailable, request the latest attempt or a learner-approved
+summary; do not reconstruct prior success or treat a checkpoint as a new attempt.

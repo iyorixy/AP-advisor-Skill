@@ -1,4 +1,4 @@
-**English** | [简体中文](./README.zh-CN.md)
+**English** | [简体中文](./README.zh-CN.md) | [繁體中文](./README.zh-TW.md)
 
 # AP Advisor Skills
 
@@ -15,6 +15,38 @@ These are workflow Skills, not standalone tutoring apps or replacements for a
 subject expert. They guide the host model through an evidence-first AP workflow,
 load course-specific references only when needed, and use local validators for
 claims that can be checked mechanically.
+
+## GPT-6 Astra support
+
+All three Skills include an Astra-aware interaction contract: complete the
+requested deliverable, ask only decision-changing questions, honor corrections
+and mode changes, and keep Coach turns to one action awaiting real learner work.
+This follows the [official Astra prompting guidance](https://developers.openai.com/api/docs/guides/latest-model?model=gpt-6-astra),
+checked September 5, 2026. The instructions also work with other capable hosts.
+
+Select `gpt-6-astra` in a host that offers it. A Skill does not switch models or
+grant account access. For Codex configuration, set these keys in your chosen
+`config.toml`, updating existing values rather than duplicating them:
+
+```toml
+model = "gpt-6-astra"
+model_reasoning_effort = "medium"
+```
+
+See the [Codex configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference).
+`medium` is this project's starting suggestion, not a measured optimum. Preserve
+an existing suitable effort when migrating; use `low` for routine follow-ups
+or `high` for difficult reviews if your host supports them. Astra's documented
+efforts exclude `none` and `minimal`; available controls depend on the host.
+See the [model specification](https://developers.openai.com/api/docs/models/gpt-6-astra).
+
+Each course now has an on-demand evidence-review reference for images, source
+or model interpretation, and item quality. It separates readable evidence from
+uncertain transcription, checks subject reasoning before Topic metadata, and
+checks generated questions for sufficient givens and a defensible answer.
+Coach protocols preserve affected versus unaffected evidence after corrections
+and keep compact session checkpoints without exposing hidden keys. Responses
+preserve English, Simplified Chinese, or Traditional Chinese as requested.
 
 ## What the Skills actually do
 
@@ -67,7 +99,8 @@ facts remain time-sensitive and are rechecked against current official sources.
    instead of silently changing one.
 3. **Load only the needed contract:** use the course catalog and boundary package,
    plus the assessment-task reference for exam-oriented work or the session
-   protocol for Coach.
+   protocol for Coach; load the evidence-review reference for visual or complex
+   source work and generated assessment items.
 4. **Reason, map, and validate:** solve or review the subject matter independently,
    map content and Practice separately, then run the course validator for every
    displayed Topic and declared exam-task contract.
@@ -241,6 +274,11 @@ thresholds, Python compilation and standard-library imports, unit tests, and
 the installed skill-creator validator. Treat the checkout as verified only when
 every command exits `0` and the last command emits lower-case
 `"overall_status":"pass"`.
+
+These are local checks, including consistency checks on recorded behavioral
+reviews; they do not run a fresh Astra evaluation or measure learning gains.
+Historical review records remain historical evidence; Astra-specific behavior
+has not yet been evaluated with fresh model outputs.
 
 The mathematics selector deliberately uses transparent rules rather than BKT,
 IRT, vector retrieval, or empirical mastery probabilities. Aggregate

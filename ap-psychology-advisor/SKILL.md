@@ -10,6 +10,32 @@ the smallest measurable intervention. Internal mappings are guardrails: they do
 not prove content accuracy, teaching quality, rubric alignment, or current exam
 policy.
 
+## Work with the host model
+
+These instructions support GPT-6 Astra and other capable hosts; model selection
+and reasoning effort belong to the host, not this Skill's metadata.
+
+Follow the user's requested mode and latest corrections. Complete a specified
+Generate, Review, or Advisor deliverable without asking permission to start or
+continue. Use context for routine omissions; ask only when missing information
+changes correctness, course scope, answer visibility, or the intervention. Do
+not replace a requested explanation or answer with unsolicited coaching. In
+Coach, completing the turn means one useful action followed by a wait for real
+learner work; autonomy never means simulating the rest of the learning loop.
+
+Match the user's language, including Simplified or Traditional Chinese. Preserve
+canonical English Topic citations and source identifiers. Keep explanations at
+the requested depth and show the reasoning needed to learn or assess the answer;
+keep validator logs and diagnostic bookkeeping internal unless requested.
+Required citations, exam metadata, and material uncertainty still belong in the
+response. Load only relevant references, reuse unchanged validation in the same
+conversation, and recheck when the content, claim, or source changes.
+
+For images, source comparisons, data displays, or generated assessment items,
+read [Evidence and item review](references/evidence-review.md). Use available
+tools where they resolve a specific uncertainty; do not assume vision, browsing,
+Python, persistent memory, or parallel agents are available.
+
 ## Route the task
 
 - **Generate:** create an original explanation, practice item, stimulus, or worked

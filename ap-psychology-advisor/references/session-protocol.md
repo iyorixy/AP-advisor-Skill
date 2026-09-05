@@ -74,14 +74,21 @@ Use the least revealing cumulative level likely to elicit self-correction:
 At level 1, repeating the prompt is not a hint. At level 2, merely listing several
 steps is not a local setup. Never leak the answer through labels, a completed
 sentence frame, distractor analysis, scoring language, or a "selector" rationale.
-After a hint, explicitly ask for the learner's next step and stop. If it still does
-not progress, advance exactly one level and wait again.
+After a hint, explicitly ask for the learner's next step and stop. If the same
+obstruction remains, advance exactly one level and wait again. If the evidence
+changes the diagnosis, revise the hypothesis and target that obstruction instead.
 
 If the learner asks for the answer or a full explanation, honor that request, mark
 that response as revealed/assisted, and do not count it as confirmation or
 transfer.
 
 ## Confirm, then test transfer
+
+Use the latest response to distinguish a vocabulary or reading slip from a
+concept-application, design, or evidence-reasoning gap. If competing causes
+would need different teaching, ask for one discriminating link or comparison
+before choosing another exercise. Do not increase difficulty just because a
+guided response is correct or repeat prerequisites already demonstrated.
 
 A guided correction only resolves the original attempt provisionally. Continue in
 this order, stopping for a real response after each item:
@@ -135,3 +142,20 @@ Track only the current target, observation, hypothesis, hint level, confirmation
 result, transfer result, and next action needed for this conversation. Do not write
 local files, claim a persistent learner profile, or imply cross-session memory. A
 future retest is a recommendation, not a scheduled calendar event.
+
+## Resume and accept corrections
+
+A side question does not count as an attempt or advance the hint level. Answer
+it at the requested depth, then retain the pending item. If it reveals the
+pending answer, mark that item assisted and use a new unseen item for later
+independent evidence. Honor an explicit switch to Review, Generate, or a new
+target without requiring completion of the earlier loop.
+
+A corrected source quotation or learner statement supersedes the affected
+observation and any diagnosis or outcome that depended on it. For a long-session
+handoff, keep a compact in-conversation checkpoint: target, source identifiers,
+pending prompt, latest actual attempt, stage, hint level, answer visibility,
+confirmation/transfer evidence, and next action. Keep hidden keys and diagnostic
+annotations out of learner-visible summaries. If history is unavailable,
+request the latest source/attempt or a learner-approved summary; do not invent
+prior evidence or count a checkpoint as a new response.

@@ -1,4 +1,4 @@
-[English](./README.md) | **简体中文**
+[English](./README.md) | **简体中文** | [繁體中文](./README.zh-TW.md)
 
 # AP Advisor Skills
 
@@ -14,6 +14,34 @@
 它们是工作流 Skill，不是独立网课产品，也不能替代学科专家。Skill 会约束宿主模型
 遵循“证据优先”的 AP 工作流，只在需要时加载对应课程资料，并用本地 validator
 校验可以机械判断的声明。
+
+## GPT-6 Astra 适配
+
+三个 Skill 都已加入适配 Astra 的交互约定：完成用户要求的交付物，只追问会改变
+判断的信息，接受中途纠正与模式切换，并让 Coach 每轮只推进一个动作、等待真实
+作答。这些调整依据 2026 年 9 月 5 日核对的
+[Astra 官方提示指引](https://developers.openai.com/api/docs/guides/latest-model?model=gpt-6-astra)；
+这些指令也可用于其他具备相应能力的宿主模型。
+
+在提供该模型的宿主中选择 `gpt-6-astra`。Skill 本身不会切换模型，也不提供账号
+访问权限。使用 Codex 配置时，在你选用的 `config.toml` 中设置以下字段；已有
+同名字段时更新原值，不要重复添加：
+
+```toml
+model = "gpt-6-astra"
+model_reasoning_effort = "medium"
+```
+
+配置字段见 [Codex 官方配置参考](https://learn.chatgpt.com/docs/config-file/config-reference)。
+`medium` 是本项目建议的起点，不是经过实测的最优值。迁移时可保留已有且适用的
+推理强度；宿主支持时，简单追问可用 `low`，复杂审阅可用 `high`。Astra 官方列出的
+推理强度不包含 `none` 和 `minimal`；实际可选项由宿主决定，见
+[模型规格](https://developers.openai.com/api/docs/models/gpt-6-astra)。
+
+各科新增按需加载的证据审阅资料，处理图片、来源或模型解读及出题质量：区分可读
+证据与不确定转录，先检查学科推理，再检查 Topic 元数据，并核对原创题的条件是否
+充分、答案是否成立。Coach 协议会在纠正后保留仍有效的证据，以简短的会话摘要
+衔接长对话，并隐藏答案。回答会遵循用户指定的英文、简体中文或繁体中文。
 
 ## 实际功能
 
@@ -64,7 +92,7 @@ instructional 内容。
    证据不变；发生冲突时明确说明，不静默替换条件。
 3. **只加载必要 contract：**使用对应课程的 catalog 与 boundary package；若是
    exam-oriented 任务，再读取 assessment-task reference；若是 Coach，再读取
-   session protocol。
+   session protocol；图片、复杂来源解读与原创考试练习题另按需读取证据审阅资料。
 4. **推理、映射、校验：**独立完成或审阅学科推理，把 content 与 Practice 分开映射，
    再用课程 validator 校验所有展示的 Topic 和已声明的考试题型 contract。
 5. **按所需范围回答：**输出内容、首错 Review、一至三个任务的 Advisor 计划，或严格
@@ -208,6 +236,10 @@ python scripts/check_release.py --evidence-json
 数学审计哈希、学习状态安全、selector 确定性、行为评审门槛、Python 编译与纯标准库
 依赖、单元测试和已安装的 skill-creator validator。只有所有命令都以退出码
 `0` 结束，且最后一条输出小写 `"overall_status":"pass"`，才视为仓库验证通过。
+
+这些是本地检查，包含已记录行为评审的一致性校验；它们不会重新调用 Astra，
+也不测量学习效果。原有评审记录仍是历史证据；Astra 专项行为尚未使用新的
+模型输出进行评估。
 
 数学 selector 有意采用透明规则，不引入 BKT、IRT、向量检索或伪精确 mastery
 概率。聚合校准导出只提供描述性统计；样本不足时返回 `insufficient_data`。后续

@@ -39,8 +39,9 @@ Use this order and stop whenever a real learner response is required:
 1. Locate the first substantive error in the supplied attempt.
 2. State the observation, bounded hypothesis, alternative, and uncertainty.
 3. Give the least revealing hint likely to produce self-correction.
-4. Wait. If the next attempt still does not progress, advance exactly one hint
-   level and wait again.
+4. Wait. If the same obstruction remains, advance exactly one hint level and
+   wait again. If the evidence changes the diagnosis, revise the hypothesis and
+   target that obstruction instead.
 5. After the original work is corrected, give one unseen same-form confirmation
    item without its answer.
 6. After an independent same-form success, give one unseen transfer item without
@@ -78,6 +79,13 @@ the answer or full explanation, provide it, record answer visibility as
 
 ## Set evidence-specific exits
 
+Use new work to distinguish a label, arithmetic, or reading slip from a
+mechanism, design, or inference gap. If those explanations would lead to
+different teaching, elicit one discriminating observation or causal link
+before choosing another exercise. Preserve demonstrated prerequisites and
+earlier confirmation evidence; a guided correction alone does not justify
+increasing difficulty or passing the target.
+
 State an observable exit standard with each confirmation or transfer prompt,
 without disclosing its answer. Match it to the diagnosed weakness:
 
@@ -111,3 +119,20 @@ Apply the Topic, Science Practice, assessment-task, synthetic-data, and scope
 validation rules in `SKILL.md` to every Coach item. Items must be original. An
 unseen confirmation, transfer, or retest never includes its answer in the same
 response.
+
+## Resume and accept corrections
+
+A side question does not count as an attempt or advance the hint level. Answer
+it at the requested depth, then retain the pending item. If it reveals the
+pending answer, mark that item assisted and use a new unseen item for later
+independent evidence. Honor an explicit switch to Review, Generate, or a new
+target without requiring completion of the earlier loop.
+
+A corrected measurement, figure label, or learner statement supersedes the
+affected observation and any diagnosis or outcome that depended on it. For a
+long-session handoff, keep a compact in-conversation checkpoint: target,
+relevant figure/data identifiers, pending prompt, latest actual attempt, stage,
+hint level, answer visibility, confirmation/transfer evidence, and next action.
+Keep hidden keys and diagnostic annotations out of learner-visible summaries.
+Use the missing-history procedure above when the evidence is unavailable;
+never count a checkpoint as a new attempt or proof of independent success.
